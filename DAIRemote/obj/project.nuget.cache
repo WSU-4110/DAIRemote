@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "Zg9oHAlNYTc=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Fahim\\source\\repos\\DAIRemote\\DAIRemote.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Fahim\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}
