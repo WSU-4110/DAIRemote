@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "wEotii+aD74=",
+  "dgSpecHash": "2j4UYT9e/KA=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Fahim\\source\\repos\\DisplayProfileManager\\DisplayProfileManager.csproj",
+  "projectFilePath": "C:\\Users\\shawi\\Desktop\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Fahim\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512"
+    "C:\\Users\\shawi\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512"
   ],
   "logs": []
 }

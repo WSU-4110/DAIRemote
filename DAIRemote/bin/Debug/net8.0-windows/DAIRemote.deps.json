@@ -27,7 +27,10 @@
           "Newtonsoft.Json": "13.0.1"
         },
         "runtime": {
-          "DisplayProfileManager.dll": {}
+          "DisplayProfileManager.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }
