@@ -13,6 +13,7 @@ All of these features can be controlled remotely, providing convenience from whe
 
 * .NET SDK: Version 8.0 or higher (you can download it from [here](https://dotnet.microsoft.com/en-us/download)). <br />
 * Visual Studio or VSCode (optional for development).
+* [Android Studio](https://developer.android.com/studio?authuser=1)
 
 ### Installing
 #### Clone The Repository
