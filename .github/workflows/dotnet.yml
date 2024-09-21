@@ -24,8 +24,8 @@ jobs:
       run: dotnet restore /p:EnableWindowsTargeting=true
       working-directory: DAIRemote
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore /p:EnableWindowsTargeting=true
       working-directory: DAIRemote
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity normal /p:EnableWindowsTargeting=true
       working-directory: DAIRemote
