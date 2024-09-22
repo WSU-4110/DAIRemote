@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#C2D8FB"
+    tools:context=".RemotePage">
+
+    <TextView
+        android:id="@+id/remotePage_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/audiowide"
+        android:text="Remote"
+        android:textSize="25sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.022" />
+
+    <FrameLayout
+        android:id="@+id/touchpadFrame"
+        android:layout_width="377dp"
+        android:layout_height="586dp"
+        android:background="#CCFBEB"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.47"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/remotePage_text"
+        app:layout_constraintVertical_bias="0.255" />
+
+    <ImageButton
+        android:id="@+id/displayButton"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="#FFFFFF"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.109"
+        app:layout_constraintStart_toEndOf="@+id/connectionButton"
+        app:layout_constraintTop_toBottomOf="@+id/touchpadFrame"
+        app:layout_constraintVertical_bias="0.666"
+        app:srcCompat="@drawable/display_icon"
+        android:contentDescription="Button to choose between display profiles]"
+        />
+
+    <ImageButton
+        android:id="@+id/audioButton"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="#FFFFFF"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.176"
+        app:layout_constraintStart_toEndOf="@+id/displayButton"
+        app:layout_constraintTop_toBottomOf="@+id/touchpadFrame"
+        app:layout_constraintVertical_bias="0.666"
+        app:srcCompat="@drawable/audio_icon"
+        android:contentDescription="Button to cycle through audio playback devices"
+        />
+
+    <ImageButton
+        android:id="@+id/keyboardButton"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="#FFFFFF"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.364"
+        app:layout_constraintStart_toEndOf="@+id/audioButton"
+        app:layout_constraintTop_toBottomOf="@+id/touchpadFrame"
+        app:layout_constraintVertical_bias="0.666"
+        app:srcCompat="@drawable/keyboard_icon"
+        android:contentDescription="Button to have the Android keyboard pop-up"
+        />
+
+    <ImageButton
+        android:id="@+id/connectionButton"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="8dp"
+        android:background="#FFFFFF"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.105"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/touchpadFrame"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/connection_icon"
+        android:contentDescription="Button to check connection"
+        />
+
+    <Button
+        android:id="@+id/homeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Home"
+        app:layout_constraintBottom_toTopOf="@+id/touchpadFrame"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.049"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.6" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
