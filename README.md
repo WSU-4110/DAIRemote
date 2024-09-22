@@ -43,6 +43,39 @@ Start the application using the following command:
 dotnet run
 ```
 
+## Running the Android Application
+### Option 1 (Android Studio):
+* Launch Android Studio and start the Android application. The emulator will open in a separate window alongside the IDE.
+
+### Option 2 (Command Line):
+1. **Ensure Android SDK is in PATH**:
+   - Check if the SDK is located at:
+     ```
+     C:\Users\<yourUser>\AppData\Local\Android\Sdk
+     ```
+   - Replace `<yourUser>` with your user.  
+   - If necessary, add this path to your system environment variables.
+2. **Add Emulator Path**:
+   - Add the following path to your system PATH variable:
+     ```
+     C:\Users\<yourUser>\AppData\Local\Android\Sdk\emulator
+     ```
+3. **Navigate to the Project Directory**:
+   ```bash
+   cd DAIRemoteApp
+   ```
+4. **List All Available AVDs**:
+   ```bash
+   emulator -list-avds
+   ```
+   - If no AVDs are available, you will need to create one. You can find a tutorial on creating an AVD [here](https://www.youtube.com/watch?v=4rCNc3uhLJE).
+5. **Run the Emulator**
+   ```bash
+   emulator -avd <yourAVD>
+   ```
+   - Replace `<yourAVD>` with the name of the AVD you wish to run.
+
+
 ## Authors
 
 * Shawinder Minhas - hk1225@wayne.edu	<br />
@@ -50,6 +83,3 @@ dotnet run
 * Fahim Zaman - FahimZaman@wayne.edu <br />
 * Mehad Ali - fj2852@wayne.edu <br />
 * Domenic Zarza - hi5947@wayne.edu <br />
-
-
-
