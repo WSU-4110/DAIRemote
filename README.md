@@ -44,8 +44,10 @@ dotnet run
 ```
 
 ## Running the Android Application
-### Option 1 (Android Studio):
-* Launch Android Studio and start the Android application. The emulator will open in a separate window alongside the IDE.
+### Option 1 (Using BlueStacks):
+* Download [BlueStacks](https://www.bluestacks.com/download.html)
+* Navigate to the folder where the APK file is stored (e.g. DAIRemoteApp/app/build/outputs/apk/debug)
+* Right-click on the APK file and select "Open with BlueStacks and the Android app should run.
 
 ### Option 2 (Command Line):
 1. **Ensure Android SDK is in PATH**:
