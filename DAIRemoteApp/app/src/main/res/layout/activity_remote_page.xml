@@ -60,16 +60,16 @@
         android:id="@+id/audioButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginTop="16dp"
         android:background="#FFFFFF"
         android:contentDescription="Button to cycle through audio playback devices"
         android:scaleType="fitCenter"
-        app:layout_constraintStart_toEndOf="@id/connectionButton"
         app:layout_constraintEnd_toStartOf="@id/keyboardButton"
-        app:layout_constraintTop_toBottomOf="@id/touchpadFrame"
         app:layout_constraintHeight_percent="0.1"
+        app:layout_constraintStart_toEndOf="@id/connectionButton"
+        app:layout_constraintTop_toBottomOf="@id/touchpadFrame"
         app:layout_constraintWidth_percent="0.2"
-        app:srcCompat="@drawable/audio_icon"
-        android:layout_marginTop="16dp"/>
+        app:srcCompat="@drawable/audio_icon" />
 
     <ImageButton
         android:id="@+id/keyboardButton"
