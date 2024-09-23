@@ -70,19 +70,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\shawi\\.nuget\\packages\\": {}
+    "C:\\Users\\aweso\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\shawi\\Desktop\\DAIRemote\\DAIRemote\\DAIRemote.csproj",
+      "projectUniqueName": "C:\\Users\\aweso\\Downloads\\DAIRemote\\DAIRemote\\DAIRemote.csproj",
       "projectName": "DAIRemote",
-      "projectPath": "C:\\Users\\shawi\\Desktop\\DAIRemote\\DAIRemote\\DAIRemote.csproj",
-      "packagesPath": "C:\\Users\\shawi\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\shawi\\Desktop\\DAIRemote\\DAIRemote\\obj\\",
+      "projectPath": "C:\\Users\\aweso\\Downloads\\DAIRemote\\DAIRemote\\DAIRemote.csproj",
+      "packagesPath": "C:\\Users\\aweso\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\aweso\\Downloads\\DAIRemote\\DAIRemote\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\shawi\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\aweso\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0-windows"
@@ -94,8 +94,8 @@
         "net8.0-windows7.0": {
           "targetAlias": "net8.0-windows",
           "projectReferences": {
-            "C:\\Users\\shawi\\Desktop\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj": {
-              "projectPath": "C:\\Users\\shawi\\Desktop\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj"
+            "C:\\Users\\aweso\\Downloads\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj": {
+              "projectPath": "C:\\Users\\aweso\\Downloads\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj"
             }
           }
         }
