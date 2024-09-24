@@ -4,9 +4,11 @@ namespace DAIRemote
 {
     public partial class Form1 : Form
     {
+        private Panel audioFormPanel;
         public Form1()
         {
             InitializeComponent();
+            ShowAudioOutputForm();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -35,6 +37,20 @@ namespace DAIRemote
                 // Handle any errors that might occur
                 MessageBox.Show($"An error occurred while saving the display configuration: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+         private void ShowAudioOutputForm()
+        {
+            // Create an instance of AudioOutputForm
+            AudioOutputForm audioForm = new AudioOutputForm();
+
+            // Set the form as a child control
+            audioForm.TopLevel = false; // This is important, prevents it from being a top-level form
+            audioForm.FormBorderStyle = FormBorderStyle.None; // Remove borders
+            audioForm.Dock = DockStyle.Fill; // Ensure it fills the panel
+
+            // Add the form to the Panel and display it
+            this.audioFormPanel.Controls.Add(audioForm);
+            audioForm.Show(); // Show the embedded form
         }
     }
 }
