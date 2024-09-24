@@ -13,7 +13,6 @@ namespace DAIRemote
         public AudioOutputForm()
         {
             InitializeComponent();
-            audioDeviceComboBox = new ComboBox(); // Initialize the ComboBox
             LoadAudioDevices();
         }
 
