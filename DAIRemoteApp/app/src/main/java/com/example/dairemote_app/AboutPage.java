@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.content.Intent;
 
-public class InstructionsPage extends AppCompatActivity {
+public class AboutPage extends AppCompatActivity {
 
     Button homePage_button; // button for returning to home page (menu button)
 
@@ -20,13 +20,13 @@ public class InstructionsPage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_instructions_page);
+        setContentView(R.layout.activity_about_page);
 
-        homePage_button = findViewById(R.id.homeButton2);
+        homePage_button = findViewById(R.id.homeButton3);
         homePage_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(InstructionsPage.this, MainActivity.class);
+                Intent intent = new Intent(AboutPage.this, MainActivity.class);
                 startActivity(intent);
             }
         });
