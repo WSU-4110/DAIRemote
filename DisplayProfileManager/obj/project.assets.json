@@ -52,19 +52,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\aweso\\.nuget\\packages\\": {}
+    "C:\\Users\\shawi\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\aweso\\Downloads\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj",
+      "projectUniqueName": "C:\\Users\\shawi\\Desktop\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj",
       "projectName": "DisplayProfileManager",
-      "projectPath": "C:\\Users\\aweso\\Downloads\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj",
-      "packagesPath": "C:\\Users\\aweso\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\aweso\\Downloads\\DAIRemote\\DisplayProfileManager\\obj\\",
+      "projectPath": "C:\\Users\\shawi\\Desktop\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj",
+      "packagesPath": "C:\\Users\\shawi\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\shawi\\Desktop\\DAIRemote\\DisplayProfileManager\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\aweso\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\shawi\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
