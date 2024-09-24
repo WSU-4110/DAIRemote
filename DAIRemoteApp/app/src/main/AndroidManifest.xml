@@ -13,13 +13,10 @@
         android:theme="@style/Theme.DAIRemoteApp"
         tools:targetApi="31">
         <activity
-            android:name=".AboutPage"
-            android:exported="false" />
-        <activity
             android:name=".InstructionsPage"
             android:exported="false" />
         <activity
-            android:name=".RemotePage"
+            android:name=".InteractionPage"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

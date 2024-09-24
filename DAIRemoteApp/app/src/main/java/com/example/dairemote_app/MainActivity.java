@@ -15,10 +15,8 @@ import android.content.Intent;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button remotePage_button;  // button object for the Remote Page
+    Button interactionPage_button;  // button object for the Interaction Page
     Button instructionsPage_button;     // button object for the Instructions Page
-    Button aboutPage_button;    // button for the About Page
-    Button homePage_button; // button for returning to home page (menu buttons)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,22 +24,12 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // on clicking the "about" button, user is sent to the about page
-        aboutPage_button = findViewById(R.id.about_page);   // initializing button to about_page id
-        aboutPage_button.setOnClickListener(new View.OnClickListener() {
+        // on clicking the "interaction page" button, user is sent to the interaction page
+        interactionPage_button = findViewById(R.id.interaction_page);   // initializing button to interaction_page id
+        interactionPage_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AboutPage.class);   // from main page to about page
-                startActivity(intent);
-            }
-        });
-
-        // on clicking the "remote" button, user is sent to the remote page
-        remotePage_button = findViewById(R.id.remote_page);   // initializing button to remote_page id
-        remotePage_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, RemotePage.class);   // from main page to remote page
+                Intent intent = new Intent(MainActivity.this, InteractionPage.class);   // from main page to interaction page
                 startActivity(intent);
             }
         });
@@ -51,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         instructionsPage_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, InstructionsPage.class);   // from main page to instructions page
+                Intent intent = new Intent(MainActivity.this, InstructionsPage.class);   // from main page to interaction page
                 startActivity(intent);
             }
         });

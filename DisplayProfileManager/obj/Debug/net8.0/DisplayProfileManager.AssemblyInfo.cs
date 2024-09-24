@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DisplayProfileManager")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3e0eb628312e39c006d655d331b9132e7cc7fb4d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0361894df26b4b0d0d56fc048607d6d38badf5f5")]
 [assembly: System.Reflection.AssemblyProductAttribute("DisplayProfileManager")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DisplayProfileManager")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
