@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DAIRemote")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0361894df26b4b0d0d56fc048607d6d38badf5f5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e53119d94ce55c62f088f517945907b0bea95ea7")]
 [assembly: System.Reflection.AssemblyProductAttribute("DAIRemote")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DAIRemote")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
