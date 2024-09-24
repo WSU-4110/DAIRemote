@@ -14,7 +14,6 @@ namespace DAIRemote
         {
             InitializeComponent();
             audioDeviceComboBox = new ComboBox(); // Initialize the ComboBox
-            Controls.Add(audioDeviceComboBox); // Add ComboBox to the form
             LoadAudioDevices();
         }
 
