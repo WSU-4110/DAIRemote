@@ -5,3 +5,6 @@ obj/*
 *.user
 .vs/
 *.sln.docstates
+*.dll
+*.cache
+*.editorconfig
