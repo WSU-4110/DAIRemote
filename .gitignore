@@ -3,5 +3,5 @@ obj/*
 *.pdb
 *.suo
 *.user
-.vs/
+.vs/*
 *.sln.docstates
