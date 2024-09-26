@@ -5,3 +5,4 @@ obj/*
 *.user
 .vs/
 *.sln.docstates
+DAIRemote/obj/Debug/net8.0-windows/.NETCoreApp,Version=v8.0.AssemblyAttributes.cs
