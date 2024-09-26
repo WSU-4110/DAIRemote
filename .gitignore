@@ -3,5 +3,7 @@ obj/*
 *.pdb
 *.suo
 *.user
-.vs/
+.vs/*
 *.sln.docstates
+\obj
+\bin
