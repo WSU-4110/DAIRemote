@@ -54,6 +54,7 @@
             ResumeLayout(false);
         }
 
+
         #endregion
 
         private Button BtnSaveDisplayConfig;
