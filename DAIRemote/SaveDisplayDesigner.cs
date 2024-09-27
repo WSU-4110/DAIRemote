@@ -30,6 +30,7 @@
         {
             BtnSaveDisplayConfig = new Button();
             SuspendLayout();
+
             // 
             // BtnSaveDisplayConfig
             // 

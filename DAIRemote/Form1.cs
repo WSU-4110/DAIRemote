@@ -59,7 +59,8 @@ namespace DAIRemote
             }
         }
 
-         private void InitializeCustomComponents()
+      
+        private void InitializeCustomComponents()
         {
             this.btnShowAudioOutputs = new Button();
             this.audioFormPanel = new Panel();
@@ -104,6 +105,11 @@ namespace DAIRemote
             this.Name = "Form1";
             this.Size = new System.Drawing.Size(320, 300); // Adjust size as needed
             this.ResumeLayout(false);
+        }
+
+        private void Form1_Load_1(object sender, EventArgs e)
+        {
+
         }
     }
 }
