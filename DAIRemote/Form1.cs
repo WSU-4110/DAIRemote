@@ -1,4 +1,4 @@
-using static DisplayProfileManager.DisplayConfig;
+using DisplayProfileManager;
 
 namespace DAIRemote
 {
@@ -13,28 +13,10 @@ namespace DAIRemote
         {
 
         }
-
+        string fileName = "displayConfig";
         private void BtnSaveDisplayConfig_Click(object sender, EventArgs e)
         {
-            try
-            {
-                // Define the file path where you want to save the configuration
-                string filePath = "displayConfig.json";
-
-                // Get the current display configuration
-                var (pathArray, modeInfoArray, topologyId) = GetDisplayConfig();
-
-                // Save the display configuration to a file
-                SaveDisplayConfig(filePath, pathArray, modeInfoArray, topologyId);
-
-                // Inform the user that the configuration has been saved
-                MessageBox.Show($"Display configuration saved to {filePath}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                // Handle any errors that might occur
-                MessageBox.Show($"An error occurred while saving the display configuration: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            DisplayConfig.SaveDisplaySettings(fileName + ".json");
         }
     }
 }
