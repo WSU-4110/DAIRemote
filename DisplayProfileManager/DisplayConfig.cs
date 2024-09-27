@@ -798,7 +798,7 @@ namespace DisplayProfileManager
                     Marshal.FreeHGlobal(modeInfoArrayPtr);
                 }
             }
-        }
+        } 
 
         static void Main()
         {
