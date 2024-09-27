@@ -1,6 +1,6 @@
 using System;
 using System.Windows.Forms;
-using static DisplayProfileManager.DisplayConfig;
+using DisplayProfileManager;
 
 namespace DAIRemote
 {
@@ -29,22 +29,10 @@ namespace DAIRemote
                 trayIconManager.HideIcon();
             }
         }
-
+        string fileName = "displayConfig";
         private void BtnSaveDisplayConfig_Click(object sender, EventArgs e)
         {
-            try
-            {
-                string filePath = "displayConfig.json";
-
-                var (pathArray, modeInfoArray, topologyId) = GetDisplayConfig();
-                SaveDisplayConfig(filePath, pathArray, modeInfoArray, topologyId);
-
-                MessageBox.Show($"Display configuration saved to {filePath}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"An error occurred while saving the display configuration: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            DisplayConfig.SaveDisplaySettings(fileName + ".json");
         }
     }
 }
