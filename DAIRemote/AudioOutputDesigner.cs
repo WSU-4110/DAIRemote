@@ -1,65 +1,12 @@
-using static DisplayProfileManager.DisplayConfig;
+﻿using System;
+using System.Windows.Forms;
 
 namespace DAIRemote
 {
-    public partial class Form1 : Form
+    public partial class Form1
     {
-        private Panel audioFormPanel;
-        private Button btnShowAudioOutputs;
 
-
-        public Form1()
-        {
-            InitializeComponent();
-            InitializeCustomComponents();
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void BtnShowAudioOutputs_Click(object sender, EventArgs e)
-        {
-            // Clear the panel before showing the new form
-            audioFormPanel.Controls.Clear();
-
-            // Create an instance of the AudioOutputForm
-            AudioOutputForm audioForm = new AudioOutputForm
-            {
-                TopLevel = false,
-                FormBorderStyle = FormBorderStyle.None,
-                Dock = DockStyle.Fill // Fill the panel
-            };
-
-            audioFormPanel.Controls.Add(audioForm); // Add the audioForm to the panel
-            audioForm.Show(); // Show the embedded form
-        }
-
-        private void BtnSaveDisplayConfig_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // Define the file path where you want to save the configuration
-                string filePath = "displayConfig.json";
-
-                // Get the current display configuration
-                var (pathArray, modeInfoArray, topologyId) = GetDisplayConfig();
-
-                // Save the display configuration to a file
-                SaveDisplayConfig(filePath, pathArray, modeInfoArray, topologyId);
-
-                // Inform the user that the configuration has been saved
-                MessageBox.Show($"Display configuration saved to {filePath}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                // Handle any errors that might occur
-                MessageBox.Show($"An error occurred while saving the display configuration: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-         private void InitializeCustomComponents()
+        private void InitializeCustomComponents()
         {
             this.btnShowAudioOutputs = new Button();
             this.audioFormPanel = new Panel();
@@ -105,5 +52,7 @@ namespace DAIRemote
             this.Size = new System.Drawing.Size(320, 300); // Adjust size as needed
             this.ResumeLayout(false);
         }
+
+
     }
 }

@@ -10,6 +10,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="AudioOutputDesigner.cs" />
+  </ItemGroup>
+
+  
+
+  <ItemGroup>
     <ProjectReference Include="..\DisplayProfileManager\DisplayProfileManager.csproj" />
   </ItemGroup>
 

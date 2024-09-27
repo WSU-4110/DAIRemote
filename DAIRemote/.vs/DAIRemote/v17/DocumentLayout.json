@@ -1,32 +1,25 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Fahim\\source\\repos\\DAIRemote\\",
+  "WorkspaceRootPath": "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DAIRemote\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{244E9C8F-2C20-4E79-882C-CF57043146A0}|..\\DisplayProfileManager\\DisplayProfileManager.csproj|c:\\users\\fahim\\source\\repos\\displayprofilemanager\\displayconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{244E9C8F-2C20-4E79-882C-CF57043146A0}|..\\DisplayProfileManager\\DisplayProfileManager.csproj|c:\\users\\fahim\\source\\repos\\displayprofilemanager\\displayprofilemanager.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}|DAIRemote.csproj|c:\\users\\fahim\\source\\repos\\dairemote\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}|DAIRemote.csproj|solutionrelative:form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}|DAIRemote.csproj|C:\\Users\\Fahim\\source\\repos\\DAIRemote\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}|DAIRemote.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}|DAIRemote.csproj|c:\\users\\fahim\\source\\repos\\dairemote\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}|DAIRemote.csproj|c:\\users\\lynn hakim\\source\\repos\\dairemote\\dairemote\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}|DAIRemote.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}|DAIRemote.csproj|c:\\users\\fahim\\source\\repos\\dairemote\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}|DAIRemote.csproj|c:\\users\\lynn hakim\\source\\repos\\dairemote\\dairemote\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}|DAIRemote.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}|DAIRemote.csproj|c:\\users\\fahim\\source\\repos\\dairemote\\dairemote.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "AbsoluteMoniker": "D:0:0:{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}|DAIRemote.csproj|c:\\users\\lynn hakim\\source\\repos\\dairemote\\dairemote\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}|DAIRemote.csproj|solutionrelative:form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}|DAIRemote.csproj|c:\\users\\lynn hakim\\source\\repos\\dairemote\\dairemote\\dairemote.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}|DAIRemote.csproj|solutionrelative:dairemote.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Fahim\\source\\repos\\DisplayProfileManager\\DisplayProfileManager.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     }
   ],
   "DocumentGroupContainers": [
@@ -36,88 +29,54 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 8,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Form1.cs [Design]",
-              "DocumentMoniker": "C:\\Users\\Fahim\\source\\repos\\DAIRemote\\Form1.cs",
-              "RelativeDocumentMoniker": "Form1.cs",
-              "ToolTip": "C:\\Users\\Fahim\\source\\repos\\DAIRemote\\Form1.cs [Design]",
-              "RelativeToolTip": "Form1.cs [Design]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-08T07:22:51.666Z",
-              "IsPinned": true,
-              "EditorCaption": " [Design]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 1,
               "Title": "Form1.cs",
-              "DocumentMoniker": "C:\\Users\\Fahim\\source\\repos\\DAIRemote\\Form1.cs",
+              "DocumentMoniker": "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DAIRemote\\Form1.cs",
               "RelativeDocumentMoniker": "Form1.cs",
-              "ToolTip": "C:\\Users\\Fahim\\source\\repos\\DAIRemote\\Form1.cs",
+              "ToolTip": "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DAIRemote\\Form1.cs",
               "RelativeToolTip": "Form1.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAqwBoAAAAQAAAA",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwBoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-09-08T10:36:15.293Z",
-              "IsPinned": true
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "DAIRemote.csproj",
-              "DocumentMoniker": "C:\\Users\\Fahim\\source\\repos\\DAIRemote\\DAIRemote.csproj",
-              "RelativeDocumentMoniker": "DAIRemote.csproj",
-              "ToolTip": "C:\\Users\\Fahim\\source\\repos\\DAIRemote\\DAIRemote.csproj",
-              "RelativeToolTip": "DAIRemote.csproj",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2024-09-08T10:28:50.946Z",
+              "IsPinned": true,
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 0,
               "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\Fahim\\source\\repos\\DAIRemote\\Program.cs",
+              "DocumentMoniker": "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DAIRemote\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\Fahim\\source\\repos\\DAIRemote\\Program.cs",
+              "ToolTip": "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DAIRemote\\Program.cs",
               "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAIAAAAaAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-09-08T10:26:03.98Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "DisplayProfileManager.csproj",
               "DocumentMoniker": "C:\\Users\\Fahim\\source\\repos\\DisplayProfileManager\\DisplayProfileManager.csproj",
-              "RelativeDocumentMoniker": "..\\DisplayProfileManager\\DisplayProfileManager.csproj",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\Fahim\\source\\repos\\DisplayProfileManager\\DisplayProfileManager.csproj",
               "ToolTip": "C:\\Users\\Fahim\\source\\repos\\DisplayProfileManager\\DisplayProfileManager.csproj",
-              "RelativeToolTip": "..\\DisplayProfileManager\\DisplayProfileManager.csproj",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\Fahim\\source\\repos\\DisplayProfileManager\\DisplayProfileManager.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2024-09-08T10:08:34.336Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-08T10:08:34.336Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "Form1.Designer.cs",
-              "DocumentMoniker": "C:\\Users\\Fahim\\source\\repos\\DAIRemote\\Form1.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DAIRemote\\Form1.Designer.cs",
               "RelativeDocumentMoniker": "Form1.Designer.cs",
-              "ToolTip": "C:\\Users\\Fahim\\source\\repos\\DAIRemote\\Form1.Designer.cs",
+              "ToolTip": "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DAIRemote\\Form1.Designer.cs",
               "RelativeToolTip": "Form1.Designer.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -126,16 +85,15 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "DisplayConfig.cs",
-              "DocumentMoniker": "C:\\Users\\Fahim\\source\\repos\\DisplayProfileManager\\DisplayConfig.cs",
-              "RelativeDocumentMoniker": "..\\DisplayProfileManager\\DisplayConfig.cs",
-              "ToolTip": "C:\\Users\\Fahim\\source\\repos\\DisplayProfileManager\\DisplayConfig.cs",
-              "RelativeToolTip": "..\\DisplayProfileManager\\DisplayConfig.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIDAAARAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-08T07:40:29.897Z",
-              "EditorCaption": ""
+              "DocumentIndex": 3,
+              "Title": "DAIRemote.csproj",
+              "DocumentMoniker": "C:\\Users\\Lynn Hakim\\Source\\Repos\\DAIRemote\\DAIRemote\\DAIRemote.csproj",
+              "RelativeDocumentMoniker": "DAIRemote.csproj",
+              "ToolTip": "C:\\Users\\Lynn Hakim\\Source\\Repos\\DAIRemote\\DAIRemote\\DAIRemote.csproj",
+              "RelativeToolTip": "DAIRemote.csproj",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-09-08T10:28:50.946Z"
             }
           ]
         }
