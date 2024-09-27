@@ -736,6 +736,7 @@ namespace DisplayProfileManager
 
         public static (DISPLAYCONFIG_PATH_INFO[], DISPLAYCONFIG_MODE_INFO[], DISPLAYCONFIG_TOPOLOGY_ID) LoadDisplayConfig(string filePath)
         {
+            
             var json = File.ReadAllText(filePath);
             dynamic settings = JsonConvert.DeserializeObject(json);
 
