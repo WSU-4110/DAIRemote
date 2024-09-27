@@ -29,6 +29,8 @@ namespace DAIRemote
             audioDeviceComboBox.Name = "audioDeviceComboBox";
             audioDeviceComboBox.Size = new Size(260, 33);
             audioDeviceComboBox.TabIndex = 0;
+
+            audioDeviceComboBox.DropDown += audioDeviceComboBox_DropDown;
             audioDeviceComboBox.SelectedIndexChanged += audioDeviceComboBox_SelectedIndexChanged;
             // 
             // AudioOutputForm
@@ -53,6 +55,10 @@ namespace DAIRemote
             return devices.Select(d => d.FriendlyName).ToList();
         }
 
+        private void audioDeviceComboBox_DropDown(object sender, EventArgs e)
+        {
+            LoadAudioDevices();
+        }
         private void audioDeviceComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
 
