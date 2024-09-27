@@ -64,3 +64,36 @@ C:/Users/Lynn Hakim/Source/Repos/DAIRemote/DAIRemote/obj/Debug/net8.0-windows/DA
 /Users/lynnhakim/DAIRemote/DAIRemote/obj/Debug/net8.0-windows/DAIRemote.pdb
 /Users/lynnhakim/DAIRemote/DAIRemote/obj/Debug/net8.0-windows/DAIRemote.genruntimeconfig.cache
 /Users/lynnhakim/DAIRemote/DAIRemote/obj/Debug/net8.0-windows/ref/DAIRemote.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DisplayProfileManager.deps.json
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DisplayProfileManager.runtimeconfig.json
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DisplayProfileManager.exe
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DAIRemote.exe
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DAIRemote.deps.json
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DAIRemote.runtimeconfig.json
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DAIRemote.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DAIRemote.pdb
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.Asio.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.Core.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.Midi.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.Wasapi.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.WinForms.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.WinMM.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Newtonsoft.Json.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DisplayProfileManager.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DisplayProfileManager.pdb
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.csproj.AssemblyReference.cache
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.AudioOutputForm.resources
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.Form1.resources
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.csproj.GenerateResource.cache
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.AssemblyInfoInputs.cache
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.AssemblyInfo.cs
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.csproj.CoreCompileInputs.cache
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.sourcelink.json
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.csproj.Up2Date
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\refint\DAIRemote.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.pdb
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.genruntimeconfig.cache
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\ref\DAIRemote.dll

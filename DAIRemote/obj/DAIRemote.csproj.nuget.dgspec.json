@@ -1,33 +1,36 @@
 {
   "format": 1,
   "restore": {
-    "/Users/lynnhakim/DAIRemote/DAIRemote/DAIRemote.csproj": {}
+    "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DAIRemote\\DAIRemote.csproj": {}
   },
   "projects": {
-    "/Users/lynnhakim/DAIRemote/DAIRemote/DAIRemote.csproj": {
+    "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DAIRemote\\DAIRemote.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/lynnhakim/DAIRemote/DAIRemote/DAIRemote.csproj",
+        "projectUniqueName": "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DAIRemote\\DAIRemote.csproj",
         "projectName": "DAIRemote",
-        "projectPath": "/Users/lynnhakim/DAIRemote/DAIRemote/DAIRemote.csproj",
-        "packagesPath": "/Users/lynnhakim/.nuget/packages/",
-        "outputPath": "/Users/lynnhakim/DAIRemote/DAIRemote/obj/",
+        "projectPath": "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DAIRemote\\DAIRemote.csproj",
+        "packagesPath": "C:\\Users\\Lynn Hakim\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DAIRemote\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/lynnhakim/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\Lynn Hakim\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0-windows"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0-windows7.0": {
             "targetAlias": "net8.0-windows",
             "projectReferences": {
-              "/Users/lynnhakim/DAIRemote/DisplayProfileManager/DisplayProfileManager.csproj": {
-                "projectPath": "/Users/lynnhakim/DAIRemote/DisplayProfileManager/DisplayProfileManager.csproj"
+              "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj": {
+                "projectPath": "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj"
               }
             }
           }
@@ -63,12 +66,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[8.0.8, 8.0.8]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
@@ -77,26 +74,29 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.401/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "/Users/lynnhakim/DAIRemote/DisplayProfileManager/DisplayProfileManager.csproj": {
+    "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/lynnhakim/DAIRemote/DisplayProfileManager/DisplayProfileManager.csproj",
+        "projectUniqueName": "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj",
         "projectName": "DisplayProfileManager",
-        "projectPath": "/Users/lynnhakim/DAIRemote/DisplayProfileManager/DisplayProfileManager.csproj",
-        "packagesPath": "/Users/lynnhakim/.nuget/packages/",
-        "outputPath": "/Users/lynnhakim/DAIRemote/DisplayProfileManager/obj/",
+        "projectPath": "C:\\Users\\Lynn Hakim\\source\\repos\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj",
+        "packagesPath": "C:\\Users\\Lynn Hakim\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Lynn Hakim\\Source\\Repos\\DAIRemote\\DisplayProfileManager\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/lynnhakim/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\Lynn Hakim\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -141,7 +141,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.401/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

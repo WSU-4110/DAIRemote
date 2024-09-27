@@ -45,7 +45,7 @@
 
            
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(250, 450);
+            ClientSize = new Size(300, 450);
             BackColor = Color.FromArgb(225, 246, 225); 
             Controls.Add(BtnSaveDisplayConfig);
             Controls.Add(BtnShowAudioOutputs); 

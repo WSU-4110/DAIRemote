@@ -20,20 +20,16 @@ namespace DAIRemote
         {
             audioDeviceComboBox = new ComboBox();
             SuspendLayout();
-            // 
-            // audioDeviceComboBox
-            // 
+             
             audioDeviceComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             audioDeviceComboBox.FormattingEnabled = true;
-            audioDeviceComboBox.Location = new Point(12, 150);
+            audioDeviceComboBox.Location = new Point(12, 100);
             audioDeviceComboBox.Name = "audioDeviceComboBox";
             audioDeviceComboBox.Size = new Size(260, 33);
             audioDeviceComboBox.TabIndex = 0;
             audioDeviceComboBox.DropDown += audioDeviceComboBox_DropDown;
             audioDeviceComboBox.SelectedIndexChanged += audioDeviceComboBox_SelectedIndexChanged;
-            // 
-            // AudioOutputForm
-            // 
+            
             ClientSize = new Size(284, 100);
             Controls.Add(audioDeviceComboBox);
             Name = "AudioOutputForm";
