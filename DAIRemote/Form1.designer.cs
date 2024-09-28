@@ -2,14 +2,10 @@
 {
     partial class Form1
     {
-        /// <summary>
-        ///  Required designer variable.
-        /// </summary>
+       
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        ///  Clean up any resources being used.
-        /// </summary>
+        
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
@@ -22,42 +18,46 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        ///  Required method for Designer support - do not modify
-        ///  the contents of this method with the code editor.
-        /// </summary>
+        
         private void InitializeComponent()
         {
             BtnSaveDisplayConfig = new Button();
+            BtnShowAudioOutputs = new Button(); 
             SuspendLayout();
 
-            // 
-            // BtnSaveDisplayConfig
-            // 
             BtnSaveDisplayConfig.AccessibleName = "BtnSaveDisplayConfig";
-            BtnSaveDisplayConfig.Location = new Point(20, 8);
+            BtnSaveDisplayConfig.Location = new Point(20, 10);
             BtnSaveDisplayConfig.Name = "BtnSaveDisplayConfig";
-            BtnSaveDisplayConfig.Size = new Size(75, 23);
+            BtnSaveDisplayConfig.Size = new Size(200, 40); 
             BtnSaveDisplayConfig.TabIndex = 0;
-            BtnSaveDisplayConfig.Text = "SaveDisplayConfig";
-            BtnSaveDisplayConfig.UseVisualStyleBackColor = true;
+            BtnSaveDisplayConfig.Text = "Save Display Config";
+            BtnSaveDisplayConfig.BackColor = Color.LightSkyBlue; 
             BtnSaveDisplayConfig.Click += BtnSaveDisplayConfig_Click;
-            // 
-            // Form1
-            // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+
+            BtnShowAudioOutputs.AccessibleName = "BtnShowAudioOutputs";
+            BtnShowAudioOutputs.Location = new Point(20, 70); 
+            BtnShowAudioOutputs.Name = "BtnShowAudioOutputs";
+            BtnShowAudioOutputs.Size = new Size(200, 40); 
+            BtnShowAudioOutputs.TabIndex = 1;
+            BtnShowAudioOutputs.Text = "Show Audio Outputs";
+            BtnShowAudioOutputs.BackColor = Color.LightSkyBlue; 
+            BtnShowAudioOutputs.Click += BtnShowAudioOutputs_Click;
+
+           
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(250, 450);
+            BackColor = Color.FromArgb(225, 246, 225); 
             Controls.Add(BtnSaveDisplayConfig);
+            Controls.Add(BtnShowAudioOutputs); 
             Name = "Form1";
             Text = "DAIRemote";
             Load += Form1_Load;
             ResumeLayout(false);
         }
 
-
         #endregion
 
         private Button BtnSaveDisplayConfig;
+        private Button BtnShowAudioOutputs; 
     }
 }

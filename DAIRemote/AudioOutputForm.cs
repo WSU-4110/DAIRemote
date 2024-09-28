@@ -6,9 +6,9 @@ using NAudio.CoreAudioApi;
 
 namespace DAIRemote
 {
-    public partial class AudioOutputForm : Form
+    public partial class AudioOutputForm : System.Windows.Forms.Form
     {
-        private ComboBox audioDeviceComboBox; // Define the ComboBox
+        private ComboBox audioDeviceComboBox;
 
         public AudioOutputForm()
         {
@@ -25,20 +25,20 @@ namespace DAIRemote
             // 
             audioDeviceComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             audioDeviceComboBox.FormattingEnabled = true;
-            audioDeviceComboBox.Location = new Point(12, 12);
+            audioDeviceComboBox.Location = new Point(12, 150);
             audioDeviceComboBox.Name = "audioDeviceComboBox";
             audioDeviceComboBox.Size = new Size(260, 33);
             audioDeviceComboBox.TabIndex = 0;
-
             audioDeviceComboBox.DropDown += audioDeviceComboBox_DropDown;
             audioDeviceComboBox.SelectedIndexChanged += audioDeviceComboBox_SelectedIndexChanged;
             // 
             // AudioOutputForm
             // 
-            ClientSize = new Size(284, 61);
+            ClientSize = new Size(284, 100);
             Controls.Add(audioDeviceComboBox);
             Name = "AudioOutputForm";
             Text = "Audio Output Switcher";
+            Load += AudioOutputForm_Load;
             ResumeLayout(false);
         }
 
@@ -59,7 +59,13 @@ namespace DAIRemote
         {
             LoadAudioDevices();
         }
+
         private void audioDeviceComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void AudioOutputForm_Load(object sender, EventArgs e)
         {
 
         }
