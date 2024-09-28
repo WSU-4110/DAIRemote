@@ -22,6 +22,9 @@
             android:name=".RemotePage"
             android:exported="false" />
         <activity
+            android:name=".InteractionPage"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
