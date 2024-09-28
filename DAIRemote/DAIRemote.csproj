@@ -8,11 +8,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="AudioOutputDesigner.cs" />
-  </ItemGroup>
-
   
 
   <ItemGroup>
