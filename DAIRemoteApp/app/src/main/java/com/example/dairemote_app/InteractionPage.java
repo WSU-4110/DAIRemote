@@ -1,9 +1,14 @@
 package com.example.dairemote_app;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -14,7 +19,10 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 
-public class AboutPage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class InteractionPage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    ImageView keyboardImgBtn;
+    EditText editText;
 
     DrawerLayout drawerLayout;
     NavigationView navigationView;
@@ -23,7 +31,7 @@ public class AboutPage extends AppCompatActivity implements NavigationView.OnNav
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_about_page);
+        setContentView(R.layout.activity_interaction_page);
 
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
@@ -42,14 +50,32 @@ public class AboutPage extends AppCompatActivity implements NavigationView.OnNav
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        navigationView.setCheckedItem(R.id.nav_about);
+        navigationView.setCheckedItem(R.id.nav_remote);
+
+        keyboardImgBtn = findViewById(R.id.keyboardImgBtn);
+
+        keyboardImgBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editText = findViewById(R.id.editText);
+                editText.setVisibility(View.VISIBLE);
+                editText.requestFocus();
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+                editText.setText("");
+            }
+        });
     }
 
     @Override
     public void onBackPressed() {
         if(drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
+        } else if(editText != null && editText.getVisibility() == View.VISIBLE) {
+            editText.setText("");
+            editText.setVisibility(View.GONE);
+        }
+        else {
             super.onBackPressed();
         }
     }
@@ -63,14 +89,14 @@ public class AboutPage extends AppCompatActivity implements NavigationView.OnNav
         if(itemId == R.id.nav_home) {
             intent = new Intent(this, MainActivity.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_remote) {
-            intent = new Intent(this, InteractionPage.class);
-            startActivity(intent);
         } else if(itemId == R.id.nav_server) {
             intent = new Intent(this, RemotePage.class);
             startActivity(intent);
         } else if(itemId == R.id.nav_help) {
             intent = new Intent(this, InstructionsPage.class);
+            startActivity(intent);
+        } else if(itemId == R.id.nav_about) {
+            intent = new Intent(this, AboutPage.class);
             startActivity(intent);
         }
 
