@@ -4,13 +4,9 @@ import android.Manifest;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
+import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -22,29 +18,23 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.net.InetAddress;
 
 public class RemotePage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     Toolbar toolbar;
-    private static final int REQUEST_ENABLE_BT = 1;
-    private static final int REQUEST_PERMISSION_CODE = 100;
-
-    private BluetoothAdapter bluetoothAdapter;
 
     private ArrayList<String> deviceList = new ArrayList<>();
     private ArrayAdapter<String> adapter;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +44,13 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
         ListView listView = findViewById(R.id.device_list);
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, deviceList);
         listView.setAdapter(adapter);
+
+
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedDevice = deviceList.get(position);
+            Toast.makeText(RemotePage.this, "Selected IP: " + selectedDevice, Toast.LENGTH_SHORT).show();
+        });
+
 
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
@@ -73,154 +70,73 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
         navigationView.setNavigationItemSelectedListener(this);
 
         navigationView.setCheckedItem(R.id.nav_server);
-        checkBluetoothPermissions();
+
+
+        // Start scanning for local IPs
+        new ScanLocalNetworkTask().execute();
     }
 
-    private void checkBluetoothPermissions() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Request the permissions
-            ActivityCompat.requestPermissions(this,
-                    new String[]{
-                            Manifest.permission.BLUETOOTH_SCAN,
-                            Manifest.permission.BLUETOOTH_CONNECT,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                    },
-                    REQUEST_PERMISSION_CODE);
-        } else {
-            // Permissions are granted, check for Bluetooth support
-            setupBluetooth();
-        }
-    }
 
-    private void setupBluetooth() {
-        BluetoothManager bluetoothManager = getSystemService(BluetoothManager.class);
-        bluetoothAdapter = bluetoothManager.getAdapter();
-
-        if (bluetoothAdapter == null) {
-            // Device doesn't support Bluetooth
-            Toast.makeText(this, "Bluetooth is not supported", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (!bluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        } else {
-            // Bluetooth is enabled, scanning for devices begins
-            startBluetoothScan();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permissions granted, check Bluetooth support
-                setupBluetooth();
-            } else {
-                // Permissions denied
-                Toast.makeText(this, "Permissions are required to scan for Bluetooth devices.", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    private void startBluetoothScan() {
-        // Start discovery for Bluetooth Classic devices
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        if (bluetoothAdapter.isDiscovering()) {
-            bluetoothAdapter.cancelDiscovery(); // Cancel any ongoing discovery
-        }
-        // Start the discovery process
-        boolean started = bluetoothAdapter.startDiscovery();
-
-        if (started) {
-            Log.d("Bluetooth", "Discovery started");
-            Toast.makeText(this, "Bluetooth discovery started", Toast.LENGTH_SHORT).show();
-
-            // Register a BroadcastReceiver to receive discovery results
-            IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-            registerReceiver(broadcastReceiver, filter);
-        } else {
-            Log.e("Bluetooth", "Discovery could not be started");
-            Toast.makeText(this, "Discovery could not be started", Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
-    // BroadcastReceiver to handle found devices
-    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    @SuppressLint("StaticFieldLeak")
+    private class ScanLocalNetworkTask extends AsyncTask<Void, String, Void> {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (device != null) {
-                    if (ActivityCompat.checkSelfPermission(RemotePage.this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                        // TODO: Consider calling
-                        //    ActivityCompat#requestPermissions
-                        // here to request the missing permissions, and then overriding
-                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //                                          int[] grantResults)
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
-                        return;
-                    }
+        protected Void doInBackground(Void... voids) {
+            try {
+                // Get the IP address of the current network
+                WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+                String ip = intToIp(wm.getDhcpInfo().ipAddress);
 
-                    String deviceName;
-                    String deviceAddress;
+                // Debugging: Check if IP is being retrieved
+                Log.d("NetworkScanner", "Device IP: " + ip);
 
-                    // Check if the device is not null and get its name
-                    if (device != null) {
-                        if (device.getName() != null) {
-                            deviceName = device.getName();
-                        } else {
+
+                // Scan IP range
+                String subnet = ip.substring(0, ip.lastIndexOf('.') + 1);
+                for (int i = 1; i < 255; i++) {
+                    String host = subnet + i;
+                    InetAddress inetAddress = InetAddress.getByName(host);
+
+                    // Debugging: Check each host IP being scanned
+                    Log.d("NetworkScanner", "Scanning IP: " + host);
+
+                    if (inetAddress.isReachable(500)) {
+                        Log.d("NetworkScanner", "Reachable IP: " + inetAddress.getHostAddress());
+
+                        // Get hostname or set default to "Unknown Device"
+                        String deviceName = inetAddress.getHostName();
+                        if (deviceName == null || deviceName.isEmpty() || deviceName.equals(inetAddress.getHostAddress())) {
                             deviceName = "Unknown Device";
                         }
-                    } else {
-                        deviceName = "Unknown Device";
+
+                        String deviceInfo = deviceName + " (" + inetAddress.getHostAddress() + ")";
+                        publishProgress(deviceInfo);  // Publish the hostname and IP
                     }
 
-                    // Check if the device is not null and get its address
-                    if (device != null) {
-                        deviceAddress = device.getAddress();
-                    } else {
-                        deviceAddress = "Unknown Address";
-                    }
-
-
-                    Log.d("BluetoothDevice", "Found device: " + deviceName + " [" + deviceAddress + "]");
-                    deviceList.add(deviceName + " (" + deviceAddress + ")");
-                    adapter.notifyDataSetChanged();
-                } else {
-                    Log.d("BluetoothDevice", "No device found.");
                 }
-            } else {
-                Log.d("BluetoothDevice", "Received unknown action: " + action);
+            } catch (IOException e) {
+                Log.e("NetworkScanner", "Error scanning local network", e);
             }
+            return null;
         }
-    };
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+            deviceList.add(values[0]);  // Add the hostname and IP to the list
+            adapter.notifyDataSetChanged();  // Notify the adapter to update the ListView
+
+            // Debugging: Check that ListView is being updated
+            Log.d("NetworkScanner", "Added IP to ListView: " + values[0]);
+
+        }
+    }
+
+    private String intToIp(int ipAddress) {
+        return ((ipAddress & 0xFF) + "." +
+                ((ipAddress >> 8) & 0xFF) + "." +
+                ((ipAddress >> 16) & 0xFF) + "." +
+                ((ipAddress >> 24) & 0xFF));
+    }
 
 
 
@@ -257,10 +173,5 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
         return true;
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(broadcastReceiver); // Unregister when the activity is destroyed
-    }
 
 }
