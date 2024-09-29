@@ -16,18 +16,30 @@ namespace DAIRemote
             InitializeTrayIcon();
         }
 
-        private void InitializeTrayIcon()
-        {
-            // Create a ContextMenuStrip
-            trayMenu = new ContextMenuStrip();
-            trayMenu.Items.Add("Show", null, OnShow);
-            trayMenu.Items.Add("Exit", null, OnExit);
+            private void InitializeTrayIcon()
+            {
+                // Create a ContextMenuStrip
+                trayMenu = new ContextMenuStrip
+                {
+                    BackColor = Color.FromArgb(50, 50, 50),
+                    ForeColor = System.Drawing.Color.White,
+                    ShowImageMargin = false,
+                    Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
+            };
+
+            var showMenuItem = new ToolStripMenuItem("Show", null, OnShow);
+            var exitMenuItem = new ToolStripMenuItem("Exit", null, OnExit);
+
+
+            trayMenu.Items.Add(showMenuItem);
+            trayMenu.Items.Add(new ToolStripSeparator());
+            trayMenu.Items.Add(exitMenuItem);
 
             // Set custom icon from Resources folder
             trayIcon = new NotifyIcon
             {
                 Text = "DAIRemote",
-                Icon = new Icon("Resources/SystemTrayIcon.ico"), // Use your custom icon
+                Icon = new Icon("Resources/DAIRemoteLogo.ico"), // Use your custom icon
                 ContextMenuStrip = trayMenu,
                 Visible = true
             };

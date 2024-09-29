@@ -14,6 +14,10 @@ namespace DAIRemote
             Application.SetCompatibleTextRenderingDefault(false);
             ApplicationConfiguration.Initialize();
             Application.Run(new Form1());
+
+
+
         }
+        
     }
 }
