@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Newtonsoft.Json;
-using static System.Net.Mime.MediaTypeNames;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace DisplayProfileManager
 {
     public class DisplayConfig
     {
-
+        public const int ERROR_CONST = 0;
         /*
         The DISPLAYCONFIG_DEVICE_INFO_TYPE enumeration specifies the type of display device info 
         to configure or obtain through the DisplayConfigSetDeviceInfo or DisplayConfigGetDeviceInfo function.
@@ -41,9 +37,10 @@ namespace DisplayProfileManager
         */
         public enum DISPLAYCONFIG_MODE_INFO_TYPE : uint
         {
-            DISPLAYCONFIG_MODE_INFO_TYPE_SOURCE = 0,
-            DISPLAYCONFIG_MODE_INFO_TYPE_TARGET = 1,
-            DISPLAYCONFIG_MODE_INFO_TYPE_DESKTOP_IMAGE = 2,
+            DISPLAYCONFIG_MODE_INFO_TYPE_ZERO = 0,
+            DISPLAYCONFIG_MODE_INFO_TYPE_SOURCE = 1,
+            DISPLAYCONFIG_MODE_INFO_TYPE_TARGET = 2,
+            DISPLAYCONFIG_MODE_INFO_TYPE_DESKTOP_IMAGE = 3,
             DISPLAYCONFIG_MODE_INFO_TYPE_FORCE_UINT32 = 0xFFFFFFFF
         }
 
@@ -63,15 +60,11 @@ namespace DisplayProfileManager
             [FieldOffset(8)]
             public LUID adapterId;
 
-            // Union representation
             [FieldOffset(16)]
             public DISPLAYCONFIG_TARGET_MODE targetMode;
 
             [FieldOffset(16)]
             public DISPLAYCONFIG_SOURCE_MODE sourceMode;
-
-            [FieldOffset(16)]
-            public DISPLAYCONFIG_DESKTOP_IMAGE_INFO desktopImageInfo;
         }
 
         /*
@@ -93,10 +86,12 @@ namespace DisplayProfileManager
         */
         public enum DISPLAYCONFIG_PIXELFORMAT : uint
         {
-            DISPLAYCONFIG_PIXELFORMAT_UNKNOWN = 0,
-            DISPLAYCONFIG_PIXELFORMAT_X8R8G8B8 = 1,
-            DISPLAYCONFIG_PIXELFORMAT_R8G8B8A8 = 2,
-            // Add other pixel formats as needed
+            DISPLAYCONFIG_PIXELFORMAT_ZERO = 0x0,
+            DISPLAYCONFIG_PIXELFORMAT_8BPP = 1,
+            DISPLAYCONFIG_PIXELFORMAT_16BPP = 2,
+            DISPLAYCONFIG_PIXELFORMAT_24BPP = 3,
+            DISPLAYCONFIG_PIXELFORMAT_32BPP = 4,
+            DISPLAYCONFIG_PIXELFORMAT_NONGDI = 5,
             DISPLAYCONFIG_PIXELFORMAT_FORCE_UINT32 = 0xFFFFFFFF
         }
 
@@ -123,27 +118,50 @@ namespace DisplayProfileManager
             public DISPLAYCONFIG_2DREGION activeSize;
             public DISPLAYCONFIG_2DREGION totalSize;
 
-            // Define the union and its structures
-            [StructLayout(LayoutKind.Explicit)]
-            public struct SignalInfoUnion
-            {
-                [FieldOffset(0)]
-                public uint videoStandard;
-
-                [FieldOffset(0)]
-                public AdditionalSignalInfoStruct AdditionalSignalInfo;
-
-                [StructLayout(LayoutKind.Sequential)]
-                public struct AdditionalSignalInfoStruct
-                {
-                    public ushort videoStandard;
-                    public ushort vSyncFreqDivider;
-                    public ushort reserved;
-                }
-            }
-
-            public SignalInfoUnion DUMMYUNIONNAME;
+            public D3DKMDT_VIDEO_SIGNAL_STANDARD videoStandard;
             public DISPLAYCONFIG_SCANLINE_ORDERING scanLineOrdering;
+        }
+
+        /*
+         The D3DKMDT_VIDEO_SIGNAL_STANDARD enumeration contains constants that represent video signal standards.
+         https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmdt/ne-d3dkmdt-_d3dkmdt_video_signal_standard
+         */
+        public enum D3DKMDT_VIDEO_SIGNAL_STANDARD : UInt32
+        {
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_UNINITIALIZED = 0,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_VESADMT = 1,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_VESAGTF = 2,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_VESACVT = 3,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_IBM = 4,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_APPLE = 5,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_NTSCM = 6,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_NTSCJ = 7,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_NTSC443 = 8,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_PALB = 9,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_PALB1 = 10,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_PALG = 11,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_PALH = 12,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_PALI = 13,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_PALD = 14,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_PALN = 15,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_PALNC = 16,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_SECAMB = 17,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_SECAMD = 18,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_SECAMG = 19,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_SECAMH = 20,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_SECAMK = 21,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_SECAMK1 = 22,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_SECAML = 23,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_SECAML1 = 24,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_EIA861 = 25,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_EIA861A = 26,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_EIA861B = 27,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_PALK = 28,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_PALK1 = 29,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_PALL = 30,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_PALM = 31,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_OTHER = 255,
+            D3DKMDT_VIDEO_SIGNAL_STANDARD_USB = 65791
         }
 
         /*
@@ -162,14 +180,7 @@ namespace DisplayProfileManager
         https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-displayconfiggetdeviceinfo
         */
         [DllImport("user32.dll", SetLastError = true)]
-        public static extern int DisplayConfigGetDeviceInfo(ref DISPLAYCONFIG_DEVICE_INFO_HEADER requestPacket);
-
-        /*
-        The DisplayConfigSetDeviceInfo function sets the properties of a target.
-        https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-displayconfigsetdeviceinfo
-        */
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern int DisplayConfigSetDeviceInfo(ref DISPLAYCONFIG_DEVICE_INFO_HEADER setPacket);
+        public static extern int DisplayConfigGetDeviceInfo(ref DISPLAYCONFIG_TARGET_DEVICE_NAME deviceName);
 
         /*
         The DISPLAYCONFIG_DEVICE_INFO_HEADER structure contains display information about the device.
@@ -180,7 +191,7 @@ namespace DisplayProfileManager
         {
             public DISPLAYCONFIG_DEVICE_INFO_TYPE type;
             public uint size;
-            public long adapterId;  // Equivalent to LUID in C++
+            public LUID adapterId;
             public uint id;
         }
 
@@ -189,11 +200,13 @@ namespace DisplayProfileManager
         https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-displayconfig_source_device_name
         */
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        public struct DISPLAYCONFIG_SOURCE_DEVICE_NAME
+        public struct DISPLAYCONFIG_SOURCE_DEVICE_NAME : DISPLAYCONFIG_INFO_CONTRACT
         {
-            public DisplayConfig.DISPLAYCONFIG_DEVICE_INFO_HEADER header;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)] // CCHDEVICENAME is usually 32
-            public string viewGdiDeviceName;
+            private const int cchDeviceName = 32;
+
+            public DISPLAYCONFIG_DEVICE_INFO_HEADER header;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = cchDeviceName)]
+            public string viewGDIDeviceName;
         }
 
         /*
@@ -203,17 +216,17 @@ namespace DisplayProfileManager
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public struct DISPLAYCONFIG_TARGET_DEVICE_NAME
         {
-            public DisplayConfig.DISPLAYCONFIG_DEVICE_INFO_HEADER header; // Nested structure
-            public DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS flags; // Define this struct or enum separately
-            public DISPLAYCONFIG_VIDEO_OUTPUT_TECHNOLOGY outputTechnology; // Enum for video technology
-            public ushort edidManufactureId; // UINT16 maps to ushort in C#
-            public ushort edidProductCodeId; // UINT16 maps to ushort in C#
-            public uint connectorInstance; // UINT32 maps to uint in C#
+            public DISPLAYCONFIG_DEVICE_INFO_HEADER header;
+            public DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS flags;
+            public DISPLAYCONFIG_VIDEO_OUTPUT_TECHNOLOGY outputTechnology;
+            public ushort edidManufactureId;
+            public ushort edidProductCodeId;
+            public uint connectorInstance;
 
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)] // WCHAR[64] becomes a string in C#
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
             public string monitorFriendlyDeviceName;
 
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)] // WCHAR[128] becomes a string in C#
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
             public string monitorDevicePath;
         }
 
@@ -223,7 +236,7 @@ namespace DisplayProfileManager
         */
         public enum DISPLAYCONFIG_VIDEO_OUTPUT_TECHNOLOGY : uint
         {
-            DISPLAYCONFIG_OUTPUT_TECHNOLOGY_OTHER = 0xFFFFFFFF,
+            DISPLAYCONFIG_OUTPUT_TECHNOLOGY_OTHER = 4294967295,         // This is equivalent to -1
             DISPLAYCONFIG_OUTPUT_TECHNOLOGY_HD15 = 0,
             DISPLAYCONFIG_OUTPUT_TECHNOLOGY_SVIDEO = 1,
             DISPLAYCONFIG_OUTPUT_TECHNOLOGY_COMPOSITE_VIDEO = 2,
@@ -241,7 +254,6 @@ namespace DisplayProfileManager
             DISPLAYCONFIG_OUTPUT_TECHNOLOGY_MIRACAST = 15,
             DISPLAYCONFIG_OUTPUT_TECHNOLOGY_INDIRECT_WIRED = 16,
             DISPLAYCONFIG_OUTPUT_TECHNOLOGY_INDIRECT_VIRTUAL = 17,
-            DISPLAYCONFIG_OUTPUT_TECHNOLOGY_DISPLAYPORT_USB_TUNNEL = 18, // Add missing value
             DISPLAYCONFIG_OUTPUT_TECHNOLOGY_INTERNAL = 0x80000000,
             DISPLAYCONFIG_OUTPUT_TECHNOLOGY_FORCE_UINT32 = 0xFFFFFFFF
         }
@@ -254,52 +266,6 @@ namespace DisplayProfileManager
         public struct DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS
         {
             private uint value;
-
-            private const uint FRIENDLY_NAME_FROM_EDID_MASK = 0x00000001;
-            private const uint FRIENDLY_NAME_FORCED_MASK = 0x00000002;
-            private const uint EDID_IDS_VALID_MASK = 0x00000004;
-
-            public bool FriendlyNameFromEdid
-            {
-                get => (value & FRIENDLY_NAME_FROM_EDID_MASK) != 0;
-                set
-                {
-                    if (value)
-                        this.value |= FRIENDLY_NAME_FROM_EDID_MASK;
-                    else
-                        this.value &= ~FRIENDLY_NAME_FROM_EDID_MASK;
-                }
-            }
-
-            public bool FriendlyNameForced
-            {
-                get => (value & FRIENDLY_NAME_FORCED_MASK) != 0;
-                set
-                {
-                    if (value)
-                        this.value |= FRIENDLY_NAME_FORCED_MASK;
-                    else
-                        this.value &= ~FRIENDLY_NAME_FORCED_MASK;
-                }
-            }
-
-            public bool EdidIdsValid
-            {
-                get => (value & EDID_IDS_VALID_MASK) != 0;
-                set
-                {
-                    if (value)
-                        this.value |= EDID_IDS_VALID_MASK;
-                    else
-                        this.value &= ~EDID_IDS_VALID_MASK;
-                }
-            }
-
-            public uint Value
-            {
-                get => value;
-                set => this.value = value;
-            }
         }
 
         /*
@@ -315,41 +281,6 @@ namespace DisplayProfileManager
         }
 
         /*
-        The DISPLAYCONFIG_SET_TARGET_PERSISTENCE structure contains information about setting the display.
-        https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-displayconfig_set_target_persistence
-        */
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct DISPLAYCONFIG_SET_TARGET_PERSISTENCE
-        {
-            public DISPLAYCONFIG_DEVICE_INFO_HEADER header;
-
-            private uint flags; // This will hold the bit fields
-
-            // Property to access the bit fields
-            public bool BootPersistenceOn
-            {
-                get => (flags & 0x00000001U) != 0; // Use 'U' to specify an unsigned constant
-                set
-                {
-                    if (value)
-                    {
-                        flags |= 0x00000001U; // Use 'U' to specify an unsigned constant
-                    }
-                    else
-                    {
-                        flags &= ~0x00000001U; // Use 'U' to specify an unsigned constant
-                    }
-                }
-            }
-
-            public uint Flags
-            {
-                get => flags;
-                set => flags = value;
-            }
-        }
-
-        /*
         Specifies base output technology info for a given target ID.
         https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-displayconfig_target_base_type
         */
@@ -360,55 +291,6 @@ namespace DisplayProfileManager
             public DISPLAYCONFIG_VIDEO_OUTPUT_TECHNOLOGY baseOutputTechnology;
         }
 
-        /*
-        The DISPLAYCONFIG_SUPPORT_VIRTUAL_RESOLUTION structure contains information on the state of virtual resolution support for the monitor.
-        https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-displayconfig_support_virtual_resolution
-        */
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct DISPLAYCONFIG_SUPPORT_VIRTUAL_RESOLUTION
-        {
-            public DISPLAYCONFIG_DEVICE_INFO_HEADER header;
-            private uint _value; // Use a private field to hold the bit field value
-
-            // Property to get or set the disableMonitorVirtualResolution bit
-            public bool DisableMonitorVirtualResolution
-            {
-                get => (_value & 0x1) != 0;
-                set
-                {
-                    if (value)
-                        _value |= 0x1;  // Set the bit to 1
-                    else
-                        _value = unchecked(_value & ~0x1U); // Clear the bit to 0, with U for uint
-                    }
-                }
-
-            // Property to get or set the reserved bits
-            public uint Reserved
-            {
-                get => (_value >> 1) & 0x7FFFFFFF; // Shift right and mask to get the reserved bits
-                set => _value = (_value & 0x1) | ((value & 0x7FFFFFFF) << 1); // Set the reserved bits
-            }
-
-            // Optionally provide a way to access the raw value if needed
-            public uint RawValue
-            {
-                get => _value;
-                set => _value = value;
-            }
-        }
-
-        /*
-        The DISPLAYCONFIG_SDR_WHITE_LEVEL structure contains information about a display's current SDR white level. This is the brightness level that SDR "white" is rendered at within an HDR monitor.
-        https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-displayconfig_sdr_white_level
-        */
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct DISPLAYCONFIG_SDR_WHITE_LEVEL
-        {
-            public DISPLAYCONFIG_DEVICE_INFO_HEADER header;
-            public uint SDRWhiteLevel; // Use uint for ULONG
-        }
-
         //POINTL used in DISPLAYCONFIG_DESKTOP_IMAGE_INFO
         [StructLayout(LayoutKind.Sequential)]
         public struct POINTL
@@ -417,34 +299,13 @@ namespace DisplayProfileManager
             public int y;
         }
 
-        //RECTL used in DISPLAYCONFIG_DESKTOP_IMAGE_INFO
-        [StructLayout(LayoutKind.Sequential)]
-        public struct RECTL
-        {
-            public int left;
-            public int top;
-            public int right;
-            public int bottom;
-        }
-
-        /*
-        The DISPLAYCONFIG_DESKTOP_IMAGE_INFO structure contains information about the image displayed on the desktop.
-        https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-displayconfig_desktop_image_info
-        */
-        [StructLayout(LayoutKind.Sequential)]
-        public struct DISPLAYCONFIG_DESKTOP_IMAGE_INFO
-        {
-            public POINTL PathSourceSize;
-            public RECTL DesktopImageRegion;
-            public RECTL DesktopImageClip;
-        }
-
         /*
         The DISPLAYCONFIG_SCALING enumeration specifies the scaling transformation applied to content displayed on a video present network (VidPN) present path.
         https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ne-wingdi-displayconfig_scaling
         */
         public enum DISPLAYCONFIG_SCALING : uint
         {
+            DISPLAYCONFIG_SCALING_ZERO = 0x0,
             DISPLAYCONFIG_SCALING_IDENTITY = 1,
             DISPLAYCONFIG_SCALING_CENTERED = 2,
             DISPLAYCONFIG_SCALING_STRETCHED = 3,
@@ -454,6 +315,29 @@ namespace DisplayProfileManager
             DISPLAYCONFIG_SCALING_FORCE_UINT32 = 0xFFFFFFFF
         }
 
+        [Flags]
+        public enum SetDisplayConfigFlags : uint
+        {
+            SetDisplayConfigFlags_ZERO = 0,
+            SetDisplayConfigFlags_TOPOLOGYINTERNAL = 0X00000001,
+            SetDisplayConfigFlags_TOPOLOGYCLONE = 0X00000002,
+            SetDisplayConfigFlags_TOPOLOGYEXTEND = 0X00000004,
+            SetDisplayConfigFlags_TOPOLOGYEXTERNAL = 0X00000008,
+            SetDisplayConfigFlags_TOPOLOGYSUPPLIED = 0X00000010,
+            SetDisplayConfigFlags_USESUPPLIEDDISPLAYCONFIG = 0X00000020,
+            SetDisplayConfigFlags_VALIDATE = 0X00000040,
+            SetDisplayConfigFlags_APPLY = 0X00000080,
+            SetDisplayConfigFlags_NOOPTIMIZATION = 0X00000100,
+            SetDisplayConfigFlags_SAVETODATABASE = 0X00000200,
+            SetDisplayConfigFlags_ALLOWCHANGES = 0X00000400,
+            SetDisplayConfigFlags_PATHPERSISTIFREQUIRED = 0X00000800,
+            SetDisplayConfigFlags_FORCEMODEENUMERATION = 0X00001000,
+            SetDisplayConfigFlags_ALLOWPATHORDERCHANGES = 0X00002000,
+            SetDisplayConfigFlags_VIRTUALMODEAWARE = 0X00008000,
+
+            SetDisplayConfigFlags_USEDATABASECURRENT = SetDisplayConfigFlags_TOPOLOGYINTERNAL | SetDisplayConfigFlags_TOPOLOGYCLONE | SetDisplayConfigFlags_TOPOLOGYEXTEND | SetDisplayConfigFlags_TOPOLOGYEXTERNAL
+        }
+
         /*
         The SetDisplayConfig function modifies the display topology, source, and target modes by exclusively enabling the specified paths in the current session.
         https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setdisplayconfig
@@ -461,10 +345,10 @@ namespace DisplayProfileManager
         [DllImport("user32.dll", SetLastError = true)]
         public static extern int SetDisplayConfig(
             uint numPathArrayElements,
-            IntPtr pathArray, // Use IntPtr for optional pointers
+            IntPtr pathArray, // IntPtr for optional pointers
             uint numModeInfoArrayElements,
-            IntPtr modeInfoArray, // Use IntPtr for optional pointers
-            uint flags
+            IntPtr modeInfoArray,
+            SetDisplayConfigFlags flags
         );
 
         /*
@@ -476,7 +360,7 @@ namespace DisplayProfileManager
         {
             public DISPLAYCONFIG_PATH_SOURCE_INFO sourceInfo;
             public DISPLAYCONFIG_PATH_TARGET_INFO targetInfo;
-            public uint flags; // UINT32 in C++
+            public uint flags;
         }
 
         /*
@@ -490,59 +374,32 @@ namespace DisplayProfileManager
             public int HighPart;
         }
 
+        [Flags]
+        public enum DISPLAYCONFIG_SOURCE_STATUS
+        {
+            DISPLAYCONFIG_SOURCE_STATUS_Zero = 0x0,
+            DISPLAYCONFIG_SOURCE_STATUS_INUSE = 0x00000001
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         public struct DISPLAYCONFIG_PATH_SOURCE_INFO
         {
             public LUID adapterId;
             public uint id;
+            public uint modeInfoIdx;
+            public DISPLAYCONFIG_SOURCE_STATUS statusFlags;
+        }
 
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-            private byte[] unionData;
-
-            // Represents the union fields
-            public uint ModeInfoIdx
-            {
-                get => BitConverter.ToUInt32(unionData, 0);
-                set
-                {
-                    unionData = BitConverter.GetBytes(value);
-                }
-            }
-
-            public ushort CloneGroupId
-            {
-                get => (ushort)(BitConverter.ToUInt32(unionData, 0) & 0xFFFF);
-                set
-                {
-                    uint temp = BitConverter.ToUInt32(unionData, 0);
-                    temp &= 0xFFFF0000; // Clear the lower 16 bits
-                    temp |= (uint)value;
-                    unionData = BitConverter.GetBytes(temp);
-                }
-            }
-
-            public ushort SourceModeInfoIdx
-            {
-                get => (ushort)((BitConverter.ToUInt32(unionData, 0) >> 16) & 0xFFFF);
-                set
-                {
-                    uint temp = BitConverter.ToUInt32(unionData, 0);
-                    temp &= 0xFFFF; // Clear the upper 16 bits
-                    temp |= (uint)(value << 16);
-                    unionData = BitConverter.GetBytes(temp);
-                }
-            }
-
-            public uint StatusFlags;
-
-            public DISPLAYCONFIG_PATH_SOURCE_INFO(uint modeInfoIdx = 0)
-            {
-                adapterId = new LUID();
-                id = 0;
-                unionData = new byte[8];
-                ModeInfoIdx = modeInfoIdx;
-                StatusFlags = 0;
-            }
+        [Flags]
+        public enum DISPLAYCONFIG_PATH_TARGET_STATUS : uint
+        {
+            DISPLAYCONFIG_PATH_TARGET_STATUS_ZERO = 0X0,
+            DISPLAYCONFIG_PATH_TARGET_STATUS_INUSE = 0X00000001,
+            DISPLAYCONFIG_PATH_TARGET_STATUS_FORCIBLE = 0X00000002,
+            DISPLAYCONFIG_PATH_TARGET_STATUS_FORCEDAVAILABILITYBOOT = 0X00000004,
+            DISPLAYCONFIG_PATH_TARGET_STATUS_FORCEDAVAILABILITYPATH = 0X00000008,
+            DISPLAYCONFIG_PATH_TARGET_STATUS_FORCEDAVAILABILITYSYSTEM = 0X00000010,
+            DISPLAYCONFIG_PATH_TARGET_STATUS_IS_HMD = 0x00000020
         }
 
         /*
@@ -554,51 +411,14 @@ namespace DisplayProfileManager
         {
             public LUID adapterId;
             public uint id;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-            private byte[] unionData;
-
-            // Represents the union fields
-            public uint ModeInfoIdx
-            {
-                get => BitConverter.ToUInt32(unionData, 0);
-                set
-                {
-                    unionData = BitConverter.GetBytes(value);
-                }
-            }
-
-            public ushort DesktopModeInfoIdx
-            {
-                get => (ushort)(BitConverter.ToUInt32(unionData, 0) & 0xFFFF);
-                set
-                {
-                    uint temp = BitConverter.ToUInt32(unionData, 0);
-                    temp &= 0xFFFF0000; // Clear the lower 16 bits
-                    temp |= (uint)value;
-                    unionData = BitConverter.GetBytes(temp);
-                }
-            }
-
-            public ushort TargetModeInfoIdx
-            {
-                get => (ushort)((BitConverter.ToUInt32(unionData, 0) >> 16) & 0xFFFF);
-                set
-                {
-                    uint temp = BitConverter.ToUInt32(unionData, 0);
-                    temp &= 0xFFFF; // Clear the upper 16 bits
-                    temp |= (uint)(value << 16);
-                    unionData = BitConverter.GetBytes(temp);
-                }
-            }
-
+            public uint modeInfoIdx;
             public DISPLAYCONFIG_VIDEO_OUTPUT_TECHNOLOGY outputTechnology;
             public DISPLAYCONFIG_ROTATION rotation;
             public DISPLAYCONFIG_SCALING scaling;
             public DISPLAYCONFIG_RATIONAL refreshRate;
             public DISPLAYCONFIG_SCANLINE_ORDERING scanLineOrdering;
-            public bool targetAvailable; // BOOL in C++
-            public uint statusFlags;
+            public bool targetAvailable;
+            public DISPLAYCONFIG_PATH_TARGET_STATUS statusFlags;
         }
 
         /*
@@ -608,6 +428,7 @@ namespace DisplayProfileManager
         [Flags]
         public enum DISPLAYCONFIG_ROTATION : uint
         {
+            DISPLAYCONFIG_ROTATION_ZERO = 0x0,
             DISPLAYCONFIG_ROTATION_IDENTITY = 1,
             DISPLAYCONFIG_ROTATION_ROTATE90 = 2,
             DISPLAYCONFIG_ROTATION_ROTATE180 = 3,
@@ -624,8 +445,8 @@ namespace DisplayProfileManager
             DISPLAYCONFIG_SCANLINE_ORDERING_UNSPECIFIED = 0,
             DISPLAYCONFIG_SCANLINE_ORDERING_PROGRESSIVE = 1,
             DISPLAYCONFIG_SCANLINE_ORDERING_INTERLACED = 2,
-            DISPLAYCONFIG_SCANLINE_ORDERING_INTERLACED_UPPERFIELDFIRST = 3,
-            DISPLAYCONFIG_SCANLINE_ORDERING_INTERLACED_LOWERFIELDFIRST = 4,
+            DISPLAYCONFIG_SCANLINE_ORDERING_INTERLACED_UPPERFIELDFIRST = DISPLAYCONFIG_SCANLINE_ORDERING_INTERLACED,
+            DISPLAYCONFIG_SCANLINE_ORDERING_INTERLACED_LOWERFIELDFIRST = 3,
             DISPLAYCONFIG_SCANLINE_ORDERING_FORCE_UINT32 = 0xFFFFFFFF
         }
 
@@ -640,19 +461,33 @@ namespace DisplayProfileManager
             public uint Denominator;
         }
 
+        [Flags]
+        public enum QueryDisplayConfigFlags : uint
+        {
+            QueryDisplayConfigFlags_ZERO = 0X0,
+            QueryDisplayConfigFlags_ALLPATHS = 0X00000001,
+            QueryDisplayConfigFlags_ONLYACTIVEPATHS = 0X00000002,
+            QueryDisplayConfigFlags_DATABASECURRENT = 0X00000004,
+            QueryDisplayConfigFlags_VIRTUALMODEAWARE = 0X00000010,
+            QueryDisplayConfigFlags_INCLUDEHMD = 0X00000020
+        }
+
         /*
         The QueryDisplayConfig function retrieves information about all possible display paths for all display devices, or views, in the current setting.
         https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-querydisplayconfig
         */
         [DllImport("user32.dll", SetLastError = true)]
         public static extern int QueryDisplayConfig(
-            uint flags,
+            QueryDisplayConfigFlags flags,
             ref uint numPathArrayElements,
-            [Out] DISPLAYCONFIG_PATH_INFO[] pathArray,
+            [Out] DISPLAYCONFIG_PATH_INFO[] pathInfoArray,
             ref uint numModeInfoArrayElements,
             [Out] DISPLAYCONFIG_MODE_INFO[] modeInfoArray,
-            [Out] out DISPLAYCONFIG_TOPOLOGY_ID currentTopologyId
+            IntPtr z
         );
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern int GetDisplayConfigBufferSizes(QueryDisplayConfigFlags flags, out uint numPathArrayElements, out uint numModeInfoArrayElements);
 
         /*
         The DISPLAYCONFIG_TOPOLOGY_ID enumeration specifies the type of display topology.
@@ -661,6 +496,7 @@ namespace DisplayProfileManager
         [Flags]
         public enum DISPLAYCONFIG_TOPOLOGY_ID : uint
         {
+            DISPLAYCONFIG_TOPOLOGY_ZERO = 0x0,
             DISPLAYCONFIG_TOPOLOGY_INTERNAL = 0x00000001,
             DISPLAYCONFIG_TOPOLOGY_CLONE = 0x00000002,
             DISPLAYCONFIG_TOPOLOGY_EXTEND = 0x00000004,
@@ -668,140 +504,503 @@ namespace DisplayProfileManager
             DISPLAYCONFIG_TOPOLOGY_FORCE_UINT32 = 0xFFFFFFFF
         }
 
-        public static (DISPLAYCONFIG_PATH_INFO[], DISPLAYCONFIG_MODE_INFO[], DISPLAYCONFIG_TOPOLOGY_ID) GetDisplayConfig()
+        public enum StatusCode : uint
         {
-            uint numPathArrayElements = 0;
-            uint numModeInfoArrayElements = 0;
-            DISPLAYCONFIG_TOPOLOGY_ID currentTopologyId;
-
-            // First call to get the required buffer sizes
-            QueryDisplayConfig(0, ref numPathArrayElements, null, ref numModeInfoArrayElements, null, out currentTopologyId);
-
-            var pathArray = new DISPLAYCONFIG_PATH_INFO[numPathArrayElements];
-            var modeInfoArray = new DISPLAYCONFIG_MODE_INFO[numModeInfoArrayElements];
-
-            // Second call to get the actual data
-            QueryDisplayConfig(0, ref numPathArrayElements, pathArray, ref numModeInfoArrayElements, modeInfoArray, out currentTopologyId);
-
-            return (pathArray, modeInfoArray, currentTopologyId);
+            StatusCode_SUCCESS = 0,
+            StatusCode_INVALIDPARAMETER = 87,
+            StatusCode_NOTSUPPORTED = 50,
+            StatusCode_ACCESSDENIED = 5,
+            StatusCode_GENFAILURE = 31,
+            StatusCode_BADCONFIGURATION = 1610,
+            StatusCode_INSUFFICIENTBUFFER = 122
         }
 
-        public static void SaveDisplayConfig(string filePath, DISPLAYCONFIG_PATH_INFO[] pathArray, DISPLAYCONFIG_MODE_INFO[] modeInfoArray, DISPLAYCONFIG_TOPOLOGY_ID topologyId)
+        public interface DISPLAYCONFIG_INFO_CONTRACT
         {
-            var adapterConfigs = new Dictionary<string, object>();
+        }
 
-            // Group modes by adapter ID
-            foreach (var modeInfo in modeInfoArray)
+        public static string MonitorFriendlyName(LUID adapterId, uint targetId)
+        {
+            var displayName = new DISPLAYCONFIG_TARGET_DEVICE_NAME
             {
-                string adapterKey = modeInfo.adapterId.ToString();
-                if (!adapterConfigs.ContainsKey(adapterKey))
+                header =
                 {
-                    adapterConfigs[adapterKey] = new
-                    {
-                        Modes = new List<DISPLAYCONFIG_MODE_INFO>(),
-                        Paths = new List<DISPLAYCONFIG_PATH_INFO>()
-                    };
+                    size = (uint)Marshal.SizeOf(typeof (DISPLAYCONFIG_TARGET_DEVICE_NAME)),
+                    adapterId = adapterId,
+                    id = targetId,
+                    type = DISPLAYCONFIG_DEVICE_INFO_TYPE.DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME
                 }
+            };
+            var error = DisplayConfigGetDeviceInfo(ref displayName);
+            if (error != ERROR_CONST)
+                throw new Win32Exception(error);
+            return displayName.monitorFriendlyDeviceName;
+        }
 
-                ((List<DISPLAYCONFIG_MODE_INFO>)((dynamic)adapterConfigs[adapterKey]).Modes).Add(modeInfo);
+        [StructLayout(LayoutKind.Sequential)]
+        [Serializable]
+        public struct MonitorAdditionalInfo
+        {
+            public ushort manufactureId { get; set; }
+            public ushort productCodeId { get; set; }
+            public bool valid { get; set; }
+
+            // Base64 encoded version of monitorDevicePath for JSON serialization
+            [JsonPropertyName("monitorDevicePath")]
+            public string monitorDevicePath64
+            {
+                get
+                {
+                    string outValue = monitorDevicePath ?? "";
+                    return Convert.ToBase64String(Encoding.UTF32.GetBytes(outValue));
+                }
+                set
+                {
+                    if (value == null)
+                    {
+                        monitorDevicePath = null;
+                        return;
+                    }
+
+                    monitorDevicePath = Encoding.UTF32.GetString(Convert.FromBase64String(value));
+                }
             }
 
-            // Group paths by adapter ID
-            foreach (var path in pathArray)
-            {
-                string adapterKey = path.sourceInfo.adapterId.ToString();
-                if (!adapterConfigs.ContainsKey(adapterKey))
-                {
-                    adapterConfigs[adapterKey] = new
-                    {
-                        Modes = new List<DISPLAYCONFIG_MODE_INFO>(),
-                        Paths = new List<DISPLAYCONFIG_PATH_INFO>()
-                    };
-                }
+            [System.Text.Json.Serialization.JsonIgnore]
+            public string monitorDevicePath;
 
-                ((List<DISPLAYCONFIG_PATH_INFO>)((dynamic)adapterConfigs[adapterKey]).Paths).Add(path);
+            [JsonPropertyName("monitorFriendlyDevice")]
+            public string monitorFriendlyDevice64
+            {
+                get
+                {
+                    string outValue = monitorFriendlyDevice ?? "";
+                    return Convert.ToBase64String(Encoding.UTF32.GetBytes(outValue));
+                }
+                set
+                {
+                    if (value == null)
+                    {
+                        monitorFriendlyDevice = null;
+                        return;
+                    }
+
+                    monitorFriendlyDevice = Encoding.UTF32.GetString(Convert.FromBase64String(value));
+                }
             }
 
-            // Create the settings object
-            var settings = new
+            [System.Text.Json.Serialization.JsonIgnore]
+            public string monitorFriendlyDevice;
+        }
+
+        public static MonitorAdditionalInfo GetMonitorAdditionalInfo(LUID adapterId, uint targetId)
+        {
+            MonitorAdditionalInfo additionalInfo = new MonitorAdditionalInfo();
+            var monitorName = new DISPLAYCONFIG_TARGET_DEVICE_NAME
             {
-                Adapters = adapterConfigs,
-                Topology = topologyId
+                header =
+                {
+                    size = (uint)Marshal.SizeOf(typeof (DISPLAYCONFIG_TARGET_DEVICE_NAME)),
+                    adapterId = adapterId,
+                    id = targetId,
+                    type = DISPLAYCONFIG_DEVICE_INFO_TYPE.DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME
+                }
+            };
+            var error = DisplayConfigGetDeviceInfo(ref monitorName);
+            if (error != ERROR_CONST)
+                throw new Win32Exception(error);
+
+            additionalInfo.valid = true;
+            additionalInfo.manufactureId = monitorName.edidManufactureId;
+            additionalInfo.productCodeId = monitorName.edidProductCodeId;
+            additionalInfo.monitorDevicePath = monitorName.monitorDevicePath;
+            additionalInfo.monitorFriendlyDevice = monitorName.monitorFriendlyDeviceName;
+
+            return additionalInfo;
+        }
+
+        // To ensure type safety
+        /// <typeparam name="T"></typeparam>
+        /// <param name="displayConfig"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        private static StatusCode MarshalStructureAndCall<T>(ref T displayConfig,
+            Func<IntPtr, StatusCode> func) where T : DISPLAYCONFIG_INFO_CONTRACT
+        {
+            var ptr = Marshal.AllocHGlobal(Marshal.SizeOf(displayConfig));
+            Marshal.StructureToPtr(displayConfig, ptr, false);
+
+            var returnValue = func(ptr);
+
+            displayConfig = (T)Marshal.PtrToStructure(ptr, displayConfig.GetType());
+
+            Marshal.FreeHGlobal(ptr);
+            return returnValue;
+        }
+
+
+
+        private static bool debug = true;
+        public static void debugMsg(System.String text)
+        {
+            if (debug)
+            {
+                Debug.WriteLine(text);
+            }
+        }
+
+        public static bool GetDisplaySettings(ref DISPLAYCONFIG_PATH_INFO[] pathInfoArray, ref DISPLAYCONFIG_MODE_INFO[] modeInfoArray, ref MonitorAdditionalInfo[] additionalInfo, bool ActiveOnly)
+        {
+            uint numPathArrayElements;
+            uint numModeInfoArrayElements;
+
+            // active paths from the computer.
+            debugMsg("Getting display settings");
+            QueryDisplayConfigFlags queryFlags = QueryDisplayConfigFlags.QueryDisplayConfigFlags_ALLPATHS;
+            if (ActiveOnly)
+            {
+                queryFlags = QueryDisplayConfigFlags.QueryDisplayConfigFlags_ONLYACTIVEPATHS;
+            }
+
+            debugMsg("Getting buffer size");
+            var status = GetDisplayConfigBufferSizes(queryFlags, out numPathArrayElements, out numModeInfoArrayElements);
+            if (status == 0)
+            {
+                pathInfoArray = new DISPLAYCONFIG_PATH_INFO[numPathArrayElements];
+                modeInfoArray = new DISPLAYCONFIG_MODE_INFO[numModeInfoArrayElements];
+                additionalInfo = new MonitorAdditionalInfo[numModeInfoArrayElements];
+
+                debugMsg("Querying display config");
+                status = QueryDisplayConfig(queryFlags,
+                                                       ref numPathArrayElements, pathInfoArray, ref numModeInfoArrayElements,
+                                                       modeInfoArray, IntPtr.Zero);
+
+                if (status == 0)
+                {
+                    // cleanup of modeInfo bad elements 
+                    int validCount = 0;
+                    foreach (DISPLAYCONFIG_MODE_INFO modeInfo in modeInfoArray)
+                    {
+                        if (modeInfo.infoType != DISPLAYCONFIG_MODE_INFO_TYPE.DISPLAYCONFIG_MODE_INFO_TYPE_ZERO)
+                        {   // count number of valid mode Infos
+                            validCount++;
+                        }
+                    }
+                    if (validCount > 0)
+                    {   // only cleanup if there is at least one valid element found
+                        DISPLAYCONFIG_MODE_INFO[] tempInfoArray = new DISPLAYCONFIG_MODE_INFO[modeInfoArray.Count()];
+                        modeInfoArray.CopyTo(tempInfoArray, 0);
+                        modeInfoArray = new DISPLAYCONFIG_MODE_INFO[validCount];
+                        int index = 0;
+                        foreach (DISPLAYCONFIG_MODE_INFO modeInfo in tempInfoArray)
+                        {
+                            if (modeInfo.infoType != DISPLAYCONFIG_MODE_INFO_TYPE.DISPLAYCONFIG_MODE_INFO_TYPE_ZERO)
+                            {
+                                modeInfoArray[index] = modeInfo;
+                                index++;
+                            }
+                        }
+                    }
+
+                    // cleanup of currently not available pathInfo elements
+                    validCount = 0;
+                    foreach (DISPLAYCONFIG_PATH_INFO pathInfo in pathInfoArray)
+                    {
+                        if (pathInfo.targetInfo.targetAvailable)
+                        {
+                            validCount++;
+                        }
+                    }
+                    if (validCount > 0)
+                    {   // only cleanup if there is at least one valid element found
+                        DISPLAYCONFIG_PATH_INFO[] tempInfoArray = new DISPLAYCONFIG_PATH_INFO[pathInfoArray.Count()];
+                        pathInfoArray.CopyTo(tempInfoArray, 0);
+                        pathInfoArray = new DISPLAYCONFIG_PATH_INFO[validCount];
+                        int index = 0;
+                        foreach (DISPLAYCONFIG_PATH_INFO pathInfo in tempInfoArray)
+                        {
+                            if (pathInfo.targetInfo.targetAvailable)
+                            {
+                                pathInfoArray[index] = pathInfo;
+                                index++;
+                            }
+                        }
+                    }
+
+                    // get the display names for all modes
+                    for (var iMode = 0; iMode < modeInfoArray.Count(); iMode++)
+                    {
+                        if (modeInfoArray[iMode].infoType == DISPLAYCONFIG_MODE_INFO_TYPE.DISPLAYCONFIG_MODE_INFO_TYPE_TARGET)
+                        {
+                            try
+                            {
+                                additionalInfo[iMode] = GetMonitorAdditionalInfo(modeInfoArray[iMode].adapterId, modeInfoArray[iMode].id);
+                            }
+                            catch (Exception e)
+                            {
+                                additionalInfo[iMode].valid = false;
+                            }
+                        }
+                    }
+                    return true;
+                }
+                else
+                {
+                    debugMsg("Querying display config failed");
+                }
+            }
+            else
+            {
+                debugMsg("Getting Buffer Size Failed");
+            }
+
+            return false;
+        }
+
+        public static string PrintDisplaySettings(DISPLAYCONFIG_PATH_INFO[] pathInfoArray, DISPLAYCONFIG_MODE_INFO[] modeInfoArray)
+        {
+            // Initialize result
+            string output = "";
+
+            // Create an object to hold the data for serialization
+            var displaySettings = new
+            {
+                pathInfoArray = pathInfoArray.Select(pathInfo => new
+                {
+                    sourceInfo = new
+                    {
+                        adapterId = new
+                        {
+                            LowPart = pathInfo.sourceInfo.adapterId.LowPart,
+                            HighPart = pathInfo.sourceInfo.adapterId.HighPart
+                        },
+                        id = pathInfo.sourceInfo.id,
+                        modeInfoIdx = pathInfo.sourceInfo.modeInfoIdx,
+                        statusFlags = pathInfo.sourceInfo.statusFlags.ToString()
+                    },
+                    targetInfo = new
+                    {
+                        adapterId = new
+                        {
+                            LowPart = pathInfo.targetInfo.adapterId.LowPart,
+                            HighPart = pathInfo.targetInfo.adapterId.HighPart
+                        },
+                        id = pathInfo.targetInfo.id,
+                        modeInfoIdx = pathInfo.targetInfo.modeInfoIdx,
+                        outputTechnology = pathInfo.targetInfo.outputTechnology.ToString(),
+                        rotation = pathInfo.targetInfo.rotation.ToString(),
+                        scaling = pathInfo.targetInfo.scaling.ToString(),
+                        refreshRate = new
+                        {
+                            numerator = pathInfo.targetInfo.refreshRate.Numerator,
+                            denominator = pathInfo.targetInfo.refreshRate.Denominator
+                        },
+                        scanLineOrdering = pathInfo.targetInfo.scanLineOrdering.ToString(),
+                        targetAvailable = pathInfo.targetInfo.targetAvailable,
+                        statusFlags = pathInfo.targetInfo.statusFlags.ToString()
+                    },
+                    flags = pathInfo.flags
+                }).ToList(),
+                modeInfoArray = modeInfoArray.Select(modeInfo => new
+                {
+                    id = modeInfo.id,
+                    adapterId = new
+                    {
+                        LowPart = modeInfo.adapterId.LowPart,
+                        HighPart = modeInfo.adapterId.HighPart
+                    },
+                    infoType = modeInfo.infoType.ToString(),
+                    mode = modeInfo.infoType == DISPLAYCONFIG_MODE_INFO_TYPE.DISPLAYCONFIG_MODE_INFO_TYPE_TARGET ?
+                   (object)new
+                   {
+                       targetVideoSignalInfo = new
+                       {
+                           pixelRate = modeInfo.targetMode.targetVideoSignalInfo.pixelRate,
+                           hSyncFreq = new
+                           {
+                               numerator = modeInfo.targetMode.targetVideoSignalInfo.hSyncFreq.Numerator,
+                               denominator = modeInfo.targetMode.targetVideoSignalInfo.hSyncFreq.Denominator
+                           },
+                           vSyncFreq = new
+                           {
+                               numerator = modeInfo.targetMode.targetVideoSignalInfo.vSyncFreq.Numerator,
+                               denominator = modeInfo.targetMode.targetVideoSignalInfo.vSyncFreq.Denominator
+                           },
+                           activeSize = new
+                           {
+                               cx = modeInfo.targetMode.targetVideoSignalInfo.activeSize.cx,
+                               cy = modeInfo.targetMode.targetVideoSignalInfo.activeSize.cy
+                           },
+                           totalSize = new
+                           {
+                               cx = modeInfo.targetMode.targetVideoSignalInfo.totalSize.cx,
+                               cy = modeInfo.targetMode.targetVideoSignalInfo.totalSize.cy
+                           },
+                           videoStandard = modeInfo.targetMode.targetVideoSignalInfo.videoStandard.ToString(),
+                           scanLineOrdering = modeInfo.targetMode.targetVideoSignalInfo.scanLineOrdering.ToString()
+                       }
+                   } :
+                   (object)new
+                   {
+                       sourceMode = new
+                       {
+                           width = modeInfo.sourceMode.width,
+                           height = modeInfo.sourceMode.height,
+                           pixelFormat = modeInfo.sourceMode.pixelFormat.ToString(),
+                           position = new
+                           {
+                               x = modeInfo.sourceMode.position.x,
+                               y = modeInfo.sourceMode.position.y
+                           }
+                       }
+                   }
+                }).ToList()
             };
 
-            // Serialize and save to file
-            var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
-            File.WriteAllText(filePath, json);
+            // Serialize to JSON using MemoryStream and Utf8JsonWriter
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var jsonWriter = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Indented = true }))
+                {
+                    var options = new JsonSerializerOptions { WriteIndented = true };
+                    System.Text.Json.JsonSerializer.Serialize(jsonWriter, displaySettings, options);
+                }
+                output = System.Text.Encoding.UTF8.GetString(memoryStream.ToArray());
+            }
+
+            return output;
         }
 
-        public static (DISPLAYCONFIG_PATH_INFO[], DISPLAYCONFIG_MODE_INFO[], DISPLAYCONFIG_TOPOLOGY_ID) LoadDisplayConfig(string filePath)
+        public static bool SaveDisplaySettings(string fileName)
         {
-            
-            var json = File.ReadAllText(filePath);
-            dynamic settings = JsonConvert.DeserializeObject(json);
+            DISPLAYCONFIG_PATH_INFO[] pathInfoArray = new DISPLAYCONFIG_PATH_INFO[0];
+            DISPLAYCONFIG_MODE_INFO[] modeInfoArray = new DISPLAYCONFIG_MODE_INFO[0];
+            MonitorAdditionalInfo[] additionalInfo = new MonitorAdditionalInfo[0];
 
-            DISPLAYCONFIG_PATH_INFO[] pathArray = JsonConvert.DeserializeObject<DISPLAYCONFIG_PATH_INFO[]>(settings.Paths.ToString());
-            DISPLAYCONFIG_MODE_INFO[] modeInfoArray = JsonConvert.DeserializeObject<DISPLAYCONFIG_MODE_INFO[]>(settings.Modes.ToString());
-            DISPLAYCONFIG_TOPOLOGY_ID topologyId = (DISPLAYCONFIG_TOPOLOGY_ID)settings.Topology;
+            debugMsg("Getting display config");
+            bool status = GetDisplaySettings(ref pathInfoArray, ref modeInfoArray, ref additionalInfo, true);
+            if (status)
+            {
+                if (debug)
+                {
+                    // debug output complete display settings
+                    debugMsg("Display settings to write:");
+                    debugMsg(PrintDisplaySettings(pathInfoArray, modeInfoArray));
+                }
 
-            return (pathArray, modeInfoArray, topologyId);
+                // Initialize result
+                var displaySettings = new
+                {
+                    pathInfoArray = pathInfoArray.Select(pathInfo => new
+                    {
+                        sourceInfo = new
+                        {
+                            adapterId = new
+                            {
+                                LowPart = pathInfo.sourceInfo.adapterId.LowPart,
+                                HighPart = pathInfo.sourceInfo.adapterId.HighPart
+                            },
+                            id = pathInfo.sourceInfo.id,
+                            modeInfoIdx = pathInfo.sourceInfo.modeInfoIdx,
+                            statusFlags = pathInfo.sourceInfo.statusFlags.ToString()
+                        },
+                        targetInfo = new
+                        {
+                            adapterId = new
+                            {
+                                LowPart = pathInfo.targetInfo.adapterId.LowPart,
+                                HighPart = pathInfo.targetInfo.adapterId.HighPart
+                            },
+                            id = pathInfo.targetInfo.id,
+                            modeInfoIdx = pathInfo.targetInfo.modeInfoIdx,
+                            outputTechnology = pathInfo.targetInfo.outputTechnology.ToString(),
+                            rotation = pathInfo.targetInfo.rotation.ToString(),
+                            scaling = pathInfo.targetInfo.scaling.ToString(),
+                            refreshRate = new
+                            {
+                                numerator = pathInfo.targetInfo.refreshRate.Numerator,
+                                denominator = pathInfo.targetInfo.refreshRate.Denominator
+                            },
+                            scanLineOrdering = pathInfo.targetInfo.scanLineOrdering.ToString(),
+                            targetAvailable = pathInfo.targetInfo.targetAvailable,
+                            statusFlags = pathInfo.targetInfo.statusFlags.ToString()
+                        },
+                        flags = pathInfo.flags
+                    }).ToList(),
+                    modeInfoArray = modeInfoArray.Select(modeInfo => new
+                    {
+                        id = modeInfo.id,
+                        adapterId = new
+                        {
+                            LowPart = modeInfo.adapterId.LowPart,
+                            HighPart = modeInfo.adapterId.HighPart
+                        },
+                        infoType = modeInfo.infoType.ToString(),
+                        mode = modeInfo.infoType == DISPLAYCONFIG_MODE_INFO_TYPE.DISPLAYCONFIG_MODE_INFO_TYPE_TARGET ?
+                               (object)new
+                               {
+                                   targetVideoSignalInfo = new
+                                   {
+                                       pixelRate = modeInfo.targetMode.targetVideoSignalInfo.pixelRate,
+                                       hSyncFreq = new
+                                       {
+                                           numerator = modeInfo.targetMode.targetVideoSignalInfo.hSyncFreq.Numerator,
+                                           denominator = modeInfo.targetMode.targetVideoSignalInfo.hSyncFreq.Denominator
+                                       },
+                                       vSyncFreq = new
+                                       {
+                                           numerator = modeInfo.targetMode.targetVideoSignalInfo.vSyncFreq.Numerator,
+                                           denominator = modeInfo.targetMode.targetVideoSignalInfo.vSyncFreq.Denominator
+                                       },
+                                       activeSize = new
+                                       {
+                                           cx = modeInfo.targetMode.targetVideoSignalInfo.activeSize.cx,
+                                           cy = modeInfo.targetMode.targetVideoSignalInfo.activeSize.cy
+                                       },
+                                       totalSize = new
+                                       {
+                                           cx = modeInfo.targetMode.targetVideoSignalInfo.totalSize.cx,
+                                           cy = modeInfo.targetMode.targetVideoSignalInfo.totalSize.cy
+                                       },
+                                       videoStandard = modeInfo.targetMode.targetVideoSignalInfo.videoStandard.ToString(),
+                                       scanLineOrdering = modeInfo.targetMode.targetVideoSignalInfo.scanLineOrdering.ToString()
+                                   }
+                               } :
+                               (object)new
+                               {
+                                   sourceMode = new
+                                   {
+                                       width = modeInfo.sourceMode.width,
+                                       height = modeInfo.sourceMode.height,
+                                       pixelFormat = modeInfo.sourceMode.pixelFormat.ToString(),
+                                       position = new
+                                       {
+                                           x = modeInfo.sourceMode.position.x,
+                                           y = modeInfo.sourceMode.position.y
+                                       }
+                                   }
+                               }
+                    }).ToList(),
+                    additionalInfo = additionalInfo
+                };
+
+                // Serialize to JSON and write to file
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string jsonString = System.Text.Json.JsonSerializer.Serialize(displaySettings, options);
+
+                // Write JSON string to file
+                File.WriteAllText(fileName, jsonString);
+
+                return true;
+            }
+            else
+            {
+                debugMsg("Failed to get display settings, ERROR: " + status.ToString());
+            }
+
+            return false;
         }
-
-        public static void ApplyDisplayConfig(DISPLAYCONFIG_PATH_INFO[] pathArray, DISPLAYCONFIG_MODE_INFO[] modeInfoArray, DISPLAYCONFIG_TOPOLOGY_ID topologyId)
-        {
-            IntPtr pathArrayPtr = IntPtr.Zero;
-            IntPtr modeInfoArrayPtr = IntPtr.Zero;
-
-            try
-            {
-                if (pathArray.Length > 0)
-                {
-                    pathArrayPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(DISPLAYCONFIG_PATH_INFO)) * pathArray.Length);
-                    for (int i = 0; i < pathArray.Length; i++)
-                    {
-                        Marshal.StructureToPtr(pathArray[i], pathArrayPtr + (i * Marshal.SizeOf(typeof(DISPLAYCONFIG_PATH_INFO))), false);
-                    }
-                }
-
-                if (modeInfoArray.Length > 0)
-                {
-                    modeInfoArrayPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(DISPLAYCONFIG_MODE_INFO)) * modeInfoArray.Length);
-                    for (int i = 0; i < modeInfoArray.Length; i++)
-                    {
-                        Marshal.StructureToPtr(modeInfoArray[i], modeInfoArrayPtr + (i * Marshal.SizeOf(typeof(DISPLAYCONFIG_MODE_INFO))), false);
-                    }
-                }
-
-                int result = SetDisplayConfig(
-                    (uint)pathArray.Length,
-                    pathArrayPtr,
-                    (uint)modeInfoArray.Length,
-                    modeInfoArrayPtr,
-                    (uint)topologyId // Cast to uint
-                );
-
-                if (result != 0)
-                {
-                    uint unsignedResult = (uint)result;
-                    throw new InvalidOperationException($"Failed to apply display configuration. Error code: {unsignedResult}");
-                }
-            }
-            finally
-            {
-                // Free allocated memory
-                if (pathArrayPtr != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(pathArrayPtr);
-                }
-
-                if (modeInfoArrayPtr != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(modeInfoArrayPtr);
-                }
-            }
-        } 
-
-        static void Main()
+        static void Main(string[] args)
         {
 
         }
