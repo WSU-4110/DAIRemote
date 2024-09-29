@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Windows.Forms;
 using DisplayProfileManager;
 
@@ -11,6 +12,12 @@ namespace DAIRemote
 
         public Form1()
         {
+            // Start the UDP server on a separate thread
+            UDPServer udpServer = new UDPServer();
+            Thread udpThread = new Thread(() => udpServer.hostUDPServer());
+            udpThread.IsBackground = true;
+            udpThread.Start();
+
             InitializeComponent();
             InitializeCustomComponents();
             trayIconManager = new TrayIconManager(this);

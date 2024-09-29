@@ -38,6 +38,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/touchpadFrame" />
 
+        <ImageButton
+            android:id="@+id/udptest"
+            android:layout_width="59dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="-1dp"
+            android:layout_marginEnd="45dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Send message to host"
+            android:src="@drawable/udpmsg_icon"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/touchpadFrame" />
+
         <FrameLayout
             android:id="@+id/touchpadFrame"
             android:layout_width="match_parent"
@@ -49,6 +62,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" >
+
         </FrameLayout>
 
         <EditText
@@ -63,6 +77,51 @@
             android:inputType="text"
             android:textColor="@color/white"
             android:background="@android:color/transparent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!--<TextView
+            android:id="@+id/responseTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="75dp"
+            android:layout_marginBottom="64dp"
+            android:fontFamily="@font/audiowide"
+            android:text=""
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="35sp"
+            android:textStyle="bold"
+            android:typeface="normal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />-->
+
+        <ImageButton
+            android:id="@+id/interactionsHelp"
+            android:layout_width="59dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="45dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Send message to host"
+            android:elevation="8dp"
+            android:src="@drawable/interactions_help_icon"
+            app:layout_constraintBottom_toTopOf="@+id/touchpadFrame"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/interationsHelpTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="75dp"
+            android:layout_marginTop="222dp"
+            android:fontFamily="@font/audiowide"
+            android:text="To simulate input:\nTap with 1 finger to left-click\n"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:typeface="normal"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
