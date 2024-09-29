@@ -119,7 +119,21 @@
                 app:srcCompat="@drawable/hotkey_icon"
                 android:layout_marginTop="16dp"/>
 
+            <ListView
+                android:id="@+id/device_list"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="#CCFBEB"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.77"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/remotePage_text" />
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
 
     </ScrollView>
 
