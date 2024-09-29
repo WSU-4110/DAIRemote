@@ -54,72 +54,28 @@
                 android:layout_height="0dp"
                 android:layout_marginTop="16dp"
                 android:background="#CCFBEB"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHeight_percent="0.75"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/remotePage_text" />
 
-            <ImageButton
-                android:id="@+id/connectionButton"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:background="#FFFFFF"
-                android:contentDescription="Button to choose between display profiles]"
-                android:scaleType="fitCenter"
-                app:layout_constraintHeight_percent="0.1"
-                app:layout_constraintEnd_toStartOf="@id/audioButton"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/touchpadFrame"
-                app:layout_constraintWidth_percent="0.2"
-                app:srcCompat="@drawable/connection_icon"
-                android:layout_marginTop="16dp"/>
 
-            <ImageButton
-                android:id="@+id/audioButton"
+            <ListView
+                android:id="@+id/device_list"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_marginTop="16dp"
-                android:background="#FFFFFF"
-                android:contentDescription="Button to cycle through audio playback devices"
-                android:scaleType="fitCenter"
-                app:layout_constraintEnd_toStartOf="@id/keyboardButton"
-                app:layout_constraintHeight_percent="0.1"
-                app:layout_constraintStart_toEndOf="@id/connectionButton"
-                app:layout_constraintTop_toBottomOf="@id/touchpadFrame"
-                app:layout_constraintWidth_percent="0.2"
-                app:srcCompat="@drawable/audio_icon" />
-
-            <ImageButton
-                android:id="@+id/keyboardButton"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:background="#FFFFFF"
-                android:contentDescription="Button to have the Android keyboard pop-up"
-                android:scaleType="fitCenter"
-                app:layout_constraintStart_toEndOf="@id/audioButton"
-                app:layout_constraintEnd_toStartOf="@id/hotkeyButton"
-                app:layout_constraintTop_toBottomOf="@id/touchpadFrame"
-                app:layout_constraintHeight_percent="0.1"
-                app:layout_constraintWidth_percent="0.2"
-                app:srcCompat="@drawable/keyboard_icon"
-                android:layout_marginTop="16dp"/>
-
-            <ImageButton
-                android:id="@+id/hotkeyButton"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:background="#FFFFFF"
-                android:contentDescription="Button to check connection"
-                android:scaleType="fitCenter"
-                app:layout_constraintStart_toEndOf="@id/keyboardButton"
-                app:layout_constraintTop_toBottomOf="@id/touchpadFrame"
+                android:background="#CCFBEB"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHeight_percent="0.1"
-                app:layout_constraintWidth_percent="0.2"
-                app:srcCompat="@drawable/hotkey_icon"
-                android:layout_marginTop="16dp"/>
+                app:layout_constraintHeight_percent="0.9"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/remotePage_text" />
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
 
     </ScrollView>
 
