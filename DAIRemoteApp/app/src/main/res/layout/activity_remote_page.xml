@@ -1,119 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#C2D8FB"
-    tools:context=".RemotePage">
+    android:background="@color/primary"
+    tools:context=".RemotePage"
+    android:fitsSystemWindows="true">
 
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_top"
+    <com.google.android.material.navigation.NavigationView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintGuide_percent="0.04"
-        android:orientation="horizontal" />
+        android:layout_height="match_parent"
+        android:id="@+id/nav_view"
+        app:headerLayout="@layout/main_menu_header"
+        app:menu="@menu/main_menu"
+        android:layout_gravity="start"/>
 
-    <TextView
-        android:id="@+id/remotePage_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/audiowide"
-        android:text="Remote"
-        android:textSize="32sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/guideline_top"
-        />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <FrameLayout
-        android:id="@+id/touchpadFrame"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="#CCFBEB"
-        app:layout_constraintWidth_percent="0.9"
-        app:layout_constraintHeight_percent="0.75"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/remotePage_text"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="16dp"
-        />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <ImageButton
-        android:id="@+id/connectionButton"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="#C2D8FB"
+            <include
+                android:id="@+id/toolbar"
+                layout="@layout/toolbar"/>
 
-        android:contentDescription="Button to choose between display profiles]"
-        android:scaleType="fitCenter"
-        app:layout_constraintHeight_percent="0.1"
-        app:layout_constraintEnd_toStartOf="@id/audioButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/touchpadFrame"
-        app:layout_constraintWidth_percent="0.2"
-        app:srcCompat="@drawable/connection_icon"
-        android:layout_marginTop="16dp"/>
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_top"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintGuide_percent="0.04"
+                android:orientation="horizontal" />
 
-    <ImageButton
-        android:id="@+id/audioButton"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        android:background="#C2D8FB"
-        android:contentDescription="Button to cycle through audio playback devices"
-        android:scaleType="fitCenter"
-        app:layout_constraintEnd_toStartOf="@id/keyboardButton"
-        app:layout_constraintHeight_percent="0.1"
-        app:layout_constraintStart_toEndOf="@id/connectionButton"
-        app:layout_constraintTop_toBottomOf="@id/touchpadFrame"
-        app:layout_constraintWidth_percent="0.2"
-        app:srcCompat="@drawable/audio_icon" />
+            <TextView
+                android:id="@+id/remotePage_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/audiowide"
+                android:text="Remote"
+                android:textSize="32sp"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/guideline_top" />
 
-    <ImageButton
-        android:id="@+id/keyboardButton"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="#C2D8FB"
-        android:contentDescription="Button to have the Android keyboard pop-up"
-        android:scaleType="fitCenter"
-        app:layout_constraintStart_toEndOf="@id/audioButton"
-        app:layout_constraintEnd_toStartOf="@id/hotkeyButton"
-        app:layout_constraintTop_toBottomOf="@id/touchpadFrame"
-        app:layout_constraintHeight_percent="0.1"
-        app:layout_constraintWidth_percent="0.2"
-        app:srcCompat="@drawable/keyboard_icon"
-        android:layout_marginTop="16dp"/>
+            <FrameLayout
+                android:id="@+id/touchpadFrame"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="16dp"
+                android:background="#CCFBEB"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.75"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/remotePage_text" />
 
-    <ImageButton
-        android:id="@+id/hotkeyButton"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="#C2D8FB"
-        android:contentDescription="Button to check connection"
-        android:scaleType="fitCenter"
-        app:layout_constraintStart_toEndOf="@id/keyboardButton"
-        app:layout_constraintTop_toBottomOf="@id/touchpadFrame"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.1"
-        app:layout_constraintWidth_percent="0.2"
-        app:srcCompat="@drawable/hotkey_icon"
-        android:layout_marginTop="16dp"/>
 
-    <Button
-        android:id="@+id/homeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Home"
-        android:fontFamily="@font/audiowide"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/touchpadFrame"
-        app:layout_constraintEnd_toEndOf="@id/remotePage_text"
-        app:layout_constraintHorizontal_bias="0.049"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+            <ListView
+                android:id="@+id/device_list"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="#CCFBEB"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.9"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/remotePage_text" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+    </ScrollView>
+
+</androidx.drawerlayout.widget.DrawerLayout>
