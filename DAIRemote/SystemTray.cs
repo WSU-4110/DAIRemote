@@ -27,7 +27,7 @@ namespace DAIRemote
             trayIcon = new NotifyIcon
             {
                 Text = "DAIRemote",
-                Icon = new Icon("Resources/SystemTrayIcon.ico"), // Use your custom icon
+                Icon = new Icon("Resources/DAIRemoteLogo.ico"), // Use your custom icon
                 ContextMenuStrip = trayMenu,
                 Visible = true
             };
