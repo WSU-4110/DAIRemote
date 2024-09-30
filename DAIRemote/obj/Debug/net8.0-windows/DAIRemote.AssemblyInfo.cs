@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DAIRemote")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e481640e65dfab898a5976d167c5eed570538c27")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9932a9cadbd22f60e5766c24e20eb9c3eea32781")]
 [assembly: System.Reflection.AssemblyProductAttribute("DAIRemote")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DAIRemote")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
