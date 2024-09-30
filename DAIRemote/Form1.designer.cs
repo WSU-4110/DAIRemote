@@ -21,6 +21,7 @@
         
         private void InitializeComponent()
         {
+
             BtnSaveDisplayConfig = new Button();
             BtnShowAudioOutputs = new Button(); 
             SuspendLayout();
@@ -52,7 +53,7 @@
             Name = "Form1";
             Text = "DAIRemote";
             Load += Form1_Load;
-            ResumeLayout(false);
+            ResumeLayout(false);GridItem 
         }
 
         #endregion
