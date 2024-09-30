@@ -9,7 +9,6 @@ namespace DAIRemote
     public partial class AudioOutputForm : System.Windows.Forms.Form
     {
         private ComboBox audioDeviceComboBox;
-
         public AudioOutputForm()
         {
             InitializeComponent();
@@ -67,7 +66,6 @@ namespace DAIRemote
         private void AudioOutputForm_Load(object sender, EventArgs e)
         {
             this.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
-
         }
 
     }
