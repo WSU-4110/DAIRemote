@@ -70,32 +70,34 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\shawi\\.nuget\\packages\\": {}
+    "C:\\Users\\dzarz\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\shawi\\Desktop\\DAIRemote\\DAIRemote\\DAIRemote.csproj",
+      "projectUniqueName": "C:\\Users\\dzarz\\Source\\Repos\\DAIRemote\\DAIRemote\\DAIRemote.csproj",
       "projectName": "DAIRemote",
-      "projectPath": "C:\\Users\\shawi\\Desktop\\DAIRemote\\DAIRemote\\DAIRemote.csproj",
-      "packagesPath": "C:\\Users\\shawi\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\shawi\\Desktop\\DAIRemote\\DAIRemote\\obj\\",
+      "projectPath": "C:\\Users\\dzarz\\Source\\Repos\\DAIRemote\\DAIRemote\\DAIRemote.csproj",
+      "packagesPath": "C:\\Users\\dzarz\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\dzarz\\Source\\Repos\\DAIRemote\\DAIRemote\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\shawi\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\dzarz\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0-windows"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0-windows7.0": {
           "targetAlias": "net8.0-windows",
           "projectReferences": {
-            "C:\\Users\\shawi\\Desktop\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj": {
-              "projectPath": "C:\\Users\\shawi\\Desktop\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj"
+            "C:\\Users\\dzarz\\Source\\Repos\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj": {
+              "projectPath": "C:\\Users\\dzarz\\Source\\Repos\\DAIRemote\\DisplayProfileManager\\DisplayProfileManager.csproj"
             }
           }
         }
@@ -133,7 +135,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.402/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

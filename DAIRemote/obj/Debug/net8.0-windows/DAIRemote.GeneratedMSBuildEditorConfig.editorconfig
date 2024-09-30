@@ -14,6 +14,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = DAIRemote
-build_property.ProjectDir = C:\Users\shawi\Desktop\DAIRemote\DAIRemote\
+build_property.ProjectDir = C:\Users\dzarz\Source\Repos\DAIRemote\DAIRemote\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

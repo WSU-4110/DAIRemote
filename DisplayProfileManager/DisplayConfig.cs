@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace DisplayProfileManager
 {
@@ -1000,6 +1001,35 @@ namespace DisplayProfileManager
 
             return false;
         }
+
+        public class DisplaySettings
+        {
+            public DISPLAYCONFIG_PATH_INFO[] pathInfoArray { get; set; }
+            public DISPLAYCONFIG_MODE_INFO[] modeInfoArray { get; set; }
+            public MonitorAdditionalInfo[] additionalInfo { get; set; }
+        }
+
+        public static bool SetDisplaySettings(string fileName)
+        {
+            debugMsg("Loading display settings from file: " + fileName);
+            if (!File.Exists(fileName))
+            {
+                Debug.WriteLine("Error: Display settings file " + fileName + " does not exist.");
+                return false;
+            }
+
+            string jsonData = File.ReadAllText(fileName);
+            var displaySettings = JsonConvert.DeserializeObject<DisplaySettings>(jsonData);
+
+            var pathInfoArray = displaySettings.pathInfoArray;
+            var modeInfoArray = displaySettings.modeInfoArray;
+            var additionalInfo = displaySettings.additionalInfo;
+
+            Debug.WriteLine(PrintDisplaySettings(pathInfoArray, modeInfoArray));
+
+            return true;
+        }
+
         static void Main(string[] args)
         {
 
