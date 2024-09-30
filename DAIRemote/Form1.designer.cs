@@ -21,6 +21,7 @@
         
         private void InitializeComponent()
         {
+
             BtnSaveDisplayConfig = new Button();
             BtnShowAudioOutputs = new Button(); 
             SuspendLayout();
@@ -46,7 +47,7 @@
            
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(300, 450);
-            BackColor = Color.FromArgb(225, 246, 225); 
+            BackColor = Color.FromArgb(50, 50, 50); 
             Controls.Add(BtnSaveDisplayConfig);
             Controls.Add(BtnShowAudioOutputs); 
             Name = "Form1";

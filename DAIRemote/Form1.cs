@@ -20,6 +20,8 @@ namespace DAIRemote
 
             InitializeComponent();
             InitializeCustomComponents();
+
+            this.Icon = new Icon("Resources/DAIRemoteLogo.ico");
             trayIconManager = new TrayIconManager(this);
             this.Load += Form1_Load;
             this.FormClosing += Form1_FormClosing;
