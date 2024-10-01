@@ -9,7 +9,6 @@ namespace DAIRemote
     public partial class AudioOutputForm : System.Windows.Forms.Form
     {
         private ComboBox audioDeviceComboBox;
-
         public AudioOutputForm()
         {
             InitializeComponent();
@@ -18,18 +17,21 @@ namespace DAIRemote
 
         private void InitializeComponent()
         {
-            audioDeviceComboBox = new ComboBox();
             SuspendLayout();
-             
-            audioDeviceComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            audioDeviceComboBox.FormattingEnabled = true;
-            audioDeviceComboBox.Location = new Point(12, 100);
-            audioDeviceComboBox.Name = "audioDeviceComboBox";
-            audioDeviceComboBox.Size = new Size(260, 33);
-            audioDeviceComboBox.TabIndex = 0;
+
+            audioDeviceComboBox = new ComboBox()
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                FormattingEnabled = true,
+                Location = new Point(12, 100),
+                Name = "audioDeviceComboBox",
+                Size = new Size(260, 33),
+                TabIndex = 0,
+            };
+
             audioDeviceComboBox.DropDown += audioDeviceComboBox_DropDown;
             audioDeviceComboBox.SelectedIndexChanged += audioDeviceComboBox_SelectedIndexChanged;
-            
+
             ClientSize = new Size(284, 100);
             Controls.Add(audioDeviceComboBox);
             Name = "AudioOutputForm";
@@ -63,7 +65,8 @@ namespace DAIRemote
 
         private void AudioOutputForm_Load(object sender, EventArgs e)
         {
-
+            this.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
         }
+
     }
 }
