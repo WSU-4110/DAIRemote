@@ -25,11 +25,12 @@ namespace DAIRemote
             trayIconManager = new TrayIconManager(this);
             this.Load += Form1_Load;
             this.FormClosing += Form1_FormClosing;
+            this.StartPosition = FormStartPosition.CenterScreen;
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            this.Hide(); 
+            this.Hide();
         }
 
         private void BtnShowAudioOutputs_Click(object sender, EventArgs e)
@@ -40,18 +41,18 @@ namespace DAIRemote
             {
                 TopLevel = false,
                 FormBorderStyle = FormBorderStyle.None,
-                Dock = DockStyle.Fill 
+                Dock = DockStyle.Fill
             };
 
-            audioFormPanel.Controls.Add(audioForm); 
-            audioForm.Show(); 
+            audioFormPanel.Controls.Add(audioForm);
+            audioForm.Show();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (e.CloseReason == CloseReason.UserClosing)
             {
-                e.Cancel = false; 
+                e.Cancel = false;
                 trayIconManager.HideIcon();
             }
         }
@@ -60,17 +61,30 @@ namespace DAIRemote
         {
             this.audioFormPanel = new Panel
             {
-                Location = new System.Drawing.Point(10, 60), 
-                Size = new System.Drawing.Size(760, 370), 
+                Location = new System.Drawing.Point(10, 60),
+                Size = new System.Drawing.Size(760, 370),
             };
 
             this.Controls.Add(this.audioFormPanel);
         }
-       
+
         private void BtnSaveDisplayConfig_Click(object sender, EventArgs e)
         {
-            string fileName = "displayConfig";
-            DisplayConfig.SaveDisplaySettings(fileName + ".json");
+            string fileName = profileNameTextBox.Text;
+            if (fileName != "")
+            {
+                DisplayConfig.SaveDisplaySettings(fileName + ".json");
+            } else
+            {
+                MessageBox.Show("Invalid input, name cannot be empty");
+            }
+
+            profileNameTextBox.Clear();
+        }
+
+        private void BtnLoadDisplayConfig_Click(object sender, EventArgs e)
+        {
+            DisplayConfig.SetDisplaySettings("displayConfig" + ".json");
         }
     }
 }
