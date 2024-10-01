@@ -12,7 +12,6 @@ namespace DAIRemote
 
         public Form1()
         {
-            // Start the UDP server on a separate thread
             UDPServer udpServer = new UDPServer();
             Thread udpThread = new Thread(() => udpServer.hostUDPServer());
             udpThread.IsBackground = true;
@@ -20,6 +19,9 @@ namespace DAIRemote
 
             InitializeComponent();
             InitializeCustomComponents();
+
+            this.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.Icon = new Icon("Resources/DAIRemoteLogo.ico");
             trayIconManager = new TrayIconManager(this);
             this.Load += Form1_Load;
             this.FormClosing += Form1_FormClosing;
