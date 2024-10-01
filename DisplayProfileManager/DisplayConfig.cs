@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Newtonsoft.Json;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -179,7 +180,7 @@ namespace DisplayProfileManager
         The DisplayConfigGetDeviceInfo function retrieves display configuration information about the device.
         https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-displayconfiggetdeviceinfo
         */
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("User32.dll")]
         public static extern int DisplayConfigGetDeviceInfo(ref DISPLAYCONFIG_TARGET_DEVICE_NAME deviceName);
 
         /*
@@ -342,12 +343,12 @@ namespace DisplayProfileManager
         The SetDisplayConfig function modifies the display topology, source, and target modes by exclusively enabling the specified paths in the current session.
         https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setdisplayconfig
         */
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("User32.dll")]
         public static extern int SetDisplayConfig(
             uint numPathArrayElements,
-            IntPtr pathArray, // IntPtr for optional pointers
+            [In] DISPLAYCONFIG_PATH_INFO[] pathArray,
             uint numModeInfoArrayElements,
-            IntPtr modeInfoArray,
+            [In] DISPLAYCONFIG_MODE_INFO[] modeInfoArray,
             SetDisplayConfigFlags flags
         );
 
@@ -476,7 +477,7 @@ namespace DisplayProfileManager
         The QueryDisplayConfig function retrieves information about all possible display paths for all display devices, or views, in the current setting.
         https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-querydisplayconfig
         */
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("User32.dll")]
         public static extern int QueryDisplayConfig(
             QueryDisplayConfigFlags flags,
             ref uint numPathArrayElements,
@@ -486,7 +487,7 @@ namespace DisplayProfileManager
             IntPtr z
         );
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("User32.dll")]
         public static extern int GetDisplayConfigBufferSizes(QueryDisplayConfigFlags flags, out uint numPathArrayElements, out uint numModeInfoArrayElements);
 
         /*
@@ -545,7 +546,6 @@ namespace DisplayProfileManager
             public ushort productCodeId { get; set; }
             public bool valid { get; set; }
 
-            // Base64 encoded version of monitorDevicePath for JSON serialization
             [JsonPropertyName("monitorDevicePath")]
             public string monitorDevicePath64
             {
@@ -871,6 +871,298 @@ namespace DisplayProfileManager
             return output;
         }
 
+        public static bool LoadDisplaySettings(string fileName, out DISPLAYCONFIG_PATH_INFO[] pathInfoArray, out DISPLAYCONFIG_MODE_INFO[] modeInfoArray, out MonitorAdditionalInfo[] additionalInfo)
+        {
+            pathInfoArray = new DISPLAYCONFIG_PATH_INFO[0];
+            modeInfoArray = new DISPLAYCONFIG_MODE_INFO[0];
+            additionalInfo = new MonitorAdditionalInfo[0];
+
+            try
+            {
+                string json = System.IO.File.ReadAllText(fileName);
+                var displaySettings = JsonConvert.DeserializeObject<dynamic>(json);
+                var pathInfoList = new List<DISPLAYCONFIG_PATH_INFO>();
+
+                foreach (var pathInfo in displaySettings.pathInfoArray)
+                {
+                    var sourceInfo = new DISPLAYCONFIG_PATH_SOURCE_INFO
+                    {
+                        adapterId = new LUID
+                        {
+                            LowPart = (uint)pathInfo.sourceInfo.adapterId.LowPart,
+                            HighPart = (int)pathInfo.sourceInfo.adapterId.HighPart
+                        },
+                        id = (uint)pathInfo.sourceInfo.id,
+                        modeInfoIdx = (uint)pathInfo.sourceInfo.modeInfoIdx,
+                        statusFlags = pathInfo.sourceInfo.statusFlags
+                    };
+
+                    var targetInfo = new DISPLAYCONFIG_PATH_TARGET_INFO
+                    {
+                        adapterId = new LUID
+                        {
+                            LowPart = (uint)pathInfo.targetInfo.adapterId.LowPart,
+                            HighPart = (int)pathInfo.targetInfo.adapterId.HighPart
+                        },
+                        id = (uint)pathInfo.targetInfo.id,
+                        modeInfoIdx = (uint)pathInfo.targetInfo.modeInfoIdx,
+                        outputTechnology = pathInfo.targetInfo.outputTechnology,
+                        rotation = pathInfo.targetInfo.rotation,
+                        scaling = pathInfo.targetInfo.scaling,
+                        refreshRate = new DISPLAYCONFIG_RATIONAL
+                        {
+                            Numerator = (uint)pathInfo.targetInfo.refreshRate.numerator,
+                            Denominator = (uint)pathInfo.targetInfo.refreshRate.denominator
+                        },
+                        scanLineOrdering = pathInfo.targetInfo.scanLineOrdering,
+                        targetAvailable = (bool)pathInfo.targetInfo.targetAvailable,
+                        statusFlags = pathInfo.targetInfo.statusFlags
+                    };
+
+                    pathInfoList.Add(new DISPLAYCONFIG_PATH_INFO
+                    {
+                        sourceInfo = sourceInfo,
+                        targetInfo = targetInfo,
+                        flags = (uint)pathInfo.flags
+                    });
+                }
+                pathInfoArray = pathInfoList.ToArray();
+
+                var modeInfoList = new List<DISPLAYCONFIG_MODE_INFO>();
+                foreach (var modeInfo in displaySettings.modeInfoArray)
+                {
+                    var adapterId = new LUID
+                    {
+                        LowPart = (uint)modeInfo.adapterId.LowPart,
+                        HighPart = (int)modeInfo.adapterId.HighPart
+                    };
+
+                    var mode = new DISPLAYCONFIG_MODE_INFO
+                    {
+                        id = (uint)modeInfo.id,
+                        adapterId = adapterId,
+                        infoType = modeInfo.infoType
+                    };
+
+                    if (mode.infoType == DISPLAYCONFIG_MODE_INFO_TYPE.DISPLAYCONFIG_MODE_INFO_TYPE_TARGET)
+                    {
+                        mode.targetMode = new DISPLAYCONFIG_TARGET_MODE
+                        {
+                            targetVideoSignalInfo = new DISPLAYCONFIG_VIDEO_SIGNAL_INFO
+                            {
+                                pixelRate = (ulong)modeInfo.mode.targetVideoSignalInfo.pixelRate,
+                                hSyncFreq = new DISPLAYCONFIG_RATIONAL
+                                {
+                                    Numerator = (uint)modeInfo.mode.targetVideoSignalInfo.hSyncFreq.numerator,
+                                    Denominator = (uint)modeInfo.mode.targetVideoSignalInfo.hSyncFreq.denominator
+                                },
+                                vSyncFreq = new DISPLAYCONFIG_RATIONAL
+                                {
+                                    Numerator = (uint)modeInfo.mode.targetVideoSignalInfo.vSyncFreq.numerator,
+                                    Denominator = (uint)modeInfo.mode.targetVideoSignalInfo.vSyncFreq.denominator
+                                },
+                                activeSize = new DISPLAYCONFIG_2DREGION
+                                {
+                                    cx = (uint)modeInfo.mode.targetVideoSignalInfo.activeSize.cx,
+                                    cy = (uint)modeInfo.mode.targetVideoSignalInfo.activeSize.cy
+                                },
+                                totalSize = new DISPLAYCONFIG_2DREGION
+                                {
+                                    cx = (uint)modeInfo.mode.targetVideoSignalInfo.totalSize.cx,
+                                    cy = (uint)modeInfo.mode.targetVideoSignalInfo.totalSize.cy
+                                },
+                                videoStandard = modeInfo.mode.targetVideoSignalInfo.videoStandard,
+                                scanLineOrdering = modeInfo.mode.targetVideoSignalInfo.scanLineOrdering
+                            }
+                        };
+                    }
+                    else if (mode.infoType == DISPLAYCONFIG_MODE_INFO_TYPE.DISPLAYCONFIG_MODE_INFO_TYPE_SOURCE)
+                    {
+                        mode.sourceMode = new DISPLAYCONFIG_SOURCE_MODE
+                        {
+                            width = (uint)modeInfo.mode.sourceMode.width,
+                            height = (uint)modeInfo.mode.sourceMode.height,
+                            pixelFormat = modeInfo.mode.sourceMode.pixelFormat,
+                            position = new POINTL
+                            {
+                                x = modeInfo.mode.sourceMode.position.x,
+                                y = modeInfo.mode.sourceMode.position.y
+                            }
+                        };
+                    }
+
+                    modeInfoList.Add(mode);
+                }
+                modeInfoArray = modeInfoList.ToArray();
+
+                var additionalInfoList = new List<MonitorAdditionalInfo>();
+                foreach (var info in displaySettings.additionalInfo)
+                {
+                    additionalInfoList.Add(new MonitorAdditionalInfo
+                    {
+                        manufactureId = (ushort)info.manufactureId,
+                        productCodeId = (ushort)info.productCodeId,
+                        valid = (bool)info.valid,
+                        monitorDevicePath = (string)info.monitorDevicePath,
+                        monitorFriendlyDevice = (string)info.monitorFriendlyDevice
+                    });
+                }
+                additionalInfo = additionalInfoList.ToArray();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error loading display settings: {ex.Message}");
+                return false;
+            }
+        }
+
+        public static bool SetDisplaySettings(string fileName)
+        {
+            debugMsg("Loading display settings from file: " + fileName);
+            if (!File.Exists(fileName))
+            {
+                Debug.WriteLine("ERROR: Display settings file does not exist: " + fileName);
+                return false;
+            }
+
+            DISPLAYCONFIG_PATH_INFO[] pathInfoArray;
+            DISPLAYCONFIG_MODE_INFO[] modeInfoArray;
+            MonitorAdditionalInfo[] additionalInfo;
+
+            bool success = LoadDisplaySettings(fileName, out pathInfoArray, out modeInfoArray, out additionalInfo);
+            if (success)
+            {
+                debugMsg("Display settings loaded successfully.");
+                debugMsg(PrintDisplaySettings(pathInfoArray, modeInfoArray));
+            }
+            else
+            {
+                Debug.WriteLine("Failed to load display settings.");
+                return false;
+            }
+
+            DISPLAYCONFIG_PATH_INFO[] pathInfoArrayCurrent = new DISPLAYCONFIG_PATH_INFO[0];
+            DISPLAYCONFIG_MODE_INFO[] modeInfoArrayCurrent = new DISPLAYCONFIG_MODE_INFO[0];
+            MonitorAdditionalInfo[] additionalInfoCurrent = new MonitorAdditionalInfo[0];
+
+            success = GetDisplaySettings(ref pathInfoArrayCurrent, ref modeInfoArrayCurrent, ref additionalInfoCurrent, false);
+            bool idMatch = true;
+
+            if (success)
+            {
+                if (idMatch)
+                {
+                    debugMsg("Matching adapter IDs for pathInfo");
+                    for (int iPathInfo = 0; iPathInfo < pathInfoArray.Length; iPathInfo++)
+                    {
+                        for (int iPathInfoCurrent = 0; iPathInfoCurrent < pathInfoArrayCurrent.Length; iPathInfoCurrent++)
+                        {
+                            if ((pathInfoArray[iPathInfo].sourceInfo.id == pathInfoArrayCurrent[iPathInfoCurrent].sourceInfo.id) &&
+                                    (pathInfoArray[iPathInfo].targetInfo.id == pathInfoArrayCurrent[iPathInfoCurrent].targetInfo.id))
+                            {
+                                debugMsg("\t IDs match, assigning current adapter ID");
+                                pathInfoArray[iPathInfo].sourceInfo.adapterId.LowPart = pathInfoArrayCurrent[iPathInfoCurrent].sourceInfo.adapterId.LowPart;
+                                pathInfoArray[iPathInfo].targetInfo.adapterId.LowPart = pathInfoArrayCurrent[iPathInfoCurrent].targetInfo.adapterId.LowPart;
+                                break;
+                            }
+                        }
+                    }
+
+                    debugMsg("Matching of adapter IDs for modeInfo");
+                    for (int iModeInfo = 0; iModeInfo < modeInfoArray.Length; iModeInfo++)
+                    {
+                        for (int iPathInfo = 0; iPathInfo < pathInfoArray.Length; iPathInfo++)
+                        {
+                            if ((modeInfoArray[iModeInfo].id == pathInfoArray[iPathInfo].targetInfo.id) &&
+                                    (modeInfoArray[iModeInfo].infoType == DISPLAYCONFIG_MODE_INFO_TYPE.DISPLAYCONFIG_MODE_INFO_TYPE_TARGET))
+                            {
+                                for (int iModeInfoSource = 0; iModeInfoSource < modeInfoArray.Length; iModeInfoSource++)
+                                {
+                                    if ((modeInfoArray[iModeInfoSource].id == pathInfoArray[iPathInfo].sourceInfo.id) &&
+                                        (modeInfoArray[iModeInfoSource].adapterId.LowPart == modeInfoArray[iModeInfo].adapterId.LowPart) &&
+                                        (modeInfoArray[iModeInfoSource].infoType == DISPLAYCONFIG_MODE_INFO_TYPE.DISPLAYCONFIG_MODE_INFO_TYPE_SOURCE))
+                                    {
+                                        debugMsg("\t\t IDs match, taking adpater id from pathInfo");
+                                        modeInfoArray[iModeInfoSource].adapterId.LowPart = pathInfoArray[iPathInfo].sourceInfo.adapterId.LowPart;
+                                        break;
+                                    }
+                                }
+                                modeInfoArray[iModeInfo].adapterId.LowPart = pathInfoArray[iPathInfo].targetInfo.adapterId.LowPart;
+                                break;
+                            }
+                        }
+                    }
+
+                    debugMsg("Done matching adapter IDs");
+                }
+
+                uint numPathArrayElements = (uint)pathInfoArray.Length;
+                uint numModeInfoArrayElements = (uint)modeInfoArray.Length;
+                long status = SetDisplayConfig(numPathArrayElements, pathInfoArray, numModeInfoArrayElements, modeInfoArray,
+                                                SetDisplayConfigFlags.SetDisplayConfigFlags_APPLY | SetDisplayConfigFlags.SetDisplayConfigFlags_USESUPPLIEDDISPLAYCONFIG | SetDisplayConfigFlags.SetDisplayConfigFlags_SAVETODATABASE | SetDisplayConfigFlags.SetDisplayConfigFlags_NOOPTIMIZATION | SetDisplayConfigFlags.SetDisplayConfigFlags_ALLOWCHANGES);
+                if (status != 0)
+                {
+                    debugMsg("Failed to set display settings using default method, ERROR: " + status.ToString());
+
+                    if ((additionalInfoCurrent.Length > 0) && (additionalInfo.Length > 0))
+                    {
+
+                        for (int iModeInfo = 0; iModeInfo < modeInfoArray.Length; iModeInfo++)
+                        {
+                            for (int iAdditionalInfoCurrent = 0; iAdditionalInfoCurrent < additionalInfoCurrent.Length; iAdditionalInfoCurrent++)
+                            {
+                                if ((additionalInfoCurrent[iAdditionalInfoCurrent].monitorFriendlyDevice != null) && (additionalInfo[iModeInfo].monitorFriendlyDevice != null))
+                                {
+                                    if (additionalInfoCurrent[iAdditionalInfoCurrent].monitorFriendlyDevice.Equals(additionalInfo[iModeInfo].monitorFriendlyDevice))
+                                    {
+                                        LUID originalID = modeInfoArray[iModeInfo].adapterId;
+                                        for (int iPathInfo = 0; iPathInfo < pathInfoArray.Length; iPathInfo++)
+                                        {
+                                            if ((pathInfoArray[iPathInfo].targetInfo.adapterId.LowPart == originalID.LowPart) &&
+                                               (pathInfoArray[iPathInfo].targetInfo.adapterId.HighPart == originalID.HighPart))
+                                            {
+                                                pathInfoArray[iPathInfo].targetInfo.adapterId = modeInfoArrayCurrent[iAdditionalInfoCurrent].adapterId;
+                                                pathInfoArray[iPathInfo].sourceInfo.adapterId = modeInfoArrayCurrent[iAdditionalInfoCurrent].adapterId;
+                                                pathInfoArray[iPathInfo].targetInfo.id = modeInfoArrayCurrent[iAdditionalInfoCurrent].id;
+                                            }
+                                        }
+                                        for (int iModeInfoFix = 0; iModeInfoFix < modeInfoArray.Length; iModeInfoFix++)
+                                        {
+                                            if ((modeInfoArray[iModeInfoFix].adapterId.LowPart == originalID.LowPart) &&
+                                                (modeInfoArray[iModeInfoFix].adapterId.HighPart == originalID.HighPart))
+                                            {
+                                                modeInfoArray[iModeInfoFix].adapterId = modeInfoArrayCurrent[iAdditionalInfoCurrent].adapterId;
+                                            }
+                                        }
+                                        modeInfoArray[iModeInfo].adapterId = modeInfoArrayCurrent[iAdditionalInfoCurrent].adapterId;
+                                        modeInfoArray[iModeInfo].id = modeInfoArrayCurrent[iAdditionalInfoCurrent].id;
+
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        status = SetDisplayConfig(numPathArrayElements, pathInfoArray, numModeInfoArrayElements, modeInfoArray,
+                                                SetDisplayConfigFlags.SetDisplayConfigFlags_APPLY | SetDisplayConfigFlags.SetDisplayConfigFlags_USESUPPLIEDDISPLAYCONFIG | SetDisplayConfigFlags.SetDisplayConfigFlags_SAVETODATABASE | SetDisplayConfigFlags.SetDisplayConfigFlags_NOOPTIMIZATION | SetDisplayConfigFlags.SetDisplayConfigFlags_ALLOWCHANGES);
+                        if (status != 0)
+                        {
+                            debugMsg("Failed to set display settings using alternative method, ERROR: " + status.ToString());
+                            return false;
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
         public static bool SaveDisplaySettings(string fileName)
         {
             DISPLAYCONFIG_PATH_INFO[] pathInfoArray = new DISPLAYCONFIG_PATH_INFO[0];
@@ -883,12 +1175,10 @@ namespace DisplayProfileManager
             {
                 if (debug)
                 {
-                    // debug output complete display settings
                     debugMsg("Display settings to write:");
                     debugMsg(PrintDisplaySettings(pathInfoArray, modeInfoArray));
                 }
 
-                // Initialize result
                 var displaySettings = new
                 {
                     pathInfoArray = pathInfoArray.Select(pathInfo => new
@@ -984,11 +1274,17 @@ namespace DisplayProfileManager
                     additionalInfo = additionalInfo
                 };
 
-                // Serialize to JSON and write to file
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string folderPath = Path.Combine(appDataPath, "DAIRemote");
+
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+                fileName = Path.Combine(folderPath, fileName);
+
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string jsonString = System.Text.Json.JsonSerializer.Serialize(displaySettings, options);
-
-                // Write JSON string to file
                 File.WriteAllText(fileName, jsonString);
 
                 return true;

@@ -26,6 +26,7 @@ namespace DAIRemote
             trayIconManager = new TrayIconManager(this);
             this.Load += Form1_Load;
             this.FormClosing += Form1_FormClosing;
+            this.StartPosition = FormStartPosition.CenterScreen;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -62,7 +63,11 @@ namespace DAIRemote
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            trayIconManager.HideIcon();
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = false;
+                trayIconManager.HideIcon();
+            }
         }
 
         private void InitializeCustomComponents()
@@ -78,8 +83,21 @@ namespace DAIRemote
 
         private void BtnSaveDisplayConfig_Click(object sender, EventArgs e)
         {
-            string fileName = "displayConfig";
-            DisplayConfig.SaveDisplaySettings(fileName + ".json");
+            string fileName = profileNameTextBox.Text;
+            if (fileName != "")
+            {
+                DisplayConfig.SaveDisplaySettings(fileName + ".json");
+            } else
+            {
+                MessageBox.Show("Invalid input, name cannot be empty");
+            }
+
+            profileNameTextBox.Clear();
+        }
+
+        private void BtnLoadDisplayConfig_Click(object sender, EventArgs e)
+        {
+            DisplayConfig.SetDisplaySettings("displayConfig" + ".json");
         }
     }
 }
