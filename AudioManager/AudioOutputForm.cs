@@ -1,21 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
 using NAudio.CoreAudioApi;
+using System.Data;
 
-namespace DAIRemote
+namespace AudioManager
 {
     public partial class AudioOutputForm : System.Windows.Forms.Form
     {
         private ComboBox audioDeviceComboBox;
         public AudioOutputForm()
         {
-            InitializeComponent();
+            InitializeAudioOutputFormComponent();
             LoadAudioDevices();
         }
 
-        private void InitializeComponent()
+        private void InitializeAudioOutputFormComponent()
         {
             SuspendLayout();
 

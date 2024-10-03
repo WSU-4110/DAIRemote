@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
-using System.Diagnostics;
+using System.Text;
 
-namespace DAIRemote
+namespace UDPServerManager
 {
-    class UDPServer
+    public class UDPServerHost
     {
         public void hostUDPServer()
         {
@@ -43,6 +39,11 @@ namespace DAIRemote
             {
                 udpServer.Close();
             }
+        }
+
+        static void Main(string[] args)
+        {
+
         }
     }
 }

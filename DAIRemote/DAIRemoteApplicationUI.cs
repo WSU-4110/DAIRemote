@@ -1,19 +1,18 @@
-using System;
-using System.Threading;
-using System.Windows.Forms;
+using AudioManager;
 using DisplayProfileManager;
+using UDPServerManager;
 
 namespace DAIRemote
 {
-    public partial class Form1 : System.Windows.Forms.Form
+    public partial class DAIRemoteApplicationUI : Form
     {
         private TrayIconManager trayIconManager;
         private AudioOutputForm audioForm;
         private Panel audioFormPanel;
 
-        public Form1()
+        public DAIRemoteApplicationUI()
         {
-            UDPServer udpServer = new UDPServer();
+            UDPServerHost udpServer = new UDPServerHost();
             Thread udpThread = new Thread(() => udpServer.hostUDPServer());
             udpThread.IsBackground = true;
             udpThread.Start();
@@ -24,12 +23,12 @@ namespace DAIRemote
             this.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.Icon = new Icon("Resources/DAIRemoteLogo.ico");
             trayIconManager = new TrayIconManager(this);
-            this.Load += Form1_Load;
-            this.FormClosing += Form1_FormClosing;
+            this.Load += DAIRemoteApplicationUI_Load;
+            this.FormClosing += DAIRemoteApplicationUI_FormClosing;
             this.StartPosition = FormStartPosition.CenterScreen;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void DAIRemoteApplicationUI_Load(object sender, EventArgs e)
         {
             this.Hide();
         }
@@ -61,7 +60,7 @@ namespace DAIRemote
             }
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private void DAIRemoteApplicationUI_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (e.CloseReason == CloseReason.UserClosing)
             {
@@ -87,7 +86,8 @@ namespace DAIRemote
             if (fileName != "")
             {
                 DisplayConfig.SaveDisplaySettings(fileName + ".json");
-            } else
+            }
+            else
             {
                 MessageBox.Show("Invalid input, name cannot be empty");
             }

@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAIRemote", "DAIRemote.csproj", "{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAIRemote", "DAIRemote.csproj", "{9456FC49-EB42-4F08-A5A6-ED49E7DA37AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisplayProfileManager", "..\DisplayProfileManager\DisplayProfileManager.csproj", "{244E9C8F-2C20-4E79-882C-CF57043146A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DisplayProfileManager", "..\DisplayProfileManager\DisplayProfileManager.csproj", "{244E9C8F-2C20-4E79-882C-CF57043146A0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UDPServerManager", "..\UDPServer\UDPServerManager.csproj", "{C211733B-178F-4526-9A21-05D4B2E91308}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioManager", "..\AudioManager\AudioManager.csproj", "{4B3FCAB3-180F-47A4-A390-8A4D7B2A85A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{244E9C8F-2C20-4E79-882C-CF57043146A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{244E9C8F-2C20-4E79-882C-CF57043146A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{244E9C8F-2C20-4E79-882C-CF57043146A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C211733B-178F-4526-9A21-05D4B2E91308}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C211733B-178F-4526-9A21-05D4B2E91308}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C211733B-178F-4526-9A21-05D4B2E91308}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C211733B-178F-4526-9A21-05D4B2E91308}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B3FCAB3-180F-47A4-A390-8A4D7B2A85A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B3FCAB3-180F-47A4-A390-8A4D7B2A85A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B3FCAB3-180F-47A4-A390-8A4D7B2A85A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B3FCAB3-180F-47A4-A390-8A4D7B2A85A4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
