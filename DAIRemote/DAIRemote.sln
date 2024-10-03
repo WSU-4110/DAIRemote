@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DisplayProfileManager", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UDPServerManager", "..\UDPServer\UDPServerManager.csproj", "{C211733B-178F-4526-9A21-05D4B2E91308}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioManager", "..\AudioManager\AudioManager.csproj", "{4B3FCAB3-180F-47A4-A390-8A4D7B2A85A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioManager", "..\AudioManager\AudioManager.csproj", "{B1064153-2065-4F28-BD20-409DAF3FEB21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{C211733B-178F-4526-9A21-05D4B2E91308}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C211733B-178F-4526-9A21-05D4B2E91308}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C211733B-178F-4526-9A21-05D4B2E91308}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4B3FCAB3-180F-47A4-A390-8A4D7B2A85A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4B3FCAB3-180F-47A4-A390-8A4D7B2A85A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4B3FCAB3-180F-47A4-A390-8A4D7B2A85A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4B3FCAB3-180F-47A4-A390-8A4D7B2A85A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1064153-2065-4F28-BD20-409DAF3FEB21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1064153-2065-4F28-BD20-409DAF3FEB21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1064153-2065-4F28-BD20-409DAF3FEB21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1064153-2065-4F28-BD20-409DAF3FEB21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
