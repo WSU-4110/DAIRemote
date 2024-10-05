@@ -1,8 +1,4 @@
-﻿using System;
-using System.Drawing;
-using System.Windows.Forms;
-
-namespace DAIRemote
+﻿namespace DAIRemote
 {
     public class TrayIconManager
     {
@@ -16,15 +12,15 @@ namespace DAIRemote
             InitializeTrayIcon();
         }
 
-            private void InitializeTrayIcon()
+        private void InitializeTrayIcon()
+        {
+            // Create a ContextMenuStrip
+            trayMenu = new ContextMenuStrip
             {
-                // Create a ContextMenuStrip
-                trayMenu = new ContextMenuStrip
-                {
-                    BackColor = Color.FromArgb(50, 50, 50),
-                    ForeColor = System.Drawing.Color.White,
-                    ShowImageMargin = false,
-                    Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
+                BackColor = Color.FromArgb(50, 50, 50),
+                ForeColor = System.Drawing.Color.White,
+                ShowImageMargin = false,
+                Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
             };
 
             var showMenuItem = new ToolStripMenuItem("Show", null, OnShow);

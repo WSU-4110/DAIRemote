@@ -1,6 +1,6 @@
 ﻿namespace DAIRemote
 {
-    partial class Form1
+    partial class DAIRemoteApplicationUI
     {
        
         private System.ComponentModel.IContainer components = null;
@@ -70,7 +70,7 @@
             profileNameTextBox.Size = new Size(200, 23);
             profileNameTextBox.TabIndex = 3;
             // 
-            // Form1
+            // DAIRemoteApplicationUI
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -80,9 +80,9 @@
             Controls.Add(button1);
             Controls.Add(BtnSaveDisplayConfig);
             Controls.Add(BtnShowAudioOutputs);
-            Name = "Form1";
+            Name = "DAIRemoteApplicationUI";
             Text = "DAIRemote";
-            Load += Form1_Load;
+            Load += DAIRemoteApplicationUI_Load;
             ResumeLayout(false);
             PerformLayout();
         }
