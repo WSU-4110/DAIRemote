@@ -67,7 +67,7 @@ public class AboutPage extends AppCompatActivity implements NavigationView.OnNav
             intent = new Intent(this, InteractionPage.class);
             startActivity(intent);
         } else if(itemId == R.id.nav_server) {
-            intent = new Intent(this, RemotePage.class);
+            intent = new Intent(this, ServersPage.class);
             startActivity(intent);
         } else if(itemId == R.id.nav_help) {
             intent = new Intent(this, InstructionsPage.class);
