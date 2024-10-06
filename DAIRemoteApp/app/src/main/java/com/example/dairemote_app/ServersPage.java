@@ -22,9 +22,13 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 public class ServersPage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -45,17 +49,20 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, deviceList);
         listView.setAdapter(adapter);
 
-        // Initialize filter button
-        ImageButton filterButton;
-        filterButton = findViewById(R.id.filter_button);
+        // Filter button
+        ImageButton filterButton = findViewById(R.id.filter_button);
         filterButton.setOnClickListener(view -> {
             isFilterActive = true; // Set filter flag
+            deviceList.clear(); // Clear the list for filtered results
+            adapter.notifyDataSetChanged(); // Notify the adapter to update the ListView
             new ScanLocalNetworkTask().execute(); // Start scanning again with filter
         });
 
+        // Adding IP address found onto ListView
         listView.setOnItemClickListener((parent, view, position, id) -> {
             String selectedDevice = deviceList.get(position);
             Toast.makeText(ServersPage.this, "Selected IP: " + selectedDevice, Toast.LENGTH_SHORT).show();
+            sendUdpMessage("192.168.1.13", "Hello UDP Server!");
         });
 
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -63,7 +70,6 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         toolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
-
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
@@ -90,35 +96,22 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
                     deviceList.clear(); // Clear list for filtered results
                 }
 
-                // Get the IP address of the current network
-                WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-                String ip = intToIp(wm.getDhcpInfo().ipAddress);
+                // Get local IP addresses
+                Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+                while (networkInterfaces.hasMoreElements()) {
+                    NetworkInterface networkInterface = networkInterfaces.nextElement();
+                    Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
+                    while (inetAddresses.hasMoreElements()) {
+                        InetAddress inetAddress = inetAddresses.nextElement();
+                        if (inetAddress.isSiteLocalAddress()) {
+                            String host = inetAddress.getHostAddress();
+                            Log.d("NetworkScanner", "Found local IP: " + host);
 
-                // Debugging: Check if IP is being retrieved
-                Log.d("NetworkScanner", "Device IP: " + ip);
-
-                // Scan IP range
-                String subnet = ip.substring(0, ip.lastIndexOf('.') + 1);
-                for (int i = 1; i < 255; i++) {
-                    String host = subnet + i;
-                    InetAddress inetAddress = InetAddress.getByName(host);
-
-                    // Debugging: Check each host IP being scanned
-                    Log.d("NetworkScanner", "Scanning IP: " + host);
-
-                    if (inetAddress.isReachable(500)) {
-                        Log.d("NetworkScanner", "Reachable IP: " + inetAddress.getHostAddress());
-
-                        // Check if port 11000 is open
-                        if (!isFilterActive || isPortOpen(host, 11000)) {
-                            // Get hostname or set default to "Unknown Device"
-                            String deviceName = inetAddress.getHostName();
-                            if (deviceName == null || deviceName.isEmpty() || deviceName.equals(inetAddress.getHostAddress())) {
-                                deviceName = "Unknown Device";
+                            // Check if port 11000 is open
+                            if (!isFilterActive || isPortOpen(host, 11000)) {
+                                String deviceInfo = "Unknown Device (" + host + ")";
+                                publishProgress(deviceInfo);  // Publish the hostname and IP
                             }
-
-                            String deviceInfo = deviceName + " (" + inetAddress.getHostAddress() + ")";
-                            publishProgress(deviceInfo);  // Publish the hostname and IP
                         }
                     }
                 }
@@ -142,18 +135,30 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
     private boolean isPortOpen(String ip, int port) {
         try (Socket socket = new Socket()) {
             socket.connect(new java.net.InetSocketAddress(ip, port), 1000); // 1 second timeout
-            return true;
+            Log.d("NetworkScanner", "Checking port " + port + " on " + ip);
+            return true; // Port is open
         } catch (IOException e) {
+            Log.d("NetworkScanner", "Port " + port + " is closed on " + ip);
             return false; // Port is not open
         }
     }
 
-    private String intToIp(int ipAddress) {
-        return ((ipAddress & 0xFF) + "." +
-                ((ipAddress >> 8) & 0xFF) + "." +
-                ((ipAddress >> 16) & 0xFF) + "." +
-                ((ipAddress >> 24) & 0xFF));
+    private void sendUdpMessage(String ip, String message) {
+        new Thread(() -> {
+            try {
+                DatagramSocket socket = new DatagramSocket();
+                InetAddress address = InetAddress.getByName(ip);
+                byte[] buffer = message.getBytes();
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, 11000); // Replace 11000 with your server's port if needed
+                socket.send(packet);
+                Log.d("UDP", "Sent message: " + message + " to " + ip);
+                socket.close();
+            } catch (IOException e) {
+                Log.e("UDP", "Error sending UDP message", e);
+            }
+        }).start();
     }
+
 
     @Override
     public void onBackPressed() {
