@@ -1,9 +1,6 @@
 package com.example.dairemote_app;
 
-import android.Manifest;
-
 import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -11,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -24,10 +22,11 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.net.InetAddress;
+import java.net.Socket;
+import java.util.ArrayList;
 
-public class RemotePage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class ServersPage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     DrawerLayout drawerLayout;
     NavigationView navigationView;
@@ -35,22 +34,29 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
 
     private ArrayList<String> deviceList = new ArrayList<>();
     private ArrayAdapter<String> adapter;
+    private boolean isFilterActive = false; // Flag to check if filter is active
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_remote_page);
+        setContentView(R.layout.activity_servers_page);
 
         ListView listView = findViewById(R.id.device_list);
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, deviceList);
         listView.setAdapter(adapter);
 
+        // Initialize filter button
+        ImageButton filterButton;
+        filterButton = findViewById(R.id.filter_button);
+        filterButton.setOnClickListener(view -> {
+            isFilterActive = true; // Set filter flag
+            new ScanLocalNetworkTask().execute(); // Start scanning again with filter
+        });
 
         listView.setOnItemClickListener((parent, view, position, id) -> {
             String selectedDevice = deviceList.get(position);
-            Toast.makeText(RemotePage.this, "Selected IP: " + selectedDevice, Toast.LENGTH_SHORT).show();
+            Toast.makeText(ServersPage.this, "Selected IP: " + selectedDevice, Toast.LENGTH_SHORT).show();
         });
-
 
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
@@ -68,27 +74,28 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
         toggle.syncState();
 
         navigationView.setNavigationItemSelectedListener(this);
-
         navigationView.setCheckedItem(R.id.nav_server);
-
 
         // Start scanning for local IPs
         new ScanLocalNetworkTask().execute();
     }
-
 
     @SuppressLint("StaticFieldLeak")
     private class ScanLocalNetworkTask extends AsyncTask<Void, String, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
+                // Clear previous device list
+                if (isFilterActive) {
+                    deviceList.clear(); // Clear list for filtered results
+                }
+
                 // Get the IP address of the current network
                 WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
                 String ip = intToIp(wm.getDhcpInfo().ipAddress);
 
                 // Debugging: Check if IP is being retrieved
                 Log.d("NetworkScanner", "Device IP: " + ip);
-
 
                 // Scan IP range
                 String subnet = ip.substring(0, ip.lastIndexOf('.') + 1);
@@ -102,16 +109,18 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
                     if (inetAddress.isReachable(500)) {
                         Log.d("NetworkScanner", "Reachable IP: " + inetAddress.getHostAddress());
 
-                        // Get hostname or set default to "Unknown Device"
-                        String deviceName = inetAddress.getHostName();
-                        if (deviceName == null || deviceName.isEmpty() || deviceName.equals(inetAddress.getHostAddress())) {
-                            deviceName = "Unknown Device";
+                        // Check if port 11000 is open
+                        if (!isFilterActive || isPortOpen(host, 11000)) {
+                            // Get hostname or set default to "Unknown Device"
+                            String deviceName = inetAddress.getHostName();
+                            if (deviceName == null || deviceName.isEmpty() || deviceName.equals(inetAddress.getHostAddress())) {
+                                deviceName = "Unknown Device";
+                            }
+
+                            String deviceInfo = deviceName + " (" + inetAddress.getHostAddress() + ")";
+                            publishProgress(deviceInfo);  // Publish the hostname and IP
                         }
-
-                        String deviceInfo = deviceName + " (" + inetAddress.getHostAddress() + ")";
-                        publishProgress(deviceInfo);  // Publish the hostname and IP
                     }
-
                 }
             } catch (IOException e) {
                 Log.e("NetworkScanner", "Error scanning local network", e);
@@ -127,7 +136,15 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
 
             // Debugging: Check that ListView is being updated
             Log.d("NetworkScanner", "Added IP to ListView: " + values[0]);
+        }
+    }
 
+    private boolean isPortOpen(String ip, int port) {
+        try (Socket socket = new Socket()) {
+            socket.connect(new java.net.InetSocketAddress(ip, port), 1000); // 1 second timeout
+            return true;
+        } catch (IOException e) {
+            return false; // Port is not open
         }
     }
 
@@ -138,11 +155,9 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
                 ((ipAddress >> 24) & 0xFF));
     }
 
-
-
     @Override
     public void onBackPressed() {
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)) {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
@@ -155,16 +170,16 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
         int itemId = item.getItemId();
         Log.d("Navigation", "Item selected: " + itemId);
 
-        if(itemId == R.id.nav_home) {
+        if (itemId == R.id.nav_home) {
             intent = new Intent(this, MainActivity.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_help) {
+        } else if (itemId == R.id.nav_help) {
             intent = new Intent(this, InstructionsPage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_remote) {
+        } else if (itemId == R.id.nav_remote) {
             intent = new Intent(this, InteractionPage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_about) {
+        } else if (itemId == R.id.nav_about) {
             intent = new Intent(this, AboutPage.class);
             startActivity(intent);
         }
@@ -172,6 +187,4 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
-
-
 }

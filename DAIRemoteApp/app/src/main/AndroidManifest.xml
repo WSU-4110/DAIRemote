@@ -24,7 +24,7 @@
             android:name=".InstructionsPage"
             android:exported="false" />
         <activity
-            android:name=".RemotePage"
+            android:name=".ServersPage"
             android:exported="false" />
         <activity
             android:name=".InteractionPage"

@@ -9,7 +9,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -172,7 +171,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         } else if(itemId == R.id.nav_server) {
-            intent = new Intent(this, RemotePage.class);
+            intent = new Intent(this, ServersPage.class);
             startActivity(intent);
         } else if(itemId == R.id.nav_help) {
             intent = new Intent(this, InstructionsPage.class);
@@ -187,7 +186,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     }
 
     private class UDPClient extends AsyncTask<Void, Void, String> {
-        private final String serverAddress = "192.168.1.67"; // Replace with PC's IP
+        private final String serverAddress = "35.16.17.232"; // Replace with PC's IP
         private final int serverPort = 11000;
         private String messageToSend;
         private String serverResponse = "No response";
