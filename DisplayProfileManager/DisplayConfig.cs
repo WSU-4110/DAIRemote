@@ -1296,6 +1296,19 @@ namespace DisplayProfileManager
 
             return false;
         }
+
+        /*public static bool DeleteDisplaySettings(string fileName)
+        {
+            debugMsg("Deleting display settings on file: " + fileName);
+            if (!File.Exists(fileName))
+            {
+                Debug.WriteLine("ERROR: Display settings file does not exist: " + fileName);
+                return false;
+            }
+
+            File.Delete(fileName);
+            return false;
+        }*/
         static void Main(string[] args)
         {
 
