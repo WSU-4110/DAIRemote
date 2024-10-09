@@ -6,16 +6,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary"
-    tools:context=".MainActivity"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    tools:context=".MainActivity">
 
     <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/nav_view"
+        android:layout_gravity="start"
         app:headerLayout="@layout/main_menu_header"
-        app:menu="@menu/main_menu"
-        android:layout_gravity="start"/>
+        app:menu="@menu/main_menu" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -27,7 +27,7 @@
 
             <include
                 android:id="@+id/toolbar"
-                layout="@layout/toolbar"/>
+                layout="@layout/toolbar" />
 
             <Button
                 android:id="@+id/remote_page"
@@ -108,8 +108,8 @@
                 android:layout_marginEnd="97dp"
                 android:fontFamily="@font/audiowide"
                 android:text="DAIRemote"
-                android:textColor="@color/white"
                 android:textAllCaps="false"
+                android:textColor="@color/white"
                 android:textSize="35sp"
                 android:textStyle="bold"
                 android:typeface="normal"
@@ -123,11 +123,25 @@
                 android:layout_height="162dp"
                 android:layout_marginTop="-11dp"
                 android:layout_marginBottom="-11dp"
+                android:contentDescription="DAIRemote logo"
                 app:layout_constraintBottom_toTopOf="@+id/remote_page"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView"
-                app:srcCompat="@drawable/dairemote_logo"/>
+                app:srcCompat="@drawable/dairemote_logo" />
+
+            <TextView
+                android:id="@+id/toolbarNotification"
+                android:layout_width="218dp"
+                android:layout_height="23dp"
+                android:background="#B4B3B3"
+                android:elevation="10dp"
+                android:textAlignment="center"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toTopOf="@+id/textView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

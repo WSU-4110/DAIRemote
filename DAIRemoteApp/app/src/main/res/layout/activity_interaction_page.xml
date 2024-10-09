@@ -6,16 +6,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/material_dynamic_neutral20"
-    tools:context=".InteractionPage"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    tools:context=".InteractionPage">
 
     <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/nav_view"
+        android:layout_gravity="start"
         app:headerLayout="@layout/main_menu_header"
-        app:menu="@menu/main_menu"
-        android:layout_gravity="start"/>
+        app:menu="@menu/main_menu" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -23,13 +23,13 @@
 
         <include
             android:id="@+id/toolbar"
-            layout="@layout/toolbar"/>
+            layout="@layout/toolbar" />
 
         <ImageButton
             android:id="@+id/keyboardImgBtn"
             android:layout_width="59dp"
             android:layout_height="48dp"
-            android:layout_marginStart="45dp"
+            android:layout_marginStart="35dp"
             android:layout_marginTop="-1dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Keyboard icon to pull system keyboard"
@@ -43,7 +43,7 @@
             android:layout_width="59dp"
             android:layout_height="48dp"
             android:layout_marginTop="-1dp"
-            android:layout_marginEnd="45dp"
+            android:layout_marginEnd="35dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Send message to host"
             android:src="@drawable/udpmsg_icon"
@@ -61,7 +61,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" >
+            app:layout_constraintTop_toTopOf="parent">
 
         </FrameLayout>
 
@@ -69,14 +69,15 @@
             android:id="@+id/editText"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginStart="75dp"
             android:layout_marginTop="300dp"
+            android:background="@android:color/transparent"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:visibility="visible"
             android:inputType="text"
+            android:textAlignment="center"
             android:textColor="@color/white"
-            android:background="@android:color/transparent"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -100,7 +101,7 @@
             android:id="@+id/interactionsHelp"
             android:layout_width="59dp"
             android:layout_height="48dp"
-            android:layout_marginEnd="45dp"
+            android:layout_marginEnd="35dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Send message to host"
             android:elevation="8dp"
@@ -122,6 +123,19 @@
             android:textSize="15sp"
             android:textStyle="bold"
             android:typeface="normal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/toolbarNotification"
+            android:layout_width="218dp"
+            android:layout_height="23dp"
+            android:background="#B4B3B3"
+            android:elevation="10dp"
+            android:textAlignment="center"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toTopOf="@+id/touchpadFrame"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

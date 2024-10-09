@@ -139,10 +139,9 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
     }
 
 
-
     @Override
     public void onBackPressed() {
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)) {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
@@ -155,16 +154,16 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
         int itemId = item.getItemId();
         Log.d("Navigation", "Item selected: " + itemId);
 
-        if(itemId == R.id.nav_home) {
+        if (itemId == R.id.nav_home) {
             intent = new Intent(this, MainActivity.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_help) {
+        } else if (itemId == R.id.nav_help) {
             intent = new Intent(this, InstructionsPage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_remote) {
+        } else if (itemId == R.id.nav_remote) {
             intent = new Intent(this, InteractionPage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_about) {
+        } else if (itemId == R.id.nav_about) {
             intent = new Intent(this, AboutPage.class);
             startActivity(intent);
         }

@@ -2,6 +2,7 @@ package com.example.dairemote_app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,7 +10,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -42,12 +42,26 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     NavigationView navigationView;
     Toolbar toolbar;
 
+    public void notifyUser(String msg, String color) {
+        TextView toolbarNotif = findViewById(R.id.toolbarNotification);
+        toolbarNotif.setText(msg);
+        toolbarNotif.setTextColor(Color.parseColor(color));
+        toolbarNotif.setVisibility(View.VISIBLE);
+
+        // Hide notification after 5 seconds
+        toolbarNotif.postDelayed(() -> toolbarNotif.setVisibility(View.GONE), 5000);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_interaction_page);
 
         touchpadFrame = findViewById(R.id.touchpadFrame);
+
+        // Initially Hide the toolbar notification
+        TextView toolbarNotif = findViewById(R.id.toolbarNotification);
+        toolbarNotif.setVisibility(View.GONE);
 
         touchpadFrame.setOnTouchListener(new View.OnTouchListener() {
             float startX, startY, x, y;
@@ -79,7 +93,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         long timeDifference = endTime - startTime;
 
                         if (timeDifference < CLICK_THRESHOLD && deltaX < MOVE_THRESHOLD && deltaY < MOVE_THRESHOLD) {
-                            sendTouchCoordinates("Mouse LMB", startX, startY);;
+                            sendTouchCoordinates("Mouse LMB", startX, startY);
+                            ;
                         }
                         break;
                 }
@@ -129,7 +144,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             @Override
             public void onClick(View v) {
                 // Start UDP client to send data to the server
-                new UDPClient("Hi!").execute();
+                new UDPClient("Shutdown requested").execute();
             }
         });
 
@@ -151,13 +166,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
     @Override
     public void onBackPressed() {
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)) {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
-        } else if(editText != null && editText.getVisibility() == View.VISIBLE) {
+        } else if (editText != null && editText.getVisibility() == View.VISIBLE) {
             editText.setText("");
             editText.setVisibility(View.GONE);
-        }
-        else {
+        } else {
             super.onBackPressed();
         }
     }
@@ -168,16 +182,16 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         int itemId = item.getItemId();
         Log.d("Navigation", "Item selected: " + itemId);
 
-        if(itemId == R.id.nav_home) {
+        if (itemId == R.id.nav_home) {
             intent = new Intent(this, MainActivity.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_server) {
+        } else if (itemId == R.id.nav_server) {
             intent = new Intent(this, RemotePage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_help) {
+        } else if (itemId == R.id.nav_help) {
             intent = new Intent(this, InstructionsPage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_about) {
+        } else if (itemId == R.id.nav_about) {
             intent = new Intent(this, AboutPage.class);
             startActivity(intent);
         }

@@ -1,10 +1,15 @@
 package com.example.dairemote_app;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -14,6 +19,16 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
+
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -25,6 +40,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     NavigationView navigationView;
     Toolbar toolbar;
 
+    private ConnectionManager connectionManager;
+
+    public void notifyUser(String msg, String color) {
+        TextView toolbarNotif = findViewById(R.id.toolbarNotification);
+        toolbarNotif.setText(msg);
+        toolbarNotif.setTextColor(Color.parseColor(color));
+        toolbarNotif.setVisibility(View.VISIBLE);
+
+        // Hide notification after 5 seconds
+        toolbarNotif.postDelayed(() -> toolbarNotif.setVisibility(View.GONE), 5000);
+    }
+
+    @Override
+    protected void onDestroy() {
+        // Clean up the connection when activity is destroyed
+        connectionManager.shutdown();
+
+        super.onDestroy();
+    }
+
+    /*@Override
+    protected void onStop() {
+        super.onStop();
+        // Check if the activity is being destroyed
+        if (isChangingConfigurations()) {
+            UDPShutDown();
+        }
+    }*/
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
+        // Initially Hide the toolbar notification
+        TextView toolbarNotif = findViewById(R.id.toolbarNotification);
+        toolbarNotif.setVisibility(View.GONE);
 
         // Remove the app name from tool bar
         if (getSupportActionBar() != null) {
@@ -51,6 +98,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Select the home icon by default when opening navigation menu
         navigationView.setCheckedItem(R.id.nav_home);
 
+        // Initialize the connection manager
+        connectionManager = new ConnectionManager("192.168.1.67"); // Add appropriate server details
+        connectionManager.initializeConnection();
 
 
         // on clicking the "about" button, user is sent to the about page
@@ -83,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)) {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
@@ -96,16 +146,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int itemId = item.getItemId();
         Log.d("Navigation", "Item selected: " + itemId);
 
-        if(itemId == R.id.nav_remote) {
+        if (itemId == R.id.nav_remote) {
             intent = new Intent(this, InteractionPage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_help) {
+        } else if (itemId == R.id.nav_help) {
             intent = new Intent(this, InstructionsPage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_server) {
+        } else if (itemId == R.id.nav_server) {
             intent = new Intent(this, RemotePage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_about) {
+        } else if (itemId == R.id.nav_about) {
             intent = new Intent(this, AboutPage.class);
             startActivity(intent);
         }
