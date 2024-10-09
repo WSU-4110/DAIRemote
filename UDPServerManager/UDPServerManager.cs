@@ -2,10 +2,8 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace UDPServerManager
+namespace UDPServerManagerForm
 {
     public class UDPServerHost
     {
@@ -34,17 +32,60 @@ namespace UDPServerManager
                 byte[] handshakeData = udpServer.Receive(ref remoteEP);
                 string handshakeMessage = Encoding.ASCII.GetString(handshakeData);
 
-                Debug.WriteLine($"Received handshake: {handshakeMessage}");
+                Debug.WriteLine($"Received handshake from {remoteEP.Address}:{remoteEP.Port}: {handshakeMessage}");
 
                 // Check if the received message is the handshake request
                 if (handshakeMessage.StartsWith("Connection requested"))
                 {
+                    string waitMessage = "Wait";
+                    byte[] waitBytes = Encoding.ASCII.GetBytes(waitMessage);
+                    udpServer.Send(waitBytes, waitBytes.Length, remoteEP);
+
+                    UDPServerManagerForm form = new UDPServerManagerForm();
+                    DialogResult connect;
+
+                    connect = MessageBox.Show($"Allow {remoteEP.Address}:{remoteEP.Port} to connect?", "Pending Connection", 
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question, 
+                        MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    return form.HandleConnectionResult(connect, udpServer, remoteEP);
+                }
+                return false;
+            }
+            catch (SocketException e)
+            {
+                Debug.WriteLine("Error during handshake: " + e.Message);
+                return false;
+            }
+            catch (ObjectDisposedException e)
+            {
+                Debug.WriteLine("Error: UdpClient has been disposed: " + e.Message);
+                return false;
+            }
+        }
+
+        // Method to handle the initial handshake
+        public bool clientSearch()
+        {
+            try
+            {
+                if (udpServer == null)
+                {
+                    Debug.WriteLine("Error: udpServer is not initialized.");
+                    return false;
+                }
+
+                byte[] handshakeData = udpServer.Receive(ref remoteEP);
+                string handshakeMessage = Encoding.ASCII.GetString(handshakeData);
+
+                if (handshakeMessage.StartsWith("Hello, I'm"))
+                {
+                    Debug.WriteLine($"Received client broadcast from {remoteEP.Address}:{remoteEP.Port}: {handshakeMessage}");
                     // Send an approval message back to the client
-                    string approvalMessage = "Approved";
+                    string approvalMessage = "Hello, I'm " + Environment.MachineName;
                     byte[] approvalBytes = Encoding.ASCII.GetBytes(approvalMessage);
                     udpServer.Send(approvalBytes, approvalBytes.Length, remoteEP);
 
-                    Debug.WriteLine("Sent approval back to client");
+                    Debug.WriteLine($"Sent reply to client's broadcast at {remoteEP.Address}:{remoteEP.Port}");
                     return true;
                 }
                 return false;
@@ -66,7 +107,11 @@ namespace UDPServerManager
         {
             while (!isClientConnected)
             {
-                if (InitiateHandshake())
+                if (clientSearch())
+                {
+                    Debug.WriteLine("Awaiting handshake...");
+                }
+                else if(InitiateHandshake())
                 {
                     isClientConnected = true;
                     Debug.WriteLine("Handshake successful, starting message loop...");
@@ -106,7 +151,7 @@ namespace UDPServerManager
                         if (receivedData.Equals("Shutdown requested", StringComparison.OrdinalIgnoreCase))
                         {
                             Debug.WriteLine("Shutdown message received. Exiting message loop...");
-                        
+
                             // Send shutdown acknowledgment to client
                             string shutdownAck = "Server shutting down";
                             byte[] shutdownAckData = Encoding.ASCII.GetBytes(shutdownAck);
@@ -114,7 +159,8 @@ namespace UDPServerManager
 
                             isClientConnected = false;
                             break;
-                        } else if (receivedData.Equals("DroidHeartBeat", StringComparison.OrdinalIgnoreCase))
+                        }
+                        else if (receivedData.Equals("DroidHeartBeat", StringComparison.OrdinalIgnoreCase))
                         {
                             // Update last heartbeat time
                             lastHeartbeatTime = DateTime.Now;
@@ -124,7 +170,8 @@ namespace UDPServerManager
                             string shutdownAck = "HeartBeat Ack";
                             byte[] shutdownAckData = Encoding.ASCII.GetBytes(shutdownAck);
                             udpServer.Send(shutdownAckData, shutdownAckData.Length, remoteEP);
-                        } else if (receivedData.StartsWith("Connection requested"))
+                        }
+                        else if (receivedData.StartsWith("Connection requested"))
                         {
                             // Send an approval message back to the client
                             string approvalMessage = "Approved";
@@ -179,11 +226,6 @@ namespace UDPServerManager
                 udpServer = new UdpClient(11000);
                 remoteEP = new IPEndPoint(IPAddress.Any, 11000);
             }
-        }
-
-        static void Main(string[] args)
-        {
-
         }
     }
 }

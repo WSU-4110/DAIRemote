@@ -55,7 +55,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onDestroy() {
         // Clean up the connection when activity is destroyed
-        connectionManager.shutdown();
+        if (connectionManager != null) {
+            connectionManager.shutdown();
+            connectionManager = null;
+        }
 
         super.onDestroy();
     }
@@ -99,8 +102,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setCheckedItem(R.id.nav_home);
 
         // Initialize the connection manager
-        connectionManager = new ConnectionManager("192.168.1.67"); // Add appropriate server details
-        connectionManager.initializeConnection();
+        ConnectionManager.hostSearchInBackground(new HostSearchCallback() {
+            @Override
+            public void onHostFound(String serverIp) {
+                Log.i("MainActivity", "Server IP found: " + serverIp);
+
+                // Initialize ConnectionManager with the found server IP
+                connectionManager = new ConnectionManager(serverIp);
+
+                connectionManager.initializeConnection();
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e("MainActivity", "Error during host search: " + error);
+            }
+        });
 
 
         // on clicking the "about" button, user is sent to the about page
@@ -144,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         Intent intent;
         int itemId = item.getItemId();
-        Log.d("Navigation", "Item selected: " + itemId);
+        Log.d("MainActivity", "Item selected: " + itemId);
 
         if (itemId == R.id.nav_remote) {
             intent = new Intent(this, InteractionPage.class);
