@@ -82,18 +82,20 @@ namespace DAIRemote
 
         private void BtnSaveDisplayConfig_Click(object sender, EventArgs e)
         {
-            string fileName = profileNameTextBox.Text;
-            if (fileName != "")
+            string fileName = profileNameTextBox.Text.Trim();
+
+            if (!string.IsNullOrEmpty(fileName))
             {
-                DisplayConfig.SaveDisplaySettings(fileName + ".json");
+                DisplayConfig.SaveDisplaySettings($"{fileName}.json");
+                trayIconManager.AddDisplayProfiles(trayIconManager.GetContextMenu());
+                profileNameTextBox.Clear();
             }
             else
             {
-                MessageBox.Show("Invalid input, name cannot be empty");
+                MessageBox.Show("Please enter a valid profile name.", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-
-            profileNameTextBox.Clear();
         }
+
 
         private void BtnLoadDisplayConfig_Click(object sender, EventArgs e)
         {
