@@ -24,6 +24,8 @@ public class ConnectionManager {
     public static String serverAddress;
     public static int serverPort;
     public static HostSearchCallback callback;
+    public static boolean connectionEstablished = false;
+    public static int declineCount = 0;
 
     public ConnectionManager(String serverAddress) {
         ConnectionManager.serverAddress = serverAddress;
@@ -32,7 +34,7 @@ public class ConnectionManager {
     }
 
     // Initialize connection
-    public void initializeConnection() {
+    public boolean initializeConnection() {
         try {
             udpSocket = new DatagramSocket();
         } catch (SocketException e) {
@@ -54,10 +56,16 @@ public class ConnectionManager {
 
             if(serverResponse.equalsIgnoreCase("Approved")) {
                 startHeartbeat();
+                connectionEstablished = true;
+                ConnectionManager.declineCount = 0;
+                return true;
+            } else if (serverResponse.equalsIgnoreCase("Connection attempt declined.")) {
+                Log.d("ConnectionManager", "Denied connection");
             }
-        } else if (serverResponse.equalsIgnoreCase("Connection attempt declined.")) {
-            Log.d("ConnectionManager", "Denied connection");
+        } else {
+            Log.d("ConnectionManager", "No response to broadcast.");
         }
+        return false;
         //!! add condition for if wait message is not received
     }
 
@@ -224,7 +232,7 @@ public class ConnectionManager {
     public void shutdown() {
         sendHostMessage("Shutdown requested");
         try {
-            Thread.sleep(125);  // Delay to ensure the message is sent
+            Thread.sleep(125);
         } catch (InterruptedException e) {
             e.printStackTrace();
             Log.e("ConnectionManager", "Interrupted during shutdown delay");
@@ -236,5 +244,6 @@ public class ConnectionManager {
         if (executorService != null) {
             executorService.shutdown();
         }
+        connectionEstablished = false;
     }
 }

@@ -63,6 +63,39 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         TextView toolbarNotif = findViewById(R.id.toolbarNotification);
         toolbarNotif.setVisibility(View.GONE);
 
+        // Initialize the connection manager
+        if (!ConnectionManager.connectionEstablished) {
+            ConnectionManager.hostSearchInBackground(new HostSearchCallback() {
+                @Override
+                public void onHostFound(String serverIp) {
+                    Log.i("MainActivity", "Server IP found: " + serverIp);
+
+                    // Initialize ConnectionManager with the found server IP
+                    MainActivity.connectionManager = new ConnectionManager(serverIp);
+
+                    if (!MainActivity.connectionManager.initializeConnection()) {
+                        ConnectionManager.declineCount = 1;
+                        // Ensure notifyUser runs on the main (UI) thread
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                notifyUser("Failed to connect", "#c73a30");
+                            }
+                        });
+                        Intent intent = new Intent(InteractionPage.this, MainActivity.class);
+                        startActivity(intent);
+                        // Optional: Finish the current activity so the user can't return to it
+                        finish();
+                    }
+                }
+
+                @Override
+                public void onError(String error) {
+                    Log.e("MainActivity", "Error during host search: " + error);
+                }
+            });
+        }
+
         touchpadFrame.setOnTouchListener(new View.OnTouchListener() {
             float startX, startY, x, y;
             long startTime;
@@ -81,7 +114,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         x = event.getX();
                         y = event.getY();
 
-                        sendTouchCoordinates("Mouse Move", x, y);
+                        MainActivity.connectionManager.sendHostMessage("Mouse Move: " + x + "," + y);
                         break;
                     case MotionEvent.ACTION_UP:
                         long endTime = System.currentTimeMillis();
@@ -93,7 +126,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         long timeDifference = endTime - startTime;
 
                         if (timeDifference < CLICK_THRESHOLD && deltaX < MOVE_THRESHOLD && deltaY < MOVE_THRESHOLD) {
-                            sendTouchCoordinates("Mouse LMB", startX, startY);
+                            MainActivity.connectionManager.sendHostMessage("Mouse Move: " + startX + "," + startY);
                             ;
                         }
                         break;
@@ -143,8 +176,9 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Start UDP client to send data to the server
-                new UDPClient("Shutdown requested").execute();
+                if (ConnectionManager.connectionEstablished) {
+                    MainActivity.connectionManager.shutdown();
+                }
             }
         });
 
@@ -198,57 +232,5 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    private class UDPClient extends AsyncTask<Void, Void, String> {
-        private final String serverAddress = "192.168.1.67"; // Replace with PC's IP
-        private final int serverPort = 11000;
-        private String messageToSend;
-        private String serverResponse = "No response";
-
-        public UDPClient(String message) {
-            this.messageToSend = message;
-        }
-
-        @Override
-        protected String doInBackground(Void... voids) {
-            try {
-                DatagramSocket udpSocket = new DatagramSocket();
-                InetAddress serverAddr = InetAddress.getByName(serverAddress);
-
-                byte[] sendData = messageToSend.getBytes();
-                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, serverPort);
-                udpSocket.send(sendPacket);
-
-                /*byte[] receiveData = new byte[1024];
-                DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-                udpSocket.receive(receivePacket);
-                serverResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());*/
-
-                udpSocket.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-                serverResponse = "Error: " + e.getMessage();
-            }
-            return serverResponse;
-        }
-
-        /*@Override
-        protected void onPostExecute(String result) {
-            responseTextView.setText(result);
-
-            new android.os.Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    responseTextView.setText("");
-                }
-            }, 1000);
-        }*/
-    }
-
-    private void sendTouchCoordinates(String msg, float x, float y) {
-        String message = msg + ": " + x + ", " + y;
-
-        new UDPClient(message).execute(); // Send the message using UDP client
     }
 }

@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     NavigationView navigationView;
     Toolbar toolbar;
 
-    private ConnectionManager connectionManager;
+    public static ConnectionManager connectionManager;
 
     public void notifyUser(String msg, String color) {
         TextView toolbarNotif = findViewById(R.id.toolbarNotification);
@@ -102,22 +102,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setCheckedItem(R.id.nav_home);
 
         // Initialize the connection manager
-        ConnectionManager.hostSearchInBackground(new HostSearchCallback() {
-            @Override
-            public void onHostFound(String serverIp) {
-                Log.i("MainActivity", "Server IP found: " + serverIp);
+        if (!ConnectionManager.connectionEstablished && ConnectionManager.declineCount == 0) {
+            ConnectionManager.hostSearchInBackground(new HostSearchCallback() {
+                @Override
+                public void onHostFound(String serverIp) {
+                    Log.i("MainActivity", "Server IP found: " + serverIp);
 
-                // Initialize ConnectionManager with the found server IP
-                connectionManager = new ConnectionManager(serverIp);
+                    // Initialize ConnectionManager with the found server IP
+                    connectionManager = new ConnectionManager(serverIp);
 
-                connectionManager.initializeConnection();
-            }
+                    if (!connectionManager.initializeConnection()) {
+                        // Ensure notifyUser runs on the main (UI) thread
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                notifyUser("Failed to connect", "#c73a30");
+                            }
+                        });
+                    }
+                }
 
-            @Override
-            public void onError(String error) {
-                Log.e("MainActivity", "Error during host search: " + error);
-            }
-        });
+                @Override
+                public void onError(String error) {
+                    Log.e("MainActivity", "Error during host search: " + error);
+                }
+            });
+        }
 
 
         // on clicking the "about" button, user is sent to the about page
