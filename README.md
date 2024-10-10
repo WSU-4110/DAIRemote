@@ -100,8 +100,8 @@ After completing these steps, try running `gradlew assembleDebug` again.
 
 ## Authors
 
-* Shawinder Minhas - hk1225@wayne.edu	<br />
-* Lynn Hakim - hk9794@wayne.edu <br />
-* Fahim Zaman - FahimZaman@wayne.edu <br />
-* Mehad Ali - fj2852@wayne.edu <br />
-* Domenic Zarza - hi5947@wayne.edu <br />
+* Shawinder Minhas (shawiminhas) - hk1225@wayne.edu	<br />
+* Lynn Hakim (lynnhakim) - hk9794@wayne.edu <br />
+* Fahim Zaman (Fahim-zzz) - FahimZaman@wayne.edu <br />
+* Mehad Ali (mehad123) - fj2852@wayne.edu <br />
+* Domenic Zarza (dzarza2003) - hi5947@wayne.edu <br />

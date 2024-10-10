@@ -8,19 +8,22 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="AudioOutputDesigner.cs" />
-  </ItemGroup>
-
   
 
   <ItemGroup>
+    <ProjectReference Include="..\AudioManager\AudioManager.csproj" />
     <ProjectReference Include="..\DisplayProfileManager\DisplayProfileManager.csproj" />
+    <ProjectReference Include="..\UDPServer\UDPServerManager.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="NAudio" Version="2.2.1" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="Resources\DAIRemoteLogo.ico">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
