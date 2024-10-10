@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -32,15 +33,12 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    Button remotePage_button;  // button object for the Remote Page
-    Button instructionsPage_button;     // button object for the Instructions Page
-    Button aboutPage_button;    // button for the About Page
-
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     Toolbar toolbar;
-
     public static ConnectionManager connectionManager;
+
+    ImageButton remotePage;
 
     public void notifyUser(String msg, String color) {
         TextView toolbarNotif = findViewById(R.id.toolbarNotification);
@@ -101,58 +99,45 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Select the home icon by default when opening navigation menu
         navigationView.setCheckedItem(R.id.nav_home);
 
-        // Initialize the connection manager
-        if (!ConnectionManager.connectionEstablished && ConnectionManager.declineCount == 0) {
-            ConnectionManager.hostSearchInBackground(new HostSearchCallback() {
-                @Override
-                public void onHostFound(String serverIp) {
-                    Log.i("MainActivity", "Server IP found: " + serverIp);
+        remotePage = findViewById(R.id.DAIRemoteLogoBtn);
+        remotePage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Initialize the connection manager
+                // Establish connection to host if not already established and not declined prior
+                if (!ConnectionManager.connectionEstablished) {
+                    ConnectionManager.hostSearchInBackground(new HostSearchCallback() {
+                        @Override
+                        public void onHostFound(String serverIp) {
+                            Log.i("MainActivity", "Server IP found: " + serverIp);
 
-                    // Initialize ConnectionManager with the found server IP
-                    connectionManager = new ConnectionManager(serverIp);
+                            // Initialize ConnectionManager with the found server IP
+                            connectionManager = new ConnectionManager(serverIp);
 
-                    if (!connectionManager.initializeConnection()) {
-                        // Ensure notifyUser runs on the main (UI) thread
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyUser("Failed to connect", "#c73a30");
+                            if (!connectionManager.initializeConnection()) {
+                                // Ensure notifyUser runs on the main (UI) thread
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        notifyUser("Failed to connect", "#c73a30");
+                                    }
+                                });
+                            } else {
+                                Intent intent = new Intent(MainActivity.this, InteractionPage.class);
+                                startActivity(intent);
                             }
-                        });
-                    }
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Log.e("MainActivity", "Error during host search: " + error);
+                        }
+                    });
+                } else if (ConnectionManager.connectionEstablished) {
+                    Intent intent = new Intent(MainActivity.this, InteractionPage.class);
+                    startActivity(intent);
                 }
-
-                @Override
-                public void onError(String error) {
-                    Log.e("MainActivity", "Error during host search: " + error);
-                }
-            });
-        }
-
-
-        // on clicking the "about" button, user is sent to the about page
-        aboutPage_button = findViewById(R.id.about_page);
-        aboutPage_button.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, AboutPage.class);
-            startActivity(intent);
-        });
-
-        remotePage_button = findViewById(R.id.remote_page);
-        remotePage_button.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, InteractionPage.class);
-            startActivity(intent);
-        });
-
-        remotePage_button = findViewById(R.id.server_page);
-        remotePage_button.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, RemotePage.class);
-            startActivity(intent);
-        });
-
-        instructionsPage_button = findViewById(R.id.instructions_page);
-        instructionsPage_button.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, InstructionsPage.class);
-            startActivity(intent);
+            }
         });
     }
 

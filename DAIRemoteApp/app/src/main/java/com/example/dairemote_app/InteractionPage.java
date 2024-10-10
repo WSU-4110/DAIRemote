@@ -52,8 +52,18 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         toolbarNotif.postDelayed(() -> toolbarNotif.setVisibility(View.GONE), 5000);
     }
 
+    public void startHome() {
+        Intent intent = new Intent(InteractionPage.this, MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (!ConnectionManager.connectionEstablished) {
+            startHome();
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_interaction_page);
 
@@ -62,39 +72,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         // Initially Hide the toolbar notification
         TextView toolbarNotif = findViewById(R.id.toolbarNotification);
         toolbarNotif.setVisibility(View.GONE);
-
-        // Initialize the connection manager
-        if (!ConnectionManager.connectionEstablished) {
-            ConnectionManager.hostSearchInBackground(new HostSearchCallback() {
-                @Override
-                public void onHostFound(String serverIp) {
-                    Log.i("MainActivity", "Server IP found: " + serverIp);
-
-                    // Initialize ConnectionManager with the found server IP
-                    MainActivity.connectionManager = new ConnectionManager(serverIp);
-
-                    if (!MainActivity.connectionManager.initializeConnection()) {
-                        ConnectionManager.declineCount = 1;
-                        // Ensure notifyUser runs on the main (UI) thread
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyUser("Failed to connect", "#c73a30");
-                            }
-                        });
-                        Intent intent = new Intent(InteractionPage.this, MainActivity.class);
-                        startActivity(intent);
-                        // Optional: Finish the current activity so the user can't return to it
-                        finish();
-                    }
-                }
-
-                @Override
-                public void onError(String error) {
-                    Log.e("MainActivity", "Error during host search: " + error);
-                }
-            });
-        }
 
         touchpadFrame.setOnTouchListener(new View.OnTouchListener() {
             float startX, startY, x, y;
@@ -114,7 +91,9 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         x = event.getX();
                         y = event.getY();
 
-                        MainActivity.connectionManager.sendHostMessage("Mouse Move: " + x + "," + y);
+                        if (!MainActivity.connectionManager.sendHostMessage("Mouse Move: " + x + "," + y)) {
+                            startHome();
+                        }
                         break;
                     case MotionEvent.ACTION_UP:
                         long endTime = System.currentTimeMillis();
@@ -126,7 +105,9 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         long timeDifference = endTime - startTime;
 
                         if (timeDifference < CLICK_THRESHOLD && deltaX < MOVE_THRESHOLD && deltaY < MOVE_THRESHOLD) {
-                            MainActivity.connectionManager.sendHostMessage("Mouse Move: " + startX + "," + startY);
+                            if(!MainActivity.connectionManager.sendHostMessage("Mouse Move: " + startX + "," + startY)) {
+                                startHome();
+                            }
                             ;
                         }
                         break;

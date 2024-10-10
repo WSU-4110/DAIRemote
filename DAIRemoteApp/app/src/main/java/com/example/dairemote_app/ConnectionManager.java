@@ -80,15 +80,16 @@ public class ConnectionManager {
         }, 0, 30, TimeUnit.SECONDS); // Initial delay 0, and 30-second delay after each execution
     }
 
-    public void sendHeartbeat() {
-        sendHostMessage("DroidHeartBeat");
+    public boolean sendHeartbeat() {
+        if (!sendHostMessage("DroidHeartBeat")) {
+            return false;
+        }
 
         String responseReceived = waitForResponse(10000);
         if (!responseReceived.equalsIgnoreCase("Heart Ack")) {
-            //FIGURE OUT HOW TO DEAL WITH NOTIFICATIONS
-            //!!
-            //notifyUser("No server response", "#C51212");
-            connect("Connection requested by " + getDeviceName());
+            return initializeConnection();
+        } else {
+            return false;
         }
     }
 
@@ -99,12 +100,17 @@ public class ConnectionManager {
     }
 
     // Send message to the server
-    public void sendHostMessage(String msg) {
-        if (executorService != null) {
-            executorService.submit(() -> sendMessage(msg));
-        } else {
-            Log.e("ConnectionManager", "ExecutorService is not initialized");
+    public boolean sendHostMessage(String msg) {
+        if (ConnectionManager.connectionEstablished) {
+            if (executorService != null) {
+                executorService.submit(() -> sendMessage(msg));
+                return true;
+            } else {
+                Log.e("ConnectionManager", "ExecutorService is not initialized");
+                return false;
+            }
         }
+        return false;
     }
 
     public static void sendMessage(String message) {
