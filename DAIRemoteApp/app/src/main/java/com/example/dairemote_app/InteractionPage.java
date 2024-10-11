@@ -74,34 +74,47 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         toolbarNotif.setVisibility(View.GONE);
 
         touchpadFrame.setOnTouchListener(new View.OnTouchListener() {
-            float startX, startY, x, y;
+            float startX, startY, x, y, deltaX, deltaY, currentX, currentY;
             long startTime;
-            final int CLICK_THRESHOLD = 250;  // Max time in ms to consider a tap
+            final int CLICK_THRESHOLD = 350;  // Max time in ms to consider a tap
             final float MOVE_THRESHOLD = 20f; // Max movement to still be considered a tap
+            final float DEBOUNCE_THRESHOLD = 5f; // Minimum movement to register
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         startX = event.getX();
+                        currentX = startX;
                         startY = event.getY();
+                        currentY = startY;
                         startTime = System.currentTimeMillis();
                         break;
                     case MotionEvent.ACTION_MOVE:
                         x = event.getX();
                         y = event.getY();
 
-                        if (!MainActivity.connectionManager.sendHostMessage("MOUSE_MOVE " + (x-startX) + " " + (y-startY))) {
-                            startHome();
+                        deltaX = x - currentX;
+                        deltaY = y - currentY;
+
+                        // Apply debouncing to ignore very small movements
+                        if (Math.abs(deltaX) > DEBOUNCE_THRESHOLD || Math.abs(deltaY) > DEBOUNCE_THRESHOLD) {
+                            if (!MainActivity.connectionManager.sendHostMessage("MOUSE_MOVE " + deltaX + " " + deltaY)) {
+                                startHome();
+                            }
+                            // Update currentX and currentY for the next movement
+                            currentX = x;
+                            currentY = y;
                         }
+
                         break;
                     case MotionEvent.ACTION_UP:
                         long endTime = System.currentTimeMillis();
                         float endX = event.getX();
                         float endY = event.getY();
 
-                        float deltaX = Math.abs(endX - startX);
-                        float deltaY = Math.abs(endY - startY);
+                        deltaX = Math.abs(endX - startX);
+                        deltaY = Math.abs(endY - startY);
                         long timeDifference = endTime - startTime;
 
                         if (timeDifference < CLICK_THRESHOLD && deltaX < MOVE_THRESHOLD && deltaY < MOVE_THRESHOLD) {
