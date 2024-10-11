@@ -1,10 +1,11 @@
 package com.example.dairemote_app;
 
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -13,7 +14,6 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -43,18 +43,18 @@ public class ConnectionManager {
         }
         connect("Connection requested by " + getDeviceName());
         String serverResponse = waitForResponse(100);
-        while(serverResponse.isEmpty()) {
+        while (serverResponse.isEmpty()) {
             Log.d("ConnectionManager", "Timed out waiting for response, retrying...");
             connect("Connection requested by " + getDeviceName());
             serverResponse = waitForResponse(5000);
         }
         if (serverResponse.equalsIgnoreCase("Wait")) {
             serverResponse = "";
-            while(serverResponse.isEmpty()) {
+            while (serverResponse.isEmpty()) {
                 serverResponse = waitForResponse(5000);
             }
 
-            if(serverResponse.equalsIgnoreCase("Approved")) {
+            if (serverResponse.equalsIgnoreCase("Approved")) {
                 startHeartbeat();
                 connectionEstablished = true;
                 ConnectionManager.declineCount = 0;
@@ -131,17 +131,34 @@ public class ConnectionManager {
 
     // Broadcast to search for hosts in the background
     public static void hostSearchInBackground(HostSearchCallback hostSearchCallback) {
+        boolean serverFound = false;
         callback = hostSearchCallback;
         ExecutorService executor = Executors.newSingleThreadExecutor();
         // Perform the host search
         executor.execute(ConnectionManager::hostSearch);
+
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!serverFound) {
+                    callback.onTimeout();
+                }
+            }
+        }, 2500); // 5 second timeout
+
+        // If server is found before the timeout
+        if (serverFound) {
+            callback.onHostFound("serverIp");
+        } else {
+            callback.onError("Host not found");
+        }
     }
 
     // Broadcast to search for hosts
     public static void hostSearch() {
         if (callback == null) {
             Log.e("ConnectionManager", "Callback is null!");
-            return; // Or handle this case appropriately
+            return;
         }
 
         DatagramSocket socket = null;
@@ -157,7 +174,7 @@ public class ConnectionManager {
             DatagramPacket packet = new DatagramPacket(sendData, sendData.length, broadcastAddress, port);
             socket.send(packet);
 
-            byte[] recBuf = new byte[15000];
+            byte[] recBuf = new byte[200];
             DatagramPacket receivePacket = new DatagramPacket(recBuf, recBuf.length);
             socket.receive(receivePacket); // Blocks until a response is received
 
@@ -168,6 +185,8 @@ public class ConnectionManager {
             // Pass the server IP to the callback
             if (response.contains("Hello, I'm")) {
                 callback.onHostFound(serverIp);
+            } else {
+                callback.onError("No response to broadcast");
             }
 
         } catch (SocketException e) {

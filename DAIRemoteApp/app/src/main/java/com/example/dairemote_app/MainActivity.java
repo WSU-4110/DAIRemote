@@ -2,13 +2,10 @@ package com.example.dairemote_app;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -20,16 +17,6 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
-
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -131,6 +118,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         @Override
                         public void onError(String error) {
                             Log.e("MainActivity", "Error during host search: " + error);
+                        }
+
+                        @Override
+                        public void onTimeout() {
+                            // This will run when no server is found within the timeout period
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    notifyUser("No server found. Please try again.", "#c73a30");
+                                }
+                            });
                         }
                     });
                 } else if (ConnectionManager.connectionEstablished) {
