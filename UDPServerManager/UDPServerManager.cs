@@ -324,12 +324,16 @@ namespace UDPServerManagerForm
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
                     Thread.Sleep(25);
                     break;
-                case "MOUSE_RMB_DOWN":
+                case "MOUSE_RMB":
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.RightDown);
                     Thread.Sleep(25);
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.RightUp);
                     break;
-                case "KEY_PRESS":
+                case "MOUSE_SCROLL":
+                    int scrollAmount = (int)float.Parse(parts[1]);
+                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.Wheel, scrollAmount);
+                    break;
+                case "KEYPRESS":
                     string key = parts[1];
                     SendKeys.SendWait(key);
                     break;

@@ -14,7 +14,8 @@ namespace UDPServerManager
             Move = 0x00000001,
             Absolute = 0x00008000,
             RightDown = 0x00000008,
-            RightUp = 0x00000010
+            RightUp = 0x00000010,
+            Wheel = 0x00000800
         }
 
         [DllImport("user32.dll", EntryPoint = "SetCursorPos")]
@@ -44,10 +45,10 @@ namespace UDPServerManager
             return currentMousePoint;
         }
 
-        public static void MouseEvent(MouseEventFlags value)
+        public static void MouseEvent(MouseEventFlags value, int data = 0)
         {
             MousePoint position = GetCursorPosition();
-            mouse_event((int)value, position.X, position.Y, 0, 0);
+            mouse_event((int)value, position.X, position.Y, data, 0);
         }
 
         [StructLayout(LayoutKind.Sequential)]

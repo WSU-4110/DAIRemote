@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -30,7 +33,6 @@ import java.net.InetAddress;
 
 public class InteractionPage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    FrameLayout touchpadFrame;
     ImageView keyboardImgBtn;
     EditText editText;
     TextView interactionsHelpText;
@@ -62,27 +64,62 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     protected void onCreate(Bundle savedInstanceState) {
         if (!ConnectionManager.connectionEstablished) {
             startHome();
+            return;
         }
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_interaction_page);
 
-        touchpadFrame = findViewById(R.id.touchpadFrame);
+        FrameLayout touchpadFrame = findViewById(R.id.touchpadFrame);
 
         // Initially Hide the toolbar notification
         TextView toolbarNotif = findViewById(R.id.toolbarNotification);
         toolbarNotif.setVisibility(View.GONE);
 
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
         touchpadFrame.setOnTouchListener(new View.OnTouchListener() {
+            GestureDetector gestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onSingleTapUp(@NonNull MotionEvent e) {
+                    if (!MainActivity.connectionManager.sendHostMessage("MOUSE_LMB " + startX + " " + startY)) {
+                        startHome();
+                    }
+                    return super.onSingleTapUp(e);
+                }
+
+                @Override
+                public void onLongPress(@NonNull MotionEvent e) {
+                    if (vibrator != null && vibrator.hasVibrator()) {
+                        vibrator.vibrate(50); // Vibrate for 50 milliseconds
+                    }
+                    if (!MainActivity.connectionManager.sendHostMessage("MOUSE_LMB_HOLD")) {
+                        startHome();
+                    }
+                    super.onLongPress(e);
+                }
+
+                @Override
+                public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
+                    if (e1 != null && e1.getPointerCount() == 2 && e2.getPointerCount() == 2) {
+                        if (!MainActivity.connectionManager.sendHostMessage("MOUSE_SCROLL " + distanceY)) {
+                            startHome();
+                        }
+                        return true;
+                    }
+                    return super.onScroll(e1, e2, distanceX, distanceY);
+                }
+            });
             float startX, startY, x, y, deltaX, deltaY, currentX, currentY;
             long startTime;
-            final int CLICK_THRESHOLD = 350;  // Max time in ms to consider a tap
-            final float MOVE_THRESHOLD = 20f; // Max movement to still be considered a tap
             final float DEBOUNCE_THRESHOLD = 5f; // Minimum movement to register
+            boolean rmbDetected = false;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
+                gestureDetector.onTouchEvent(event);
+
+                switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
                         startX = event.getX();
                         currentX = startX;
@@ -97,41 +134,32 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         deltaX = x - currentX;
                         deltaY = y - currentY;
 
-                        // Apply debouncing to ignore very small movements
                         if (Math.abs(deltaX) > DEBOUNCE_THRESHOLD || Math.abs(deltaY) > DEBOUNCE_THRESHOLD) {
-                            if (!MainActivity.connectionManager.sendHostMessage("MOUSE_MOVE " + deltaX + " " + deltaY)) {
+                            if (!rmbDetected) {
+                                if (!MainActivity.connectionManager.sendHostMessage("MOUSE_MOVE " + deltaX + " " + deltaY)) {
+                                    startHome();
+                                }
+                                currentX = x;
+                                currentY = y;
+                            }
+                        }
+                        break;
+                    case MotionEvent.ACTION_POINTER_DOWN:
+                        if (event.getPointerCount() == 2) {
+                            if (!MainActivity.connectionManager.sendHostMessage("MOUSE_RMB")) {
                                 startHome();
                             }
-                            // Update currentX and currentY for the next movement
-                            currentX = x;
-                            currentY = y;
+                            rmbDetected = true;
+                            return true;
                         }
-
+                        break;
+                    case MotionEvent.ACTION_POINTER_UP:
+                        if (event.getPointerCount() <= 1) {
+                            rmbDetected = false; // Reset RMB detection when both fingers are lifted
+                        }
                         break;
                     case MotionEvent.ACTION_UP:
-                        long endTime = System.currentTimeMillis();
-                        float endX = event.getX();
-                        float endY = event.getY();
-
-                        deltaX = Math.abs(endX - startX);
-                        deltaY = Math.abs(endY - startY);
-                        long timeDifference = endTime - startTime;
-
-                        if (timeDifference < CLICK_THRESHOLD && deltaX < MOVE_THRESHOLD && deltaY < MOVE_THRESHOLD) {
-                            if (event.getPointerCount() == 1) {
-                                if (!MainActivity.connectionManager.sendHostMessage("MOUSE_LMB " + startX + " " + startY)) {
-                                    startHome();
-                                }
-                            } else if (event.getPointerCount() == 2) {
-                                if (!MainActivity.connectionManager.sendHostMessage("MOUSE_RMB")) {
-                                    startHome();
-                                }
-                            }
-                        } else if (timeDifference > CLICK_THRESHOLD && deltaX < MOVE_THRESHOLD && deltaY < MOVE_THRESHOLD) {
-                            if (!MainActivity.connectionManager.sendHostMessage("MOUSE_LMB_HOLD")) {
-                                startHome();
-                            }
-                        }
+                        rmbDetected = false; // Reset when all fingers are lifted
                         break;
                 }
                 return true;
