@@ -91,7 +91,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         x = event.getX();
                         y = event.getY();
 
-                        if (!MainActivity.connectionManager.sendHostMessage("MOUSE_MOVE " + x + " " + y)) {
+                        if (!MainActivity.connectionManager.sendHostMessage("MOUSE_MOVE " + (x-startX) + " " + (y-startY))) {
                             startHome();
                         }
                         break;
@@ -105,10 +105,19 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         long timeDifference = endTime - startTime;
 
                         if (timeDifference < CLICK_THRESHOLD && deltaX < MOVE_THRESHOLD && deltaY < MOVE_THRESHOLD) {
-                            if (!MainActivity.connectionManager.sendHostMessage("MOUSE_LMB " + startX + " " + startY)) {
+                            if (event.getPointerCount() == 1) {
+                                if (!MainActivity.connectionManager.sendHostMessage("MOUSE_LMB " + startX + " " + startY)) {
+                                    startHome();
+                                }
+                            } else if (event.getPointerCount() == 2) {
+                                if (!MainActivity.connectionManager.sendHostMessage("MOUSE_RMB")) {
+                                    startHome();
+                                }
+                            }
+                        } else if (timeDifference > CLICK_THRESHOLD && deltaX < MOVE_THRESHOLD && deltaY < MOVE_THRESHOLD) {
+                            if (!MainActivity.connectionManager.sendHostMessage("MOUSE_LMB_HOLD")) {
                                 startHome();
                             }
-                            ;
                         }
                         break;
                 }

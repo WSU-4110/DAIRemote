@@ -278,7 +278,7 @@ namespace UDPServerManagerForm
             else if (receivedData.Equals("DroidHeartBeat", StringComparison.OrdinalIgnoreCase))
             {
                 lastHeartbeatTime = DateTime.Now;
-                Debug.WriteLine("Received heartbeat");
+                Debug.WriteLine("Acknowledged heartbeat");
 
                 SendUdpMessage("HeartBeat Ack");
             }
@@ -303,6 +303,8 @@ namespace UDPServerManagerForm
         {
             var parts = command.Split(' ');
             var action = parts[0];
+            // Get current mouse position
+            var currentPos = MouseOperations.GetCursorPosition();
 
             Debug.WriteLine(action);
             switch (action)
@@ -310,12 +312,17 @@ namespace UDPServerManagerForm
                 case "MOUSE_MOVE":
                     float x = float.Parse(parts[1]);
                     float y = float.Parse(parts[2]);
-                    MouseOperations.SetCursorPosition((int)x, (int)y);
+
+                    MouseOperations.SetCursorPosition((int)(x + currentPos.X), (int)(y + currentPos.Y));
                     break;
                 case "MOUSE_LMB":
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
                     Thread.Sleep(25);
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);
+                    break;
+                case "MOUSE_LMB_HOLD":
+                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
+                    Thread.Sleep(25);
                     break;
                 case "MOUSE_RMB_DOWN":
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.RightDown);

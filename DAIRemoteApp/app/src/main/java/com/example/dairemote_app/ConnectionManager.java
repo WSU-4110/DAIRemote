@@ -83,7 +83,7 @@ public class ConnectionManager {
         }
 
         String responseReceived = waitForResponse(10000);
-        if (!responseReceived.equalsIgnoreCase("Heart Ack")) {
+        if (!responseReceived.equalsIgnoreCase("HeartBeat Ack")) {
             return initializeConnection();
         } else {
             return false;
