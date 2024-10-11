@@ -119,17 +119,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         public void onError(String error) {
                             Log.e("MainActivity", "Error during host search: " + error);
                         }
-
-                        @Override
-                        public void onTimeout() {
-                            // This will run when no server is found within the timeout period
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    notifyUser("No server found. Please try again.", "#c73a30");
-                                }
-                            });
-                        }
                     });
                 } else if (ConnectionManager.connectionEstablished) {
                     Intent intent = new Intent(MainActivity.this, InteractionPage.class);

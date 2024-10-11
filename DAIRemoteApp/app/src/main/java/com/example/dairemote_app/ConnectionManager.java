@@ -1,8 +1,6 @@
 package com.example.dairemote_app;
 
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
 import java.io.IOException;
@@ -26,6 +24,7 @@ public class ConnectionManager {
     public static HostSearchCallback callback;
     public static boolean connectionEstablished = false;
     public static int declineCount = 0;
+    public static boolean broadcastResponse = false;
 
     public ConnectionManager(String serverAddress) {
         ConnectionManager.serverAddress = serverAddress;
@@ -41,19 +40,18 @@ public class ConnectionManager {
             e.printStackTrace();
             Log.e("ConnectionManager", "Error initializing DatagramSocket: " + e.getMessage());
         }
-        connect("Connection requested by " + getDeviceName());
-        String serverResponse = waitForResponse(100);
+        String serverResponse = "";
         while (serverResponse.isEmpty()) {
-            Log.d("ConnectionManager", "Timed out waiting for response, retrying...");
+            Log.d("ConnectionManager", "Waiting for response...");
             connect("Connection requested by " + getDeviceName());
-            serverResponse = waitForResponse(5000);
+            serverResponse = waitForResponse(25);
         }
         if (serverResponse.equalsIgnoreCase("Wait")) {
             serverResponse = "";
             while (serverResponse.isEmpty()) {
-                serverResponse = waitForResponse(5000);
+                Log.d("ConnectionManager", "Waiting for approval...");
+                serverResponse = waitForResponse(2500);
             }
-
             if (serverResponse.equalsIgnoreCase("Approved")) {
                 startHeartbeat();
                 connectionEstablished = true;
@@ -114,7 +112,7 @@ public class ConnectionManager {
     }
 
     public static void sendMessage(String message) {
-        if (udpSocket != null) { // Check if the socket is initialized
+        if (udpSocket != null) {
             try {
                 InetAddress serverAddr = InetAddress.getByName(serverAddress);
                 byte[] sendData = message.getBytes();
@@ -131,27 +129,10 @@ public class ConnectionManager {
 
     // Broadcast to search for hosts in the background
     public static void hostSearchInBackground(HostSearchCallback hostSearchCallback) {
-        boolean serverFound = false;
         callback = hostSearchCallback;
         ExecutorService executor = Executors.newSingleThreadExecutor();
         // Perform the host search
         executor.execute(ConnectionManager::hostSearch);
-
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!serverFound) {
-                    callback.onTimeout();
-                }
-            }
-        }, 2500); // 5 second timeout
-
-        // If server is found before the timeout
-        if (serverFound) {
-            callback.onHostFound("serverIp");
-        } else {
-            callback.onError("Host not found");
-        }
     }
 
     // Broadcast to search for hosts
@@ -185,8 +166,7 @@ public class ConnectionManager {
             // Pass the server IP to the callback
             if (response.contains("Hello, I'm")) {
                 callback.onHostFound(serverIp);
-            } else {
-                callback.onError("No response to broadcast");
+                broadcastResponse = true;
             }
 
         } catch (SocketException e) {
@@ -213,7 +193,6 @@ public class ConnectionManager {
                 DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, serverPort);
                 udpSocket.send(sendPacket);
                 Log.d("ConnectionManager", "Connecting and sending message: " + message);
-                // Return the server's response to the calling method
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.e("ConnectionManager", "Error connecting: " + e.getMessage());
@@ -236,7 +215,7 @@ public class ConnectionManager {
     public String waitForResponse(int timeout) {
         try {
             udpSocket.setSoTimeout(timeout);
-            byte[] receiveData = new byte[1024];
+            byte[] receiveData = new byte[200];
             DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 
             udpSocket.receive(receivePacket);

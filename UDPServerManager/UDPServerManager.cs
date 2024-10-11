@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 
 namespace UDPServerManagerForm
 {
@@ -11,10 +12,110 @@ namespace UDPServerManagerForm
         private UdpClient udpServer;
         private IPEndPoint remoteEP;
 
+        // Store device names mapped to IP addresses
+        private Dictionary<string, string> deviceHistory = new Dictionary<string, string>();
+
         public UDPServerHost()
         {
+            string HistoryFilePath = GetFilePath("deviceHistory.json");
+
+            LoadDeviceHistory();
             udpServer = new UdpClient(11000);
             remoteEP = new IPEndPoint(IPAddress.Any, 11000);
+        }
+
+        public void SaveDeviceHistory()
+        {
+            // Ensure the directory exists
+            string HistoryFilePath = GetFilePath("deviceHistory.json");
+
+            try
+            {
+                string json = JsonSerializer.Serialize(deviceHistory);
+                File.WriteAllText(HistoryFilePath, json);
+                Debug.WriteLine($"Device history saved to {HistoryFilePath}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error saving device history: {ex.Message}");
+            }
+        }
+
+        public void LoadDeviceHistory()
+        {
+            string historyFilePath = GetFilePath("deviceHistory.json");
+
+            try
+            {
+                string json = File.ReadAllText(historyFilePath);
+                // Deserialize JSON to Dictionary
+                deviceHistory = JsonSerializer.Deserialize<Dictionary<string, string>>(json)
+                    ?? new Dictionary<string, string>();
+            }
+            catch (JsonException ex)
+            {
+                Debug.WriteLine($"JSON error: {ex.Message}");
+                // Handle JSON parsing errors if needed
+            }
+            catch (FileNotFoundException)
+            {
+                // This should not occur because of EnsureFileExists
+                Debug.WriteLine("Device history file not found. This should not happen.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error loading device history: {ex.Message}");
+            }
+        }
+
+        // Method to add or update a device in the history
+        private void ModifyDeviceHistory(string ipAddress, string deviceName)
+        {
+            if (!deviceHistory.ContainsKey(ipAddress))
+            {
+                deviceHistory.Add(ipAddress, deviceName);
+            }
+            else
+            {
+                deviceHistory[ipAddress] = deviceName;
+            }
+        }
+
+        // Method to retrieve the device name from history, if it exists
+        private string GetDeviceName(string ipAddress)
+        {
+            return deviceHistory.ContainsKey(ipAddress) ? deviceHistory[ipAddress] : "Unknown Device";
+        }
+
+        private string ExtractDeviceName(string handshakeMessage)
+        {
+            int byIndex = handshakeMessage.IndexOf("by ");
+            if (byIndex >= 0)
+            {
+                // Extract everything after "by " as the device name
+                return handshakeMessage.Substring(byIndex + 3).Trim();
+            }
+            return null;
+        }
+
+        private string GetFilePath(string fileName)
+        {
+            string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote");
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            string filePath = Path.Combine(folderPath, fileName);
+
+            if (!File.Exists(filePath))
+            {
+                // Create an empty JSON file with an empty object for a dictionary
+                File.WriteAllText(filePath, "{}");
+            }
+
+            return filePath;
         }
 
         // Method to handle the initial handshake
@@ -42,11 +143,10 @@ namespace UDPServerManagerForm
                     udpServer.Send(waitBytes, waitBytes.Length, remoteEP);
 
                     UDPServerManagerForm form = new UDPServerManagerForm();
-                    DialogResult connect;
-
-                    connect = MessageBox.Show($"Allow {remoteEP.Address}:{remoteEP.Port} to connect?", "Pending Connection", 
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Question, 
+                    DialogResult connect = MessageBox.Show($"Allow ({remoteEP.Address}:{remoteEP.Port}) to connect?",
+                        "Pending Connection", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+
                     return form.HandleConnectionResult(connect, udpServer, remoteEP);
                 }
                 return false;
@@ -111,7 +211,7 @@ namespace UDPServerManagerForm
                 {
                     Debug.WriteLine("Awaiting handshake...");
                 }
-                else if(InitiateHandshake())
+                else if (InitiateHandshake())
                 {
                     isClientConnected = true;
                     Debug.WriteLine("Handshake successful, starting message loop...");
