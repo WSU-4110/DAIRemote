@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using UDPServerManager;
 
 namespace UDPServerManagerForm
 {
@@ -138,9 +139,7 @@ namespace UDPServerManagerForm
                 // Check if the received message is the handshake request
                 if (handshakeMessage.StartsWith("Connection requested"))
                 {
-                    string waitMessage = "Wait";
-                    byte[] waitBytes = Encoding.ASCII.GetBytes(waitMessage);
-                    udpServer.Send(waitBytes, waitBytes.Length, remoteEP);
+                    SendUdpMessage("Wait");
 
                     UDPServerManagerForm form = new UDPServerManagerForm();
                     DialogResult connect = MessageBox.Show($"Allow ({remoteEP.Address}:{remoteEP.Port}) to connect?",
@@ -181,9 +180,7 @@ namespace UDPServerManagerForm
                 {
                     Debug.WriteLine($"Received client broadcast from {remoteEP.Address}:{remoteEP.Port}: {handshakeMessage}");
                     // Send an approval message back to the client
-                    string approvalMessage = "Hello, I'm " + Environment.MachineName;
-                    byte[] approvalBytes = Encoding.ASCII.GetBytes(approvalMessage);
-                    udpServer.Send(approvalBytes, approvalBytes.Length, remoteEP);
+                    SendUdpMessage("Hello, I'm " + Environment.MachineName);
 
                     Debug.WriteLine($"Sent reply to client's broadcast at {remoteEP.Address}:{remoteEP.Port}");
                     return true;
@@ -247,53 +244,20 @@ namespace UDPServerManagerForm
                         string receivedData = Encoding.ASCII.GetString(data);
                         Debug.WriteLine($"Received: {receivedData}");
 
-                        // Check for shutdown message
-                        if (receivedData.Equals("Shutdown requested", StringComparison.OrdinalIgnoreCase))
-                        {
-                            Debug.WriteLine("Shutdown message received. Exiting message loop...");
-
-                            // Send shutdown acknowledgment to client
-                            string shutdownAck = "Server shutting down";
-                            byte[] shutdownAckData = Encoding.ASCII.GetBytes(shutdownAck);
-                            udpServer.Send(shutdownAckData, shutdownAckData.Length, remoteEP);
-
-                            isClientConnected = false;
-                            break;
-                        }
-                        else if (receivedData.Equals("DroidHeartBeat", StringComparison.OrdinalIgnoreCase))
-                        {
-                            // Update last heartbeat time
-                            lastHeartbeatTime = DateTime.Now;
-                            Debug.WriteLine("Received heartbeat");
-
-                            // Send heart beat acknowledgment to client
-                            string shutdownAck = "HeartBeat Ack";
-                            byte[] shutdownAckData = Encoding.ASCII.GetBytes(shutdownAck);
-                            udpServer.Send(shutdownAckData, shutdownAckData.Length, remoteEP);
-                        }
-                        else if (receivedData.StartsWith("Connection requested"))
-                        {
-                            // Send an approval message back to the client
-                            string approvalMessage = "Approved";
-                            byte[] approvalBytes = Encoding.ASCII.GetBytes(approvalMessage);
-                            udpServer.Send(approvalBytes, approvalBytes.Length, remoteEP);
-
-                            Debug.WriteLine("Sent approval back to client");
-                        }
+                        // Handle received data
+                        HandleReceivedData(receivedData, ref lastHeartbeatTime);
                     }
                     catch (SocketException e)
                     {
                         if (e.SocketErrorCode == SocketError.TimedOut)
                         {
-                            // Timeout is expected, continue loop to wait for a message or heartbeat
                             Debug.WriteLine("waiting for next message...");
                             continue;
                         }
                         else
                         {
-                            // Other socket errors should be logged and handled
                             Debug.WriteLine("Error in message loop: " + e.Message);
-                            break; // Exit on unexpected errors
+                            break;
                         }
                     }
                 }
@@ -301,6 +265,70 @@ namespace UDPServerManagerForm
             catch (ObjectDisposedException e)
             {
                 Debug.WriteLine("Error: UdpClient has been disposed: " + e.Message);
+            }
+        }
+
+        private void HandleReceivedData(string receivedData, ref DateTime lastHeartbeatTime)
+        {
+            if (receivedData.Equals("Shutdown requested", StringComparison.OrdinalIgnoreCase))
+            {
+                Debug.WriteLine("Shutdown message received. Exiting message loop...");
+                isClientConnected = false;
+            }
+            else if (receivedData.Equals("DroidHeartBeat", StringComparison.OrdinalIgnoreCase))
+            {
+                lastHeartbeatTime = DateTime.Now;
+                Debug.WriteLine("Received heartbeat");
+
+                SendUdpMessage("HeartBeat Ack");
+            }
+            else if (receivedData.StartsWith("Connection requested"))
+            {
+                SendUdpMessage("Approved");
+                Debug.WriteLine("Sent approval back to client");
+            }
+            else
+            {
+                retrieveCommand(receivedData);
+            }
+        }
+
+        private void SendUdpMessage(string message)
+        {
+            byte[] data = Encoding.ASCII.GetBytes(message);
+            udpServer.Send(data, data.Length, remoteEP);
+        }
+
+        public void retrieveCommand(string command)
+        {
+            var parts = command.Split(' ');
+            var action = parts[0];
+
+            Debug.WriteLine(action);
+            switch (action)
+            {
+                case "MOUSE_MOVE":
+                    float x = float.Parse(parts[1]);
+                    float y = float.Parse(parts[2]);
+                    MouseOperations.SetCursorPosition((int)x, (int)y);
+                    break;
+                case "MOUSE_LMB":
+                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
+                    Thread.Sleep(25);
+                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);
+                    break;
+                case "MOUSE_RMB_DOWN":
+                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.RightDown);
+                    Thread.Sleep(25);
+                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.RightUp);
+                    break;
+                case "KEY_PRESS":
+                    string key = parts[1];
+                    SendKeys.SendWait(key);
+                    break;
+                default:
+                    Console.WriteLine("Unknown command: " + command);
+                    break;
             }
         }
 

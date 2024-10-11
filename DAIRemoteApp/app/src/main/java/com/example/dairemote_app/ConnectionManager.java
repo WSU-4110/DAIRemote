@@ -24,7 +24,6 @@ public class ConnectionManager {
     public static HostSearchCallback callback;
     public static boolean connectionEstablished = false;
     public static int declineCount = 0;
-    public static boolean broadcastResponse = false;
 
     public ConnectionManager(String serverAddress) {
         ConnectionManager.serverAddress = serverAddress;
@@ -166,7 +165,6 @@ public class ConnectionManager {
             // Pass the server IP to the callback
             if (response.contains("Hello, I'm")) {
                 callback.onHostFound(serverIp);
-                broadcastResponse = true;
             }
 
         } catch (SocketException e) {
