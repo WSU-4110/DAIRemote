@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -82,7 +83,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             GestureDetector gestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.SimpleOnGestureListener() {
                 @Override
                 public boolean onSingleTapUp(@NonNull MotionEvent e) {
-                    if (!MainActivity.connectionManager.sendHostMessage("MOUSE_LMB " + startX + " " + startY)) {
+                    if (!MainActivity.connectionManager.sendHostMessage("MOUSE_LMB")) {
                         startHome();
                     }
                     return super.onSingleTapUp(e);
@@ -100,20 +101,24 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                 }
 
                 @Override
-                public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
-                    if (e1 != null && e1.getPointerCount() == 2 && e2.getPointerCount() == 2) {
+                public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                    // Handle two-finger scroll here for vertical scrolling
+                    if (e2.getPointerCount() == 2) {
+                        scrolling = true; // Set scrolling flag
                         if (!MainActivity.connectionManager.sendHostMessage("MOUSE_SCROLL " + distanceY)) {
                             startHome();
                         }
                         return true;
                     }
-                    return super.onScroll(e1, e2, distanceX, distanceY);
+                    return false;
                 }
             });
             float startX, startY, x, y, deltaX, deltaY, currentX, currentY;
             long startTime;
             final float DEBOUNCE_THRESHOLD = 5f; // Minimum movement to register
-            boolean rmbDetected = false;
+            final int CLICK_THRESHOLD = 125; // Minimum movement to register
+            boolean rmbDetected = false;    // Suppress movement during rmb
+            boolean scrolling = false; // Suppress other inputs during scroll
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -125,7 +130,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         currentX = startX;
                         startY = event.getY();
                         currentY = startY;
-                        startTime = System.currentTimeMillis();
                         break;
                     case MotionEvent.ACTION_MOVE:
                         x = event.getX();
@@ -135,7 +139,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         deltaY = y - currentY;
 
                         if (Math.abs(deltaX) > DEBOUNCE_THRESHOLD || Math.abs(deltaY) > DEBOUNCE_THRESHOLD) {
-                            if (!rmbDetected) {
+                            if (!rmbDetected && !scrolling) {
                                 if (!MainActivity.connectionManager.sendHostMessage("MOUSE_MOVE " + deltaX + " " + deltaY)) {
                                     startHome();
                                 }
@@ -145,20 +149,31 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         }
                         break;
                     case MotionEvent.ACTION_POINTER_DOWN:
-                        if (event.getPointerCount() == 2) {
+                        currentX = event.getX();
+                        currentY = event.getY();
+                        startTime = System.currentTimeMillis();
+
+                        scrolling = true;
+                        rmbDetected = true;
+                        break;
+                    case MotionEvent.ACTION_POINTER_UP:
+                        x = event.getX();
+                        y = event.getY();
+
+                        deltaX = currentX - x;
+                        deltaY = currentY - y;
+                        if (event.getPointerCount() == 2 && (System.currentTimeMillis() - startTime < CLICK_THRESHOLD)) {
                             if (!MainActivity.connectionManager.sendHostMessage("MOUSE_RMB")) {
                                 startHome();
                             }
-                            rmbDetected = true;
                             return true;
-                        }
-                        break;
-                    case MotionEvent.ACTION_POINTER_UP:
-                        if (event.getPointerCount() <= 1) {
-                            rmbDetected = false; // Reset RMB detection when both fingers are lifted
+                        } else if (event.getPointerCount() <= 1) {
+                            scrolling = false; // Reset when a finger is lifted
+                            rmbDetected = false; // Reset RMB detection when a finger is lifted
                         }
                         break;
                     case MotionEvent.ACTION_UP:
+                        scrolling = false; // Reset when all fingers are lifted
                         rmbDetected = false; // Reset when all fingers are lifted
                         break;
                 }
