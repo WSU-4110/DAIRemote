@@ -50,6 +50,8 @@ public class InstructionsPage extends AppCompatActivity implements NavigationVie
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
+            Intent intent = new Intent(InstructionsPage.this, MainActivity.class);
+            startActivity(intent);
             super.onBackPressed();
         }
     }
@@ -67,7 +69,7 @@ public class InstructionsPage extends AppCompatActivity implements NavigationVie
             intent = new Intent(this, InteractionPage.class);
             startActivity(intent);
         } else if (itemId == R.id.nav_server) {
-            intent = new Intent(this, RemotePage.class);
+            intent = new Intent(this, ServersPage.class);
             startActivity(intent);
         } else if (itemId == R.id.nav_about) {
             intent = new Intent(this, AboutPage.class);

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.text.Editable;
@@ -14,17 +13,15 @@ import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -32,10 +29,6 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
-
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 
 public class InteractionPage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -49,16 +42,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     Toolbar toolbar;
-
-    public void notifyUser(String msg, String color) {
-        TextView toolbarNotif = findViewById(R.id.toolbarNotification);
-        toolbarNotif.setText(msg);
-        toolbarNotif.setTextColor(Color.parseColor(color));
-        toolbarNotif.setVisibility(View.VISIBLE);
-
-        // Hide notification after 5 seconds
-        toolbarNotif.postDelayed(() -> toolbarNotif.setVisibility(View.GONE), 5000);
-    }
+    Toolbar keyboardToolbar;
+    Button winBtn;
+    Button ctrlBtn;
+    Button shiftBtn;
+    Button fnBtn;
+    Button moreOpts;
 
     public void startHome() {
         Intent intent = new Intent(InteractionPage.this, MainActivity.class);
@@ -78,14 +67,10 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
         FrameLayout touchpadFrame = findViewById(R.id.touchpadFrame);
 
-        // Initially Hide the toolbar notification
-        TextView toolbarNotif = findViewById(R.id.toolbarNotification);
-        toolbarNotif.setVisibility(View.GONE);
-
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         touchpadFrame.setOnTouchListener(new View.OnTouchListener() {
-            GestureDetector gestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.SimpleOnGestureListener() {
+            final GestureDetector gestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.SimpleOnGestureListener() {
                 @Override
                 public boolean onSingleTapUp(@NonNull MotionEvent e) {
                     if (!MainActivity.connectionManager.sendHostMessage("MOUSE_LMB")) {
@@ -95,9 +80,17 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                 }
 
                 @Override
+                public boolean onDoubleTap(@NonNull MotionEvent e) {
+                    if (!MainActivity.connectionManager.sendHostMessage("MOUSE_LMB")) {
+                        startHome();
+                    }
+                    return super.onDoubleTap(e);
+                }
+
+                @Override
                 public void onLongPress(@NonNull MotionEvent e) {
                     if (vibrator != null && vibrator.hasVibrator()) {
-                        vibrator.vibrate(50); // Vibrate for 50 milliseconds
+                        vibrator.vibrate(10); // Vibrate for 50 milliseconds
                     }
                     if (!MainActivity.connectionManager.sendHostMessage("MOUSE_LMB_HOLD")) {
                         startHome();
@@ -120,8 +113,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             });
             float startX, startY, x, y, deltaX, deltaY, currentX, currentY;
             long startTime;
-            final float DEBOUNCE_THRESHOLD = 5f; // Minimum movement to register
-            final int CLICK_THRESHOLD = 125; // Minimum movement to register
+            final int CLICK_THRESHOLD = 125; // Maximum time to register
             boolean rmbDetected = false;    // Suppress movement during rmb
             boolean scrolling = false; // Suppress other inputs during scroll
 
@@ -142,15 +134,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
                         deltaX = x - currentX;
                         deltaY = y - currentY;
-
-                        if (Math.abs(deltaX) > DEBOUNCE_THRESHOLD || Math.abs(deltaY) > DEBOUNCE_THRESHOLD) {
-                            if (!rmbDetected && !scrolling) {
-                                if (!MainActivity.connectionManager.sendHostMessage("MOUSE_MOVE " + deltaX + " " + deltaY)) {
-                                    startHome();
-                                }
-                                currentX = x;
-                                currentY = y;
+                        if (!rmbDetected && !scrolling) {
+                            if (!MainActivity.connectionManager.sendHostMessage("MOUSE_MOVE " + deltaX + " " + deltaY)) {
+                                startHome();
                             }
+                            currentX = x;
+                            currentY = y;
                         }
                         break;
                     case MotionEvent.ACTION_POINTER_DOWN:
@@ -206,15 +195,23 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
         keyboardImgBtn = findViewById(R.id.keyboardImgBtn);
         editText = findViewById(R.id.editText);
-        editText.setVisibility(View.GONE);
+        keyboardToolbar = findViewById(R.id.keyboardToolbar);
+        winBtn = findViewById(R.id.winKey);
+        ctrlBtn = findViewById(R.id.ctrlKey);
+        shiftBtn = findViewById(R.id.shiftKey);
+        fnBtn = findViewById(R.id.fnKey);
+        moreOpts = findViewById(R.id.moreOpt);
 
         keyboardImgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 editText.setVisibility(View.VISIBLE);
+                editText.setCursorVisible(false);
                 editText.requestFocus();
+
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+                toggleKeyboardToolbar(true);
             }
         });
 
@@ -234,6 +231,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_ENTER")) {
                         startHome();
                     }
+                    toggleKeyboardToolbar(false);
                     return true;
                 }
                 return false;
@@ -262,6 +260,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                 // Empty
             }
         });
+
         // Commented out the text view to display the system's response
         // Maybe future feature
         // responseTextView = findViewById(R.id.responseTextView);
@@ -292,13 +291,68 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         });
     }
 
+    private void clearEditText() {
+        // Hide the EditText
+        editText.setText("");
+        editText.setVisibility(View.GONE);
+        editText.clearFocus();
+    }
+
+    private void toggleKeyboardToolbar(boolean open) {
+        if (open) {
+            if (keyboardToolbar != null && !(keyboardToolbar.getVisibility() == View.VISIBLE)) {
+                keyboardToolbar.setVisibility(View.VISIBLE);
+                winBtn.setVisibility(View.VISIBLE);
+                ctrlBtn.setVisibility(View.VISIBLE);
+                shiftBtn.setVisibility(View.VISIBLE);
+                fnBtn.setVisibility(View.VISIBLE);
+                moreOpts.setVisibility(View.VISIBLE);
+            }
+        } else {
+            if (keyboardToolbar != null && keyboardToolbar.getVisibility() == View.VISIBLE) {
+                keyboardToolbar.setVisibility(View.GONE);
+                winBtn.setVisibility(View.GONE);
+                ctrlBtn.setVisibility(View.GONE);
+                shiftBtn.setVisibility(View.GONE);
+                fnBtn.setVisibility(View.GONE);
+                moreOpts.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            View v = getCurrentFocus();
+            if (v instanceof EditText) {
+                Rect outRect = new Rect();
+                v.getGlobalVisibleRect(outRect);
+
+                Rect toolbarRect = new Rect();
+                View keyboardToolbar = findViewById(R.id.keyboardToolbar); // Replace with the actual toolbar ID
+                keyboardToolbar.getGlobalVisibleRect(toolbarRect);
+
+                if (!outRect.contains((int) event.getRawX(), (int) event.getRawY()) &&
+                        !toolbarRect.contains((int) event.getRawX(), (int) event.getRawY())) {
+                    editText.setText("");
+                    v.clearFocus();
+                    v.setVisibility(View.GONE);
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    toggleKeyboardToolbar(false);
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event);
+    }
+
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (editText != null && editText.getVisibility() == View.VISIBLE) {
-            editText.setText("");
-            editText.setVisibility(View.GONE);
+        } else if (editText != null) {
+            clearEditText();
+            toggleKeyboardToolbar(false);
         } else {
             super.onBackPressed();
         }
@@ -314,7 +368,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         } else if (itemId == R.id.nav_server) {
-            intent = new Intent(this, RemotePage.class);
+            intent = new Intent(this, ServersPage.class);
             startActivity(intent);
         } else if (itemId == R.id.nav_help) {
             intent = new Intent(this, InstructionsPage.class);

@@ -282,10 +282,11 @@ namespace UDPServerManagerForm
 
                 SendUdpMessage("HeartBeat Ack");
             }
-            else if (receivedData.StartsWith("Connection requested"))
+            else if (receivedData.StartsWith("Hello, I'm"))
             {
-                SendUdpMessage("Approved");
-                Debug.WriteLine("Sent approval back to client");
+                SendUdpMessage("Hello, I'm " + Environment.MachineName);
+                Debug.WriteLine("Sent response to broadcast");
+                InitiateHandshake();
             }
             else
             {

@@ -18,6 +18,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     DrawerLayout drawerLayout;
@@ -37,6 +39,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toolbarNotif.postDelayed(() -> toolbarNotif.setVisibility(View.GONE), 5000);
     }
 
+    public void bkgrdNotifyUser(String msg, String color) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyUser(msg, color);
+            }
+        });
+    }
+
     @Override
     protected void onDestroy() {
         // Clean up the connection when activity is destroyed
@@ -47,15 +58,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         super.onDestroy();
     }
-
-    /*@Override
-    protected void onStop() {
-        super.onStop();
-        // Check if the activity is being destroyed
-        if (isChangingConfigurations()) {
-            UDPShutDown();
-        }
-    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,26 +92,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         remotePage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                v.animate().scaleX(1.2f).scaleY(1.2f) // Scale the button up to 120% of its original size
+                    .setDuration(150) // Duration of the scale up animation
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Scale back to normal size
+                            v.animate().scaleX(1f).scaleY(1f)
+                                    .setDuration(150) // Duration of the scale down animation
+                                    .start();
+                    }
+                })
+                .start();
                 // Initialize the connection manager
                 // Establish connection to host if not already established and not declined prior
                 if (!ConnectionManager.connectionEstablished) {
                     ConnectionManager.hostSearchInBackground(new HostSearchCallback() {
                         @Override
-                        public void onHostFound(String serverIp) {
-                            Log.i("MainActivity", "Server IP found: " + serverIp);
+                        public void onHostFound(List<String> serverIps) {
+                            if (serverIps.isEmpty()) {
+                                return;
+                            }
+                            Log.i("MainActivity", "Hosts found: " + serverIps);
+
+                            //!! Implement logic to select the host
+                            String selectedHost = serverIps.get(0);
+                            bkgrdNotifyUser("Connecting to " + selectedHost, "#c3cf1b");
 
                             // Initialize ConnectionManager with the found server IP
-                            connectionManager = new ConnectionManager(serverIp);
-
+                            connectionManager = new ConnectionManager(selectedHost);
                             if (!connectionManager.initializeConnection()) {
                                 // Ensure notifyUser runs on the main (UI) thread
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        notifyUser("Failed to connect", "#c73a30");
-                                    }
-                                });
+                                bkgrdNotifyUser("Denied connection", "#c73a30");
                             } else {
+                                bkgrdNotifyUser("Connection approved", "#3fcf1b");
                                 Intent intent = new Intent(MainActivity.this, InteractionPage.class);
                                 startActivity(intent);
                             }
@@ -118,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         @Override
                         public void onError(String error) {
                             Log.e("MainActivity", "Error during host search: " + error);
+                            bkgrdNotifyUser("No hosts found", "#c73a30");
                         }
                     });
                 } else if (ConnectionManager.connectionEstablished) {
@@ -152,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             intent = new Intent(this, InstructionsPage.class);
             startActivity(intent);
         } else if (itemId == R.id.nav_server) {
-            intent = new Intent(this, RemotePage.class);
+            intent = new Intent(this, ServersPage.class);
             startActivity(intent);
         } else if (itemId == R.id.nav_about) {
             intent = new Intent(this, AboutPage.class);

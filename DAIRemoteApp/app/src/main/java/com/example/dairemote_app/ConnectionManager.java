@@ -10,6 +10,8 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -40,16 +42,22 @@ public class ConnectionManager {
             Log.e("ConnectionManager", "Error initializing DatagramSocket: " + e.getMessage());
         }
         String serverResponse = "";
+        int broadcastCount = 0;
         while (serverResponse.isEmpty()) {
-            Log.d("ConnectionManager", "Waiting for response...");
+            Log.d("ConnectionManager", "Waiting for broadcast response...");
             connect("Connection requested by " + getDeviceName());
-            serverResponse = waitForResponse(25);
+            broadcastCount += 1;
+            if (broadcastCount == 1) {
+                serverResponse = waitForResponse(25);
+            } else {
+                serverResponse = waitForResponse(10000);
+            }
         }
         if (serverResponse.equalsIgnoreCase("Wait")) {
             serverResponse = "";
             while (serverResponse.isEmpty()) {
                 Log.d("ConnectionManager", "Waiting for approval...");
-                serverResponse = waitForResponse(2500);
+                serverResponse = waitForResponse(10000);
             }
             if (serverResponse.equalsIgnoreCase("Approved")) {
                 startHeartbeat();
@@ -59,6 +67,11 @@ public class ConnectionManager {
             } else if (serverResponse.equalsIgnoreCase("Connection attempt declined.")) {
                 Log.d("ConnectionManager", "Denied connection");
             }
+        } else if (serverResponse.equalsIgnoreCase("Approved")) {
+            startHeartbeat();
+            connectionEstablished = true;
+            ConnectionManager.declineCount = 0;
+            return true;
         } else {
             Log.d("ConnectionManager", "No response to broadcast.");
         }
@@ -140,31 +153,41 @@ public class ConnectionManager {
             Log.e("ConnectionManager", "Callback is null!");
             return;
         }
-
         DatagramSocket socket = null;
+        List<String> hosts = new ArrayList<>();
         try {
             socket = new DatagramSocket();
             socket.setBroadcast(true);
             String message = "Hello, I'm " + getDeviceName();
             byte[] sendData = message.getBytes();
-
             InetAddress broadcastAddress = InetAddress.getByName("192.168.1.255"); // Broadcast address
             int port = 11000;
-
             DatagramPacket packet = new DatagramPacket(sendData, sendData.length, broadcastAddress, port);
             socket.send(packet);
 
-            byte[] recBuf = new byte[200];
-            DatagramPacket receivePacket = new DatagramPacket(recBuf, recBuf.length);
-            socket.receive(receivePacket); // Blocks until a response is received
+            socket.setSoTimeout(225); // Millisecond timeout for responses and to break out of loop
+            while (true) {
+                try {
+                    byte[] recBuf = new byte[200];
+                    DatagramPacket receivePacket = new DatagramPacket(recBuf, recBuf.length);
+                    socket.receive(receivePacket); // Blocks until a response is received
 
-            String response = new String(receivePacket.getData()).trim();
-            String serverIp = receivePacket.getAddress().getHostAddress();
-            Log.i("ConnectionManager", "Response from server: " + response + " at " + serverIp);
+                    String response = new String(receivePacket.getData()).trim();
+                    String serverIp = receivePacket.getAddress().getHostAddress();
+                    Log.i("ConnectionManager", "Response from server: " + response + " at " + serverIp);
 
-            // Pass the server IP to the callback
-            if (response.contains("Hello, I'm")) {
-                callback.onHostFound(serverIp);
+                    if (response.contains("Hello, I'm")) {
+                        hosts.add(serverIp);
+                    }
+                } catch (SocketTimeoutException e) {
+                    // Stop listening for responses
+                    break;
+                }
+            }
+            if (!hosts.isEmpty()) {
+                callback.onHostFound(hosts);
+            } else {
+                callback.onError("No hosts found");
             }
 
         } catch (SocketException e) {

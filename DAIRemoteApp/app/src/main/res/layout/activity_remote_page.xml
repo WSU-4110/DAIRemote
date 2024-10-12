@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/primary"
     android:fitsSystemWindows="true"
-    tools:context=".RemotePage">
+    tools:context=".ServersPage">
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"

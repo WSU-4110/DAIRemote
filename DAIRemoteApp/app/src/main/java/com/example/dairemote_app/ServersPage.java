@@ -1,9 +1,6 @@
 package com.example.dairemote_app;
 
-import android.Manifest;
-
 import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -27,7 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.net.InetAddress;
 
-public class RemotePage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class ServersPage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     DrawerLayout drawerLayout;
     NavigationView navigationView;
@@ -48,7 +45,7 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
 
         listView.setOnItemClickListener((parent, view, position, id) -> {
             String selectedDevice = deviceList.get(position);
-            Toast.makeText(RemotePage.this, "Selected IP: " + selectedDevice, Toast.LENGTH_SHORT).show();
+            Toast.makeText(ServersPage.this, "Selected IP: " + selectedDevice, Toast.LENGTH_SHORT).show();
         });
 
 
