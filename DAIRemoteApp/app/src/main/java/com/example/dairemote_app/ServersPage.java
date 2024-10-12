@@ -52,6 +52,10 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
             String selectedDevice = deviceList.get(position);
             Toast.makeText(ServersPage.this, "Connected to IP: " + selectedDevice, Toast.LENGTH_SHORT).show();
 
+            // Save the selected IP address in SharedPreferences (so that other activity pages can use selected IP address)
+            saveSelectedIp(selectedDevice);
+
+
         });
 
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -74,6 +78,14 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         // Start scanning for local IPs
         new ScanLocalNetworkTask().execute();
     }
+
+    private void saveSelectedIp(String ipAddress) {
+        SharedPreferences sharedPreferences = getSharedPreferences("AppPreferences", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("selected_ip", ipAddress);
+        editor.apply();
+    }
+
 
     @SuppressLint("StaticFieldLeak")
     private class ScanLocalNetworkTask extends AsyncTask<Void, String, Void> {
