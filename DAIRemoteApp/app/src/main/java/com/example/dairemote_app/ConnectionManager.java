@@ -76,7 +76,6 @@ public class ConnectionManager {
             Log.d("ConnectionManager", "No response to broadcast.");
         }
         return false;
-        //!! add condition for if wait message is not received
     }
 
     public void startHeartbeat() {
@@ -105,7 +104,7 @@ public class ConnectionManager {
 
     public static void stopHeartbeat() {
         if (heartbeatScheduler != null && !heartbeatScheduler.isShutdown()) {
-            heartbeatScheduler.shutdown(); // Stop the scheduler
+            heartbeatScheduler.shutdown();
         }
     }
 
@@ -180,7 +179,7 @@ public class ConnectionManager {
                         hosts.add(serverIp);
                     }
                 } catch (SocketTimeoutException e) {
-                    // Stop listening for responses
+                    // Stop listening for responses, occurs on timeout
                     break;
                 }
             }

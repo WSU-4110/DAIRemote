@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using UDPServerManager;
 
 namespace UDPServerManagerForm
@@ -350,6 +351,7 @@ namespace UDPServerManagerForm
                         SendKeys.SendWait("{SPACE}");
                     } else
                     {
+                        key = Regex.Replace(key, "[+^%~(){}]", "{$0}");
                         SendKeys.SendWait(key);
                     }
                     break;
