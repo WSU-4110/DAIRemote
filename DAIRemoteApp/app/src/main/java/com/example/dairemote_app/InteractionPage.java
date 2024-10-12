@@ -21,6 +21,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -261,6 +262,21 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             }
         });
 
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                } else if (editText.getVisibility() == View.VISIBLE) {
+                    clearEditText();
+                    toggleKeyboardToolbar(false);
+                } else {
+                    setEnabled(false);
+                    onBackPressed();
+                }
+            }
+        });
+
         // Commented out the text view to display the system's response
         // Maybe future feature
         // responseTextView = findViewById(R.id.responseTextView);
@@ -324,35 +340,42 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             View v = getCurrentFocus();
+
             if (v instanceof EditText) {
                 Rect outRect = new Rect();
                 v.getGlobalVisibleRect(outRect);
 
                 Rect toolbarRect = new Rect();
-                View keyboardToolbar = findViewById(R.id.keyboardToolbar); // Replace with the actual toolbar ID
-                keyboardToolbar.getGlobalVisibleRect(toolbarRect);
+                View keyboardToolbar = findViewById(R.id.keyboardToolbar);
+                if (keyboardToolbar != null) {
+                    keyboardToolbar.getGlobalVisibleRect(toolbarRect);
+                }
 
                 if (!outRect.contains((int) event.getRawX(), (int) event.getRawY()) &&
                         !toolbarRect.contains((int) event.getRawX(), (int) event.getRawY())) {
+
                     editText.setText("");
                     v.clearFocus();
                     v.setVisibility(View.GONE);
+
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    if (imm != null) {
+                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    }
+
                     toggleKeyboardToolbar(false);
                 }
             }
         }
+
         return super.dispatchTouchEvent(event);
     }
 
     @Override
     public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (editText != null) {
-            clearEditText();
-            toggleKeyboardToolbar(false);
+        if (!(editText.getVisibility() == View.VISIBLE)) {
+            Intent intent = new Intent(InteractionPage.this, MainActivity.class);
+            startActivity(intent);
         } else {
             super.onBackPressed();
         }

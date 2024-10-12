@@ -145,14 +145,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    // Avoid closing app on "Back" press if drawer is open
-
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if (isTaskRoot()) {
+                finishAffinity();
+            } else {
+                super.onBackPressed();
+            }
         }
     }
 

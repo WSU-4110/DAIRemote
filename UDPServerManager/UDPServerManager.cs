@@ -14,79 +14,65 @@ namespace UDPServerManagerForm
         private UdpClient udpServer;
         private IPEndPoint remoteEP;
 
-        // Store device names mapped to IP addresses
-        private Dictionary<string, string> deviceHistory = new Dictionary<string, string>();
-
         public UDPServerHost()
         {
-            string HistoryFilePath = GetFilePath("deviceHistory.json");
-
-            LoadDeviceHistory();
             udpServer = new UdpClient(11000);
             remoteEP = new IPEndPoint(IPAddress.Any, 11000);
         }
 
-        public void SaveDeviceHistory()
+        public class DeviceHistoryEntry
         {
-            // Ensure the directory exists
-            string HistoryFilePath = GetFilePath("deviceHistory.json");
-
-            try
-            {
-                string json = JsonSerializer.Serialize(deviceHistory);
-                File.WriteAllText(HistoryFilePath, json);
-                Debug.WriteLine($"Device history saved to {HistoryFilePath}");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error saving device history: {ex.Message}");
-            }
+            public string DeviceName { get; set; }
+            public string IpAddress { get; set; }
+            public DateTime Timestamp { get; set; }
         }
 
-        public void LoadDeviceHistory()
+        public void SaveDeviceHistory(string ipAddress, string deviceName="")
+        {
+            // Ensure the directory exists
+            string filePath = GetFilePath("deviceHistory.json"); 
+            
+            var ipData = new DeviceHistoryEntry
+            {
+                DeviceName = deviceName,
+                IpAddress = ipAddress,
+                Timestamp = DateTime.Now
+            };
+
+            // Read the existing JSON file if it exists
+            List<DeviceHistoryEntry> ipList = new List<DeviceHistoryEntry>();
+            if (File.Exists(filePath))
+            {
+                string existingData = File.ReadAllText(filePath);
+                ipList = JsonSerializer.Deserialize<List<DeviceHistoryEntry>>(existingData);
+            }
+
+            // Add the new IP to the list
+            ipList.Add(ipData);
+
+            // Write the updated list to the JSON file
+            string jsonData = JsonSerializer.Serialize(ipList, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(filePath, jsonData);
+
+        }
+
+        public bool LoadDeviceHistory(string ipAddress)
         {
             string historyFilePath = GetFilePath("deviceHistory.json");
 
-            try
-            {
-                string json = File.ReadAllText(historyFilePath);
-                // Deserialize JSON to Dictionary
-                deviceHistory = JsonSerializer.Deserialize<Dictionary<string, string>>(json)
-                    ?? new Dictionary<string, string>();
-            }
-            catch (JsonException ex)
-            {
-                Debug.WriteLine($"JSON error: {ex.Message}");
-                // Handle JSON parsing errors if needed
-            }
-            catch (FileNotFoundException)
-            {
-                // This should not occur because of EnsureFileExists
-                Debug.WriteLine("Device history file not found. This should not happen.");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error loading device history: {ex.Message}");
-            }
-        }
+            string existingData = File.ReadAllText(historyFilePath);
+            List<DeviceHistoryEntry> ipList = JsonSerializer.Deserialize<List<DeviceHistoryEntry>>(existingData);
 
-        // Method to add or update a device in the history
-        private void ModifyDeviceHistory(string ipAddress, string deviceName)
-        {
-            if (!deviceHistory.ContainsKey(ipAddress))
+            // Check if any entry in the list has the same IP address
+            foreach (var entry in ipList)
             {
-                deviceHistory.Add(ipAddress, deviceName);
+                if (entry.IpAddress == ipAddress)
+                {
+                    return true;
+                }
             }
-            else
-            {
-                deviceHistory[ipAddress] = deviceName;
-            }
-        }
 
-        // Method to retrieve the device name from history, if it exists
-        private string GetDeviceName(string ipAddress)
-        {
-            return deviceHistory.ContainsKey(ipAddress) ? deviceHistory[ipAddress] : "Unknown Device";
+            return false;
         }
 
         private string ExtractDeviceName(string handshakeMessage)
@@ -113,8 +99,8 @@ namespace UDPServerManagerForm
 
             if (!File.Exists(filePath))
             {
-                // Create an empty JSON file with an empty object for a dictionary
-                File.WriteAllText(filePath, "{}");
+                // Create an empty JSON file with an empty array
+                File.WriteAllText(filePath, "[]");
             }
 
             return filePath;
@@ -141,13 +127,28 @@ namespace UDPServerManagerForm
                 if (handshakeMessage.StartsWith("Connection requested"))
                 {
                     SendUdpMessage("Wait");
+                    string ip = remoteEP.Address.ToString();
+                    if (LoadDeviceHistory(ip))
+                    {
+                        string approvalMessage = "Approved";
+                        byte[] approvalBytes = Encoding.ASCII.GetBytes(approvalMessage);
+                        udpServer.Send(approvalBytes, approvalBytes.Length, remoteEP);
+                        return true;
+                    } else
+                    {
+                        UDPServerManagerForm form = new UDPServerManagerForm();
+                        DialogResult connect = MessageBox.Show($"Allow ({remoteEP.Address}:{remoteEP.Port}) to connect?",
+                            "Pending Connection", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                            MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
 
-                    UDPServerManagerForm form = new UDPServerManagerForm();
-                    DialogResult connect = MessageBox.Show($"Allow ({remoteEP.Address}:{remoteEP.Port}) to connect?",
-                        "Pending Connection", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                        MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
-
-                    return form.HandleConnectionResult(connect, udpServer, remoteEP);
+                        if (form.HandleConnectionResult(connect, udpServer, remoteEP))
+                        {
+                            string deviceName = ExtractDeviceName(handshakeMessage);
+                            SaveDeviceHistory(ip, deviceName);
+                            return true;
+                        }
+                    }
+                    return false;
                 }
                 return false;
             }
