@@ -6,8 +6,11 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -206,12 +209,53 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         keyboardImgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                editText = findViewById(R.id.editText);
                 editText.setVisibility(View.VISIBLE);
                 editText.requestFocus();
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
-                editText.setText("");
+            }
+        });
+
+        editText.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_DEL && event.getAction() == KeyEvent.ACTION_DOWN) {
+                    // Detect backspace
+                    int cursorPosition = editText.getSelectionStart();
+                    if (cursorPosition > 0) {
+                        editText.getText().delete(cursorPosition - 1, cursorPosition);
+                        if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_DELETE")) {
+                            startHome();
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        editText.addTextChangedListener(new TextWatcher() {
+            String previousText = "";
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                previousText = s.toString();
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (count > before) {
+                    // Character added
+                    char addedChar = s.charAt(start + count - 1);
+                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE " + addedChar)) {
+                        startHome();
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // No-op
             }
         });
         // Commented out the text view to display the system's response

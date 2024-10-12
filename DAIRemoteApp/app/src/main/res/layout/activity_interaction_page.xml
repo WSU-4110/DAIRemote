@@ -73,7 +73,7 @@
             android:background="@android:color/transparent"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:inputType="text"
+            android:inputType="textNoSuggestions|textVisiblePassword"
             android:textAlignment="center"
             android:textColor="@color/white"
             android:visibility="visible"

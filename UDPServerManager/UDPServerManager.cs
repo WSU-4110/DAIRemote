@@ -301,7 +301,7 @@ namespace UDPServerManagerForm
 
         public void retrieveCommand(string command)
         {
-            var parts = command.Split(' ');
+            var parts = command.Split(new[] { ' ' }, 2);
             var action = parts[0];
             // Get current mouse position
             var currentPos = MouseOperations.GetCursorPosition();
@@ -310,10 +310,19 @@ namespace UDPServerManagerForm
             switch (action)
             {
                 case "MOUSE_MOVE":
-                    float x = float.Parse(parts[1]);
-                    float y = float.Parse(parts[2]);
+                    var moveParts = parts[1].Split(' ');
 
-                    MouseOperations.SetCursorPosition((int)(x + currentPos.X), (int)(y + currentPos.Y));
+                    if (moveParts.Length >= 2)
+                    {
+                        float x = float.Parse(moveParts[0]);
+                        float y = float.Parse(moveParts[1]);
+
+                        MouseOperations.SetCursorPosition((int)(x + currentPos.X), (int)(y + currentPos.Y));
+                    }
+                    else
+                    {
+                        Debug.WriteLine("MOUSE_MOVE command received but not enough parameters.");
+                    }
                     break;
                 case "MOUSE_LMB":
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
@@ -333,9 +342,18 @@ namespace UDPServerManagerForm
                     int scrollAmount = (int)float.Parse(parts[1]);
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.Wheel, scrollAmount);
                     break;
-                case "KEYPRESS":
-                    string key = parts[1];
-                    SendKeys.SendWait(key);
+                case "KEYBOARD_WRITE":
+                    string key = parts.Length > 1 ? parts[1] : "";
+                    if (key == "")
+                    {
+                        SendKeys.SendWait("{SPACE}");
+                    } else
+                    {
+                        SendKeys.SendWait(key);
+                    }
+                    break;
+                case "KEYBOARD_DELETE":
+                    SendKeys.SendWait("{BACKSPACE}");
                     break;
                 default:
                     Console.WriteLine("Unknown command: " + command);
