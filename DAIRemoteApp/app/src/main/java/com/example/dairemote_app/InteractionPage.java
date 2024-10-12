@@ -186,7 +186,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     }
 
     private class UDPClient extends AsyncTask<Void, Void, String> {
-        private final String serverAddress = "192.168.1.13"; // Replace with PC's IP
+        private final String serverAddress = ""; // Replace with PC's IP
         private final int serverPort = 11000;
         private String messageToSend;
         private String serverResponse = "No response";

@@ -18,17 +18,18 @@ namespace UDPServerManager
 
                 while (true)
                 {
-                    // Receive data from client
+                    // Receive data from any client
                     byte[] data = udpServer.Receive(ref remoteEP);
                     string receivedData = Encoding.ASCII.GetString(data);
-                    Debug.WriteLine($"Received: {receivedData}");
+                    Debug.WriteLine($"Received: {receivedData} from {remoteEP.Address}");
 
-                    /*// Send a response back to the client
-                    string responseData = "Data received!";
+                    // Prepare the response with the server's IP address
+                    string responseData = $"Hello, I'm the server at {udpServer.Client.LocalEndPoint}";
                     byte[] responseBytes = Encoding.ASCII.GetBytes(responseData);
+
+                    // Send the response back to the client
                     udpServer.Send(responseBytes, responseBytes.Length, remoteEP);
                     Debug.WriteLine("Sent response back to client");
-                    */
                 }
             }
             catch (Exception e)
@@ -43,7 +44,8 @@ namespace UDPServerManager
 
         static void Main(string[] args)
         {
-
+            UDPServerHost serverHost = new UDPServerHost();
+            serverHost.hostUDPServer(); // Start the server
         }
     }
 }
