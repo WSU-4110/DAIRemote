@@ -3,6 +3,7 @@ package com.example.dairemote_app;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -15,6 +16,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -220,13 +222,17 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_DEL && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    // Detect backspace
                     int cursorPosition = editText.getSelectionStart();
                     if (cursorPosition > 0) {
                         editText.getText().delete(cursorPosition - 1, cursorPosition);
-                        if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_DELETE")) {
-                            startHome();
-                        }
+                    }
+                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_DELETE")) {
+                        startHome();
+                    }
+                    return true;
+                } else if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
+                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_ENTER")) {
+                        startHome();
                     }
                     return true;
                 }
@@ -235,17 +241,15 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         });
 
         editText.addTextChangedListener(new TextWatcher() {
-            String previousText = "";
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                previousText = s.toString();
+                // Empty
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (count > before) {
-                    // Character added
                     char addedChar = s.charAt(start + count - 1);
                     if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE " + addedChar)) {
                         startHome();
@@ -255,7 +259,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
             @Override
             public void afterTextChanged(Editable s) {
-                // No-op
+                // Empty
             }
         });
         // Commented out the text view to display the system's response

@@ -355,6 +355,9 @@ namespace UDPServerManagerForm
                 case "KEYBOARD_DELETE":
                     SendKeys.SendWait("{BACKSPACE}");
                     break;
+                case "KEYBOARD_ENTER":
+                    SendKeys.SendWait("{ENTER}");
+                    break;
                 default:
                     Console.WriteLine("Unknown command: " + command);
                     break;

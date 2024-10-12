@@ -69,7 +69,8 @@
             android:id="@+id/editText"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginTop="300dp"
+            android:layout_marginTop="350dp"
+            android:autofillHints=""
             android:background="@android:color/transparent"
             android:focusable="true"
             android:focusableInTouchMode="true"
@@ -79,7 +80,8 @@
             android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="LabelFor" />
 
         <!--<TextView
             android:id="@+id/responseTextView"
@@ -114,7 +116,6 @@
             android:id="@+id/interationsHelpTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="75dp"
             android:layout_marginTop="222dp"
             android:fontFamily="@font/audiowide"
             android:text="To simulate input:\nTap with 1 finger to left-click\nTap with 2 fingers to right-click\nDrag with 2 fingers to scroll\nLong-press and move to drag\nTap once to release drag"
@@ -124,6 +125,7 @@
             android:textSize="15sp"
             android:textStyle="bold"
             android:typeface="normal"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
