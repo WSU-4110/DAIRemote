@@ -13,6 +13,7 @@ namespace UDPServerManagerForm
         private bool isClientConnected = false;
         private UdpClient udpServer;
         private IPEndPoint remoteEP;
+        private string serverAddress;
 
         public UDPServerHost()
         {
@@ -152,6 +153,7 @@ namespace UDPServerManagerForm
                 string approvalMessage = "Approved";
                 byte[] approvalBytes = Encoding.ASCII.GetBytes(approvalMessage);
                 udpServer.Send(approvalBytes, approvalBytes.Length, remoteEP);
+                serverAddress = ip;
 
                 Debug.WriteLine("Approval granted, prior history");
                 return true;
@@ -166,7 +168,7 @@ namespace UDPServerManagerForm
                 if (form.HandleConnectionResult(connect, udpServer, remoteEP))
                 {
                     SaveDeviceHistory(ip, deviceName);
-
+                    serverAddress = ip;
                     Debug.WriteLine("Approval granted by user");
                     return true;
                 }
@@ -216,17 +218,40 @@ namespace UDPServerManagerForm
         {
             while (!isClientConnected)
             {
-                if (clientSearch())
+                try
                 {
-                    Debug.WriteLine("Awaiting handshake...");
+                    bool foundClient = await Task.Run(() => clientSearch());
+
+                    if (foundClient)
+                    {
+                        Debug.WriteLine("Awaiting handshake...");
+                        continue;
+                    }
+
+                    bool handshakeSuccessful = await Task.Run(() => InitiateHandshake());
+
+                    if (handshakeSuccessful)
+                    {
+                        isClientConnected = true;
+                        Debug.WriteLine("Handshake successful, starting message loop...");
+                        MessageLoop();
+                        break;
+                    }
                 }
-                else if (InitiateHandshake())
+                catch (Exception e)
                 {
-                    isClientConnected = true;
-                    Debug.WriteLine("Handshake successful, starting message loop...");
-                    break;
+                    Debug.WriteLine("Error during handshake: " + e.Message);
                 }
             }
+        }
+
+        public bool isClient(String ipAddress)
+        {
+            if (serverAddress != null)
+            {
+                return serverAddress.Equals(ipAddress);
+            }
+            return false;
         }
 
         // Main message loop once the handshake is successful
@@ -234,7 +259,7 @@ namespace UDPServerManagerForm
         {
             try
             {
-                udpServer.Client.ReceiveTimeout = 16000; // 15-second timeout for receive
+                udpServer.Client.ReceiveTimeout = 20000; // 20-second timeout for receive
 
                 DateTime lastHeartbeatTime = DateTime.Now;
                 TimeSpan heartbeatTimeout = TimeSpan.FromSeconds(60);
@@ -253,11 +278,17 @@ namespace UDPServerManagerForm
 
                         // Blocking call: wait for a message from the client
                         byte[] data = udpServer.Receive(ref remoteEP);
-                        string receivedData = Encoding.ASCII.GetString(data);
-                        Debug.WriteLine($"Received: {receivedData}");
 
-                        // Handle received data
-                        HandleReceivedData(receivedData, ref lastHeartbeatTime);
+                        // Check if input is by client
+                        if (isClient(remoteEP.Address.ToString()))
+                        {
+                            string receivedData = Encoding.ASCII.GetString(data);
+                            Debug.WriteLine($"Received: {receivedData}");
+
+                            // Handle received data
+                            HandleReceivedData(receivedData, ref lastHeartbeatTime);
+                        }
+                        
                     }
                     catch (SocketException e)
                     {
