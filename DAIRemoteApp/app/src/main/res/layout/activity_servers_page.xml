@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary"
-    tools:context=".RemotePage"
+    tools:context=".ServersPage"
     android:fitsSystemWindows="true">
 
     <com.google.android.material.navigation.NavigationView
@@ -37,7 +37,7 @@
                 android:orientation="horizontal" />
 
             <TextView
-                android:id="@+id/remotePage_text"
+                android:id="@+id/serversPage_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/audiowide"
@@ -58,18 +58,18 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHeight_percent="0.75"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/remotePage_text" />
+                app:layout_constraintTop_toBottomOf="@+id/serversPage_text" />
 
 
             <ListView
                 android:id="@+id/device_list"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:background="#CCFBEB"
+                android:background="#4F5050"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHeight_percent="0.9"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/remotePage_text" />
+                app:layout_constraintTop_toBottomOf="@+id/serversPage_text" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

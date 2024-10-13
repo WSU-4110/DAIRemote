@@ -1,11 +1,8 @@
 package com.example.dairemote_app;
 
-import android.Manifest;
-
 import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
-import android.net.wifi.WifiManager;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,10 +21,14 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 
-public class RemotePage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class ServersPage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     DrawerLayout drawerLayout;
     NavigationView navigationView;
@@ -39,25 +40,25 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_remote_page);
+        setContentView(R.layout.activity_servers_page);
 
         ListView listView = findViewById(R.id.device_list);
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, deviceList);
         listView.setAdapter(adapter);
 
 
+        // Adding IP address found onto ListView
         listView.setOnItemClickListener((parent, view, position, id) -> {
             String selectedDevice = deviceList.get(position);
-            Toast.makeText(RemotePage.this, "Selected IP: " + selectedDevice, Toast.LENGTH_SHORT).show();
-        });
+            Toast.makeText(ServersPage.this, "Connected to IP: " + selectedDevice, Toast.LENGTH_SHORT).show();
 
+        });
 
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
         toolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
-
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
@@ -68,53 +69,59 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
         toggle.syncState();
 
         navigationView.setNavigationItemSelectedListener(this);
-
         navigationView.setCheckedItem(R.id.nav_server);
-
 
         // Start scanning for local IPs
         new ScanLocalNetworkTask().execute();
     }
 
-
     @SuppressLint("StaticFieldLeak")
     private class ScanLocalNetworkTask extends AsyncTask<Void, String, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
+            DatagramSocket socket = null;
             try {
-                // Get the IP address of the current network
-                WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-                String ip = intToIp(wm.getDhcpInfo().ipAddress);
+                // Create and configure the socket
+                socket = new DatagramSocket();
+                socket.setBroadcast(true); // Enable broadcasting
 
-                // Debugging: Check if IP is being retrieved
-                Log.d("NetworkScanner", "Device IP: " + ip);
+                // Sends UDP broadcast message
+                String message = "Hello UDP Server!";
+                byte[] buffer = message.getBytes();
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length,
+                        InetAddress.getByName("255.255.255.255"), 11000); // 255.255.255.255 is the broadcast to network
+                socket.send(packet);
+                Log.d("UDP", "Broadcast message sent: " + message);
 
+                // prepares to receive response from host
+                byte[] responseBuffer = new byte[15000];
+                DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
+                socket.setSoTimeout(2000); // server times out after 2000ms
 
-                // Scan IP range
-                String subnet = ip.substring(0, ip.lastIndexOf('.') + 1);
-                for (int i = 1; i < 255; i++) {
-                    String host = subnet + i;
-                    InetAddress inetAddress = InetAddress.getByName(host);
+                while (true) {
+                    try {
+                        socket.receive(responsePacket); // blocks until a response is received
+                        String response = new String(responsePacket.getData(), 0, responsePacket.getLength());
+                        Log.d("UDP", "Received response: " + response);
 
-                    // Debugging: Check each host IP being scanned
-                    Log.d("NetworkScanner", "Scanning IP: " + host);
+                        // extract the server's IP address
+                        String serverIp = responsePacket.getAddress().getHostAddress();
+                        Log.d("UDP", "Server IP: " + serverIp);
 
-                    if (inetAddress.isReachable(500)) {
-                        Log.d("NetworkScanner", "Reachable IP: " + inetAddress.getHostAddress());
+                        // adding the server IP to the ListView
+                        publishProgress(serverIp); //
 
-                        // Get hostname or set default to "Unknown Device"
-                        String deviceName = inetAddress.getHostName();
-                        if (deviceName == null || deviceName.isEmpty() || deviceName.equals(inetAddress.getHostAddress())) {
-                            deviceName = "Unknown Device";
-                        }
-
-                        String deviceInfo = deviceName + " (" + inetAddress.getHostAddress() + ")";
-                        publishProgress(deviceInfo);  // Publish the hostname and IP
+                    } catch (SocketTimeoutException e) {
+                        Log.d("UDP", "No more responses received.");
+                        break;
                     }
-
                 }
             } catch (IOException e) {
-                Log.e("NetworkScanner", "Error scanning local network", e);
+                Log.e("NetworkScanner", "Error during broadcast", e);
+            } finally {
+                if (socket != null && !socket.isClosed()) {
+                    socket.close(); // making sure the socket is closed
+                }
             }
             return null;
         }
@@ -122,27 +129,18 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
         @Override
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
-            deviceList.add(values[0]);  // Add the hostname and IP to the list
-            adapter.notifyDataSetChanged();  // Notify the adapter to update the ListView
+            deviceList.add(values[0]);  // add the hostname and IP to the list
+            adapter.notifyDataSetChanged();  // notify the adapter to update the ListView
 
-            // Debugging: Check that ListView is being updated
+            // checking that ListView is being updated
             Log.d("NetworkScanner", "Added IP to ListView: " + values[0]);
-
         }
     }
-
-    private String intToIp(int ipAddress) {
-        return ((ipAddress & 0xFF) + "." +
-                ((ipAddress >> 8) & 0xFF) + "." +
-                ((ipAddress >> 16) & 0xFF) + "." +
-                ((ipAddress >> 24) & 0xFF));
-    }
-
 
 
     @Override
     public void onBackPressed() {
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)) {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
@@ -155,16 +153,16 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
         int itemId = item.getItemId();
         Log.d("Navigation", "Item selected: " + itemId);
 
-        if(itemId == R.id.nav_home) {
+        if (itemId == R.id.nav_home) {
             intent = new Intent(this, MainActivity.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_help) {
+        } else if (itemId == R.id.nav_help) {
             intent = new Intent(this, InstructionsPage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_remote) {
+        } else if (itemId == R.id.nav_remote) {
             intent = new Intent(this, InteractionPage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_about) {
+        } else if (itemId == R.id.nav_about) {
             intent = new Intent(this, AboutPage.class);
             startActivity(intent);
         }
@@ -172,6 +170,4 @@ public class RemotePage extends AppCompatActivity implements NavigationView.OnNa
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
-
-
 }

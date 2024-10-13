@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         remotePage_button = findViewById(R.id.server_page);
         remotePage_button.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, RemotePage.class);
+            Intent intent = new Intent(MainActivity.this, ServersPage.class);
             startActivity(intent);
         });
 
@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             intent = new Intent(this, InstructionsPage.class);
             startActivity(intent);
         } else if(itemId == R.id.nav_server) {
-            intent = new Intent(this, RemotePage.class);
+            intent = new Intent(this, ServersPage.class);
             startActivity(intent);
         } else if(itemId == R.id.nav_about) {
             intent = new Intent(this, AboutPage.class);
