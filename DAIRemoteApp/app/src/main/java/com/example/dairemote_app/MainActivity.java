@@ -1,10 +1,13 @@
 package com.example.dairemote_app;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.Button;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -15,21 +18,37 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+import java.util.List;
 
-    Button remotePage_button;  // button object for the Remote Page
-    Button instructionsPage_button;     // button object for the Instructions Page
-    Button aboutPage_button;    // button for the About Page
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     Toolbar toolbar;
+    public static ConnectionManager connectionManager;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    ImageButton remotePage;
 
+    public void notifyUser(String msg, String color) {
+        TextView toolbarNotif = findViewById(R.id.toolbarNotification);
+        toolbarNotif.setText(msg);
+        toolbarNotif.setTextColor(Color.parseColor(color));
+        toolbarNotif.setVisibility(View.VISIBLE);
+
+        // Hide notification after 5 seconds
+        toolbarNotif.postDelayed(() -> toolbarNotif.setVisibility(View.GONE), 5000);
+    }
+
+    public void bkgrdNotifyUser(String msg, String color) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyUser(msg, color);
+            }
+        });
+    }
+
+    public void drawerSetup(int page) {
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
         toolbar = findViewById(R.id.toolbar);
@@ -49,44 +68,99 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
         // Select the home icon by default when opening navigation menu
-        navigationView.setCheckedItem(R.id.nav_home);
+        navigationView.setCheckedItem(page);
+    }
 
+    @Override
+    protected void onDestroy() {
+        // Clean up the connection when activity is destroyed
+        if (connectionManager != null) {
+            connectionManager.shutdown();
+            connectionManager = null;
+        }
 
+        super.onDestroy();
+    }
 
-        // on clicking the "about" button, user is sent to the about page
-        aboutPage_button = findViewById(R.id.about_page);
-        aboutPage_button.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, AboutPage.class);
-            startActivity(intent);
-        });
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-        remotePage_button = findViewById(R.id.remote_page);
-        remotePage_button.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, InteractionPage.class);
-            startActivity(intent);
-        });
+        drawerSetup(R.id.nav_home);
 
-        remotePage_button = findViewById(R.id.server_page);
-        remotePage_button.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, ServersPage.class);
-            startActivity(intent);
-        });
+        // Initially Hide the toolbar notification
+        TextView toolbarNotif = findViewById(R.id.toolbarNotification);
+        toolbarNotif.setVisibility(View.GONE);
 
-        instructionsPage_button = findViewById(R.id.instructions_page);
-        instructionsPage_button.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, InstructionsPage.class);
-            startActivity(intent);
+        remotePage = findViewById(R.id.DAIRemoteLogoBtn);
+        remotePage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                v.animate().scaleX(1.2f).scaleY(1.2f) // Scale the button up to 120% of its original size
+                    .setDuration(150) // Duration of the scale up animation
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Scale back to normal size
+                            v.animate().scaleX(1f)
+                                    .scaleY(1f)
+                                    .setDuration(150) // Duration of the scale down animation
+                                    .start();
+                    }
+                })
+                .start();
+                // Initialize the connection manager
+                // Establish connection to host if not already established and not declined prior
+                if (!ConnectionManager.connectionEstablished) {
+                    ConnectionManager.hostSearchInBackground(new HostSearchCallback() {
+                        @Override
+                        public void onHostFound(List<String> serverIps) {
+                            if (serverIps.isEmpty()) {
+                                return;
+                            }
+                            Log.i("MainActivity", "Hosts found: " + serverIps);
+
+                            //!! Implement logic to select the host
+                            String selectedHost = serverIps.get(0);
+                            bkgrdNotifyUser("Connecting to " + selectedHost, "#c3cf1b");
+
+                            // Initialize ConnectionManager with the found server IP
+                            connectionManager = new ConnectionManager(selectedHost);
+                            if (!connectionManager.initializeConnection()) {
+                                // Ensure notifyUser runs on the main (UI) thread
+                                bkgrdNotifyUser("Denied connection", "#c73a30");
+                            } else {
+                                bkgrdNotifyUser("Connection approved", "#3fcf1b");
+                                Intent intent = new Intent(MainActivity.this, InteractionPage.class);
+                                startActivity(intent);
+                            }
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Log.e("MainActivity", "Error during host search: " + error);
+                            bkgrdNotifyUser("No hosts found", "#c73a30");
+                        }
+                    });
+                } else if (ConnectionManager.connectionEstablished) {
+                    Intent intent = new Intent(MainActivity.this, InteractionPage.class);
+                    startActivity(intent);
+                }
+            }
         });
     }
 
-    // Avoid closing app on "Back" press if drawer is open
-
     @Override
     public void onBackPressed() {
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)) {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if (isTaskRoot()) {
+                finishAffinity();
+            } else {
+                super.onBackPressed();
+            }
         }
     }
 
@@ -94,18 +168,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         Intent intent;
         int itemId = item.getItemId();
-        Log.d("Navigation", "Item selected: " + itemId);
+        Log.d("MainActivity", "Item selected: " + itemId);
 
-        if(itemId == R.id.nav_remote) {
+        if (itemId == R.id.nav_remote) {
             intent = new Intent(this, InteractionPage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_help) {
+        } else if (itemId == R.id.nav_help) {
             intent = new Intent(this, InstructionsPage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_server) {
+        } else if (itemId == R.id.nav_server) {
             intent = new Intent(this, ServersPage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_about) {
+        } else if (itemId == R.id.nav_about) {
             intent = new Intent(this, AboutPage.class);
             startActivity(intent);
         }

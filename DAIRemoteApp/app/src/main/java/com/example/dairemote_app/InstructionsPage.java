@@ -47,9 +47,11 @@ public class InstructionsPage extends AppCompatActivity implements NavigationVie
 
     @Override
     public void onBackPressed() {
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)) {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
+            Intent intent = new Intent(InstructionsPage.this, MainActivity.class);
+            startActivity(intent);
             super.onBackPressed();
         }
     }
@@ -60,16 +62,16 @@ public class InstructionsPage extends AppCompatActivity implements NavigationVie
         int itemId = item.getItemId();
         Log.d("Navigation", "Item selected: " + itemId);
 
-        if(itemId == R.id.nav_home) {
+        if (itemId == R.id.nav_home) {
             intent = new Intent(this, MainActivity.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_remote) {
+        } else if (itemId == R.id.nav_remote) {
             intent = new Intent(this, InteractionPage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_server) {
+        } else if (itemId == R.id.nav_server) {
             intent = new Intent(this, ServersPage.class);
             startActivity(intent);
-        } else if(itemId == R.id.nav_about) {
+        } else if (itemId == R.id.nav_about) {
             intent = new Intent(this, AboutPage.class);
             startActivity(intent);
         }

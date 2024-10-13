@@ -13,7 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AudioManager\AudioManager.csproj" />
     <ProjectReference Include="..\DisplayProfileManager\DisplayProfileManager.csproj" />
-    <ProjectReference Include="..\UDPServer\UDPServerManager.csproj" />
+    <ProjectReference Include="..\UDPServerManager\UDPServerManager.csproj" />
   </ItemGroup>
 
   <ItemGroup>

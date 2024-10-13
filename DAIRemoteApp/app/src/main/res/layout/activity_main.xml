@@ -6,16 +6,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary"
-    tools:context=".MainActivity"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    tools:context=".MainActivity">
 
     <com.google.android.material.navigation.NavigationView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
         android:id="@+id/nav_view"
+        android:layout_width="225dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
         app:headerLayout="@layout/main_menu_header"
-        app:menu="@menu/main_menu"
-        android:layout_gravity="start"/>
+        app:menu="@menu/main_menu" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -23,111 +23,76 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
             <include
                 android:id="@+id/toolbar"
-                layout="@layout/toolbar"/>
+                layout="@layout/toolbar" />
 
-            <Button
-                android:id="@+id/remote_page"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="11dp"
-                android:layout_marginEnd="10dp"
-                android:backgroundTint="@color/material_dynamic_neutral20"
-                android:fontFamily="@font/audiowide"
-                android:text="Remote"
-                android:textColor="@color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
+            <ImageButton
+                android:id="@+id/DAIRemoteLogoBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="180dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Clickable DAIRemote that connects user and goes to interaction page"
+                android:padding="70dp"
+                android:src="@drawable/dairemote_logo"
+                app:layout_constraintBottom_toTopOf="@+id/startContext"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/DAIRemoteLogo" />
-
-            <Button
-                android:id="@+id/server_page"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="30dp"
-                android:layout_marginEnd="10dp"
-                android:backgroundTint="@color/material_dynamic_neutral20"
-                android:fontFamily="@font/audiowide"
-                android:text="Servers"
-                android:textColor="@color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/remote_page" />
-
-            <Button
-                android:id="@+id/about_page"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="30dp"
-                android:layout_marginEnd="10dp"
-                android:backgroundTint="@color/material_dynamic_neutral20"
-                android:fontFamily="@font/audiowide"
-                android:text="About"
-                android:textColor="@color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/instructions_page" />
-
-            <Button
-                android:id="@+id/instructions_page"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="30dp"
-                android:layout_marginEnd="10dp"
-                android:backgroundTint="@color/material_dynamic_neutral20"
-                android:fontFamily="@font/audiowide"
-                android:text="Instructions"
-                android:textColor="@color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/server_page" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="97dp"
-                android:layout_marginTop="64dp"
                 android:layout_marginEnd="97dp"
+                android:layout_marginBottom="-45dp"
                 android:fontFamily="@font/audiowide"
                 android:text="DAIRemote"
-                android:textColor="@color/white"
                 android:textAllCaps="false"
+                android:textColor="@color/white"
                 android:textSize="35sp"
                 android:textStyle="bold"
                 android:typeface="normal"
+                app:layout_constraintBottom_toTopOf="@+id/DAIRemoteLogoBtn"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/startContext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-70dp"
+                android:fontFamily="@font/audiowide"
+                android:text="Tap to start"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:typeface="normal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.497"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/DAIRemoteLogoBtn"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/toolbarNotification"
+                android:layout_width="218dp"
+                android:layout_height="23dp"
+                android:layout_marginTop="20dp"
+                android:background="#B4B3B3"
+                android:elevation="10dp"
+                android:fontFamily="@font/audiowide"
+                android:textAlignment="center"
+                android:visibility="invisible"
+                app:autoSizeTextType="uniform"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageView
-                android:id="@+id/DAIRemoteLogo"
-                android:layout_width="217dp"
-                android:layout_height="162dp"
-                android:layout_marginTop="-11dp"
-                android:layout_marginBottom="-11dp"
-                app:layout_constraintBottom_toTopOf="@+id/remote_page"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView"
-                app:srcCompat="@drawable/dairemote_logo"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -14,7 +14,6 @@
 
         private void InitializeTrayIcon()
         {
-            // Create a ContextMenuStrip
             trayMenu = new ContextMenuStrip
             {
                 BackColor = Color.FromArgb(50, 50, 50),
@@ -23,24 +22,45 @@
                 Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
             };
 
+            string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            string[] jsonFiles = Directory.GetFiles(folderPath);
+
+            foreach (string jsonFile in jsonFiles)
+            {
+                // Create menu item for each JSON file
+                string fileName = Path.GetFileNameWithoutExtension(jsonFile);
+
+                var jsonMenuItem = new ToolStripMenuItem(fileName, null, (sender, e) =>
+                {
+                    // Handle click event
+                    DisplayProfileManager.DisplayConfig.SetDisplaySettings(jsonFile);
+                });
+
+                trayMenu.Items.Add(jsonMenuItem);
+            }
+
+            trayMenu.Items.Add(new ToolStripSeparator());
+
             var showMenuItem = new ToolStripMenuItem("Show", null, OnShow);
             var exitMenuItem = new ToolStripMenuItem("Exit", null, OnExit);
 
-
             trayMenu.Items.Add(showMenuItem);
-            trayMenu.Items.Add(new ToolStripSeparator());
             trayMenu.Items.Add(exitMenuItem);
 
-            // Set custom icon from Resources folder
             trayIcon = new NotifyIcon
             {
                 Text = "DAIRemote",
-                Icon = new Icon("Resources/DAIRemoteLogo.ico"), // Use your custom icon
+                Icon = new Icon("Resources/DAIRemoteLogo.ico"),
                 ContextMenuStrip = trayMenu,
                 Visible = true
             };
 
-            // Handle double-click to open the application
             trayIcon.DoubleClick += (s, e) => ShowForm();
         }
 
