@@ -14,11 +14,12 @@ namespace UDPServerManagerForm
         private UdpClient udpServer;
         private IPEndPoint remoteEP;
         private string clientAddress;
+        private int serverPort = 11000;
 
         public UDPServerHost()
         {
-            udpServer = new UdpClient(11000);
-            remoteEP = new IPEndPoint(IPAddress.Any, 11000);
+            udpServer = new UdpClient(serverPort);
+            remoteEP = new IPEndPoint(IPAddress.Any, serverPort);
         }
 
         public class DeviceHistoryEntry
@@ -57,7 +58,7 @@ namespace UDPServerManagerForm
 
         }
 
-        public bool LoadDeviceHistory(string ipAddress)
+        public bool SearchDeviceHistory(string ipAddress)
         {
             string historyFilePath = GetFilePath("deviceHistory.json");
 
@@ -112,13 +113,6 @@ namespace UDPServerManagerForm
         {
             try
             {
-                // Ensure udpServer is initialized before checking for data
-                if (udpServer == null)
-                {
-                    Debug.WriteLine("Error: udpServer is not initialized.");
-                    return false;
-                }
-
                 byte[] handshakeData = udpServer.Receive(ref remoteEP);
                 string handshakeMessage = Encoding.ASCII.GetString(handshakeData);
 
@@ -148,7 +142,7 @@ namespace UDPServerManagerForm
             Debug.WriteLine("Checking for approval...");
             SendUdpMessage("Wait");
             string ip = remoteEP.Address.ToString();
-            if (LoadDeviceHistory(ip))
+            if (SearchDeviceHistory(ip))
             {
                 string approvalMessage = "Approved";
                 byte[] approvalBytes = Encoding.ASCII.GetBytes(approvalMessage);
@@ -181,12 +175,6 @@ namespace UDPServerManagerForm
         {
             try
             {
-                if (udpServer == null)
-                {
-                    Debug.WriteLine("Error: udpServer is not initialized.");
-                    return false;
-                }
-
                 byte[] handshakeData = udpServer.Receive(ref remoteEP);
                 string handshakeMessage = Encoding.ASCII.GetString(handshakeData);
 
@@ -314,8 +302,8 @@ namespace UDPServerManagerForm
                 // Ensure UDP client is properly disposed
                 if (udpServer != null)
                 {
-                    udpServer.Close();  // Close the UDP connection
-                    udpServer = null;    // Set to null to avoid reusing
+                    udpServer.Close();
+                    udpServer = null;
                 }
             }
         }
@@ -360,7 +348,6 @@ namespace UDPServerManagerForm
         {
             var parts = command.Split(new[] { ' ' }, 2);
             var action = parts[0];
-            // Get current mouse position
             var currentPos = MouseOperations.GetCursorPosition();
 
             Debug.WriteLine(action);
@@ -439,8 +426,8 @@ namespace UDPServerManagerForm
                 }
 
                 // Reinitialize the UDP server for new connections
-                udpServer = new UdpClient(11000);
-                remoteEP = new IPEndPoint(IPAddress.Any, 11000);
+                udpServer = new UdpClient(serverPort);
+                remoteEP = new IPEndPoint(IPAddress.Any, serverPort);
             }
         }
     }
