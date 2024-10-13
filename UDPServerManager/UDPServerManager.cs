@@ -13,7 +13,7 @@ namespace UDPServerManagerForm
         private bool isClientConnected = false;
         private UdpClient udpServer;
         private IPEndPoint remoteEP;
-        private string serverAddress;
+        private string clientAddress;
 
         public UDPServerHost()
         {
@@ -153,7 +153,7 @@ namespace UDPServerManagerForm
                 string approvalMessage = "Approved";
                 byte[] approvalBytes = Encoding.ASCII.GetBytes(approvalMessage);
                 udpServer.Send(approvalBytes, approvalBytes.Length, remoteEP);
-                serverAddress = ip;
+                clientAddress = ip;
 
                 Debug.WriteLine("Approval granted, prior history");
                 return true;
@@ -168,7 +168,7 @@ namespace UDPServerManagerForm
                 if (form.HandleConnectionResult(connect, udpServer, remoteEP))
                 {
                     SaveDeviceHistory(ip, deviceName);
-                    serverAddress = ip;
+                    clientAddress = ip;
                     Debug.WriteLine("Approval granted by user");
                     return true;
                 }
@@ -247,9 +247,9 @@ namespace UDPServerManagerForm
 
         public bool isClient(String ipAddress)
         {
-            if (serverAddress != null)
+            if (clientAddress != null)
             {
-                return serverAddress.Equals(ipAddress);
+                return clientAddress.Equals(ipAddress);
             }
             return false;
         }
