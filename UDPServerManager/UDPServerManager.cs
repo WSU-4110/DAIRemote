@@ -309,6 +309,15 @@ namespace UDPServerManagerForm
             {
                 Debug.WriteLine("Error: UdpClient has been disposed: " + e.Message);
             }
+            finally
+            {
+                // Ensure UDP client is properly disposed
+                if (udpServer != null)
+                {
+                    udpServer.Close();  // Close the UDP connection
+                    udpServer = null;    // Set to null to avoid reusing
+                }
+            }
         }
 
         private void HandleReceivedData(string receivedData, ref DateTime lastHeartbeatTime)
@@ -427,8 +436,6 @@ namespace UDPServerManagerForm
                 if (isClientConnected)
                 {
                     MessageLoop();
-                    udpServer.Close();
-                    udpServer = null;
                 }
 
                 // Reinitialize the UDP server for new connections

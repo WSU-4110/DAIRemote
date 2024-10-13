@@ -87,7 +87,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_remote_page);
+        setContentView(R.layout.activity_servers_page);
 
         drawerSetup(R.id.nav_server);
 
