@@ -37,7 +37,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
     NavigationView navigationView;
     Toolbar toolbar;
 
-    private List<String> availableHosts = new ArrayList<>();
+	private List<String> availableHosts = new ArrayList<>();
     private ArrayAdapter<String> adapter;
     private String selectedHost = null;
     private TextView connectionStatus;
@@ -161,7 +161,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         });
     }
 
-    @Override
+	@Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);

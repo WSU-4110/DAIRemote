@@ -176,7 +176,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (itemId == R.id.nav_help) {
             intent = new Intent(this, InstructionsPage.class);
             startActivity(intent);
+<<<<<<< HEAD
         } else if (itemId == R.id.nav_server) {
+=======
+        } else if(itemId == R.id.nav_server) {
+>>>>>>> main
             intent = new Intent(this, ServersPage.class);
             startActivity(intent);
         } else if (itemId == R.id.nav_about) {
