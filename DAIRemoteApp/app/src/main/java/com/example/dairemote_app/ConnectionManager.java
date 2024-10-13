@@ -12,6 +12,7 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,11 +24,19 @@ public class ConnectionManager {
     public static DatagramSocket udpSocket;
     public static String serverAddress;
     public static int serverPort;
+    public static String serverResponse;
     public static HostSearchCallback callback;
     public static boolean connectionEstablished = false;
     public static int declineCount = 0;
 
     public ConnectionManager(String serverAddress) {
+        try {
+            udpSocket = new DatagramSocket();
+        } catch (SocketException e) {
+            e.printStackTrace();
+            Log.e("ConnectionManager", "Error initializing DatagramSocket: " + e.getMessage());
+        }
+
         ConnectionManager.serverAddress = serverAddress;
         serverPort = 11000;
         this.executorService = Executors.newCachedThreadPool();
@@ -35,29 +44,26 @@ public class ConnectionManager {
 
     // Initialize connection
     public boolean initializeConnection() {
-        try {
-            udpSocket = new DatagramSocket();
-        } catch (SocketException e) {
-            e.printStackTrace();
-            Log.e("ConnectionManager", "Error initializing DatagramSocket: " + e.getMessage());
-        }
-        String serverResponse = "";
+        serverResponse = "";
         int broadcastCount = 0;
         while (serverResponse.isEmpty()) {
             Log.d("ConnectionManager", "Waiting for broadcast response...");
             connect("Connection requested by " + getDeviceName());
             broadcastCount += 1;
             if (broadcastCount == 1) {
-                serverResponse = waitForResponse(25);
+                waitForResponse(25);
             } else {
-                serverResponse = waitForResponse(10000);
+                waitForResponse(10000);
             }
         }
+        return finishConnection();
+    }
+
+    public boolean finishConnection() {
         if (serverResponse.equalsIgnoreCase("Wait")) {
-            serverResponse = "";
-            while (serverResponse.isEmpty()) {
+            while (!Objects.equals(serverResponse, "Approved")) {
                 Log.d("ConnectionManager", "Waiting for approval...");
-                serverResponse = waitForResponse(10000);
+                waitForResponse(10000);
             }
             if (serverResponse.equalsIgnoreCase("Approved")) {
                 startHeartbeat();
@@ -86,19 +92,17 @@ public class ConnectionManager {
             public void run() {
                 sendHeartbeat();
             }
-        }, 0, 30, TimeUnit.SECONDS); // Initial delay 0, and 30-second delay after each execution
+        }, 0, 15, TimeUnit.SECONDS); // Initial delay 0, and 15-second delay after each execution
     }
 
-    public boolean sendHeartbeat() {
+    public void sendHeartbeat() {
         if (!sendHostMessage("DroidHeartBeat")) {
-            return false;
+            return;
         }
 
-        String responseReceived = waitForResponse(10000);
-        if (!responseReceived.equalsIgnoreCase("HeartBeat Ack")) {
-            return initializeConnection();
-        } else {
-            return false;
+        waitForResponse(10000);
+        if (!serverResponse.equalsIgnoreCase("HeartBeat Ack")) {
+            initializeConnection();
         }
     }
 
@@ -171,11 +175,11 @@ public class ConnectionManager {
                     DatagramPacket receivePacket = new DatagramPacket(recBuf, recBuf.length);
                     socket.receive(receivePacket); // Blocks until a response is received
 
-                    String response = new String(receivePacket.getData()).trim();
+                    serverResponse = new String(receivePacket.getData()).trim();
                     String serverIp = receivePacket.getAddress().getHostAddress();
-                    Log.i("ConnectionManager", "Response from server: " + response + " at " + serverIp);
+                    Log.i("ConnectionManager", "Response from server: " + serverResponse + " at " + serverIp);
 
-                    if (response.contains("Hello, I'm")) {
+                    if (serverResponse.contains("Hello, I'm")) {
                         hosts.add(serverIp);
                     }
                 } catch (SocketTimeoutException e) {
@@ -232,7 +236,7 @@ public class ConnectionManager {
     }
 
     // Wait for server response
-    public String waitForResponse(int timeout) {
+    public void waitForResponse(int timeout) {
         try {
             udpSocket.setSoTimeout(timeout);
             byte[] receiveData = new byte[200];
@@ -240,16 +244,14 @@ public class ConnectionManager {
 
             udpSocket.receive(receivePacket);
 
-            String response = new String(receivePacket.getData(), 0, receivePacket.getLength());
-            Log.d("ConnectionManager", "Server response: " + response);
+            serverResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
+            Log.d("ConnectionManager", "Server response: " + serverResponse);
 
-            return response;
         } catch (SocketTimeoutException e) {
             Log.e("ConnectionManager", "No response received within the timeout: " + e.getMessage());
         } catch (Exception e) {
             Log.e("ConnectionManager", "Error waiting for response: " + e.getMessage());
         }
-        return "";
     }
 
     // Shutdown the connection
@@ -269,5 +271,6 @@ public class ConnectionManager {
             executorService.shutdown();
         }
         connectionEstablished = false;
+        serverAddress = "";
     }
 }

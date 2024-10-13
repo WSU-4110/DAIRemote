@@ -2,19 +2,22 @@ package com.example.dairemote_app;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -23,6 +26,10 @@ import com.google.android.material.navigation.NavigationView;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.net.InetAddress;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ServersPage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -30,31 +37,19 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
     NavigationView navigationView;
     Toolbar toolbar;
 
-    private ArrayList<String> deviceList = new ArrayList<>();
+    private List<String> availableHosts = new ArrayList<>();
     private ArrayAdapter<String> adapter;
+    private String selectedHost = null;
+    private TextView connectionStatus;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_remote_page);
-
-        ListView listView = findViewById(R.id.device_list);
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, deviceList);
-        listView.setAdapter(adapter);
-
-
-        listView.setOnItemClickListener((parent, view, position, id) -> {
-            String selectedDevice = deviceList.get(position);
-            Toast.makeText(ServersPage.this, "Selected IP: " + selectedDevice, Toast.LENGTH_SHORT).show();
-        });
-
-
+    public void drawerSetup(int page) {
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
         toolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
 
+        // Remove the app name from tool bar
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
@@ -66,81 +61,113 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        navigationView.setCheckedItem(R.id.nav_server);
-
-
-        // Start scanning for local IPs
-        new ScanLocalNetworkTask().execute();
+        // Select the home icon by default when opening navigation menu
+        navigationView.setCheckedItem(page);
     }
 
+    public void notifyUser(String msg, String color) {
+        TextView toolbarNotif = findViewById(R.id.toolbarNotification);
+        toolbarNotif.setText(msg);
+        toolbarNotif.setTextColor(Color.parseColor(color));
+        toolbarNotif.setVisibility(View.VISIBLE);
 
-    @SuppressLint("StaticFieldLeak")
-    private class ScanLocalNetworkTask extends AsyncTask<Void, String, Void> {
-        @Override
-        protected Void doInBackground(Void... voids) {
-            try {
-                // Get the IP address of the current network
-                WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-                String ip = intToIp(wm.getDhcpInfo().ipAddress);
+        // Hide notification after 5 seconds
+        toolbarNotif.postDelayed(() -> toolbarNotif.setVisibility(View.GONE), 5000);
+    }
 
-                // Debugging: Check if IP is being retrieved
-                Log.d("NetworkScanner", "Device IP: " + ip);
-
-
-                // Scan IP range
-                String subnet = ip.substring(0, ip.lastIndexOf('.') + 1);
-                for (int i = 1; i < 255; i++) {
-                    String host = subnet + i;
-                    InetAddress inetAddress = InetAddress.getByName(host);
-
-                    // Debugging: Check each host IP being scanned
-                    Log.d("NetworkScanner", "Scanning IP: " + host);
-
-                    if (inetAddress.isReachable(500)) {
-                        Log.d("NetworkScanner", "Reachable IP: " + inetAddress.getHostAddress());
-
-                        // Get hostname or set default to "Unknown Device"
-                        String deviceName = inetAddress.getHostName();
-                        if (deviceName == null || deviceName.isEmpty() || deviceName.equals(inetAddress.getHostAddress())) {
-                            deviceName = "Unknown Device";
-                        }
-
-                        String deviceInfo = deviceName + " (" + inetAddress.getHostAddress() + ")";
-                        publishProgress(deviceInfo);  // Publish the hostname and IP
-                    }
-
-                }
-            } catch (IOException e) {
-                Log.e("NetworkScanner", "Error scanning local network", e);
+    public void bkgrdNotifyUser(String msg, String color) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyUser(msg, color);
             }
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(String... values) {
-            super.onProgressUpdate(values);
-            deviceList.add(values[0]);  // Add the hostname and IP to the list
-            adapter.notifyDataSetChanged();  // Notify the adapter to update the ListView
-
-            // Debugging: Check that ListView is being updated
-            Log.d("NetworkScanner", "Added IP to ListView: " + values[0]);
-
-        }
+        });
     }
 
-    private String intToIp(int ipAddress) {
-        return ((ipAddress & 0xFF) + "." +
-                ((ipAddress >> 8) & 0xFF) + "." +
-                ((ipAddress >> 16) & 0xFF) + "." +
-                ((ipAddress >> 24) & 0xFF));
-    }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_remote_page);
 
+        drawerSetup(R.id.nav_server);
+
+        connectionStatus = findViewById(R.id.toolbarNotification);
+        ListView hostListView = findViewById(R.id.hostList);
+
+        // Adapter for the ListView to display the available hosts
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_single_choice, availableHosts);
+        hostListView.setAdapter(adapter);
+        hostListView.setOnItemClickListener((parent, view, position, id) -> {
+            selectedHost = availableHosts.get(position);
+        });
+
+        // Perform host search in the background
+        ConnectionManager.hostSearchInBackground(new HostSearchCallback() {
+            @Override
+            public void onHostFound(List<String> hosts) {
+                runOnUiThread(() -> {
+                    availableHosts.clear();
+                    availableHosts.addAll(hosts);
+                    adapter.notifyDataSetChanged();
+
+                    // Check if any host matches current connection and select it
+                    if (ConnectionManager.serverAddress != null && !ConnectionManager.serverAddress.isEmpty()) {
+                        for (int i = 0; i < availableHosts.size(); i++) {
+                            if (Objects.equals(availableHosts.get(i), ConnectionManager.serverAddress)) {
+                                hostListView.setItemChecked(i, true);  // Select the matching host
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e("HostListActivity", "Error: " + error);
+            }
+        });
+
+        hostListView.setOnItemClickListener((parent, view, position, id) -> {
+            selectedHost = availableHosts.get(position);
+            if (!Objects.equals(selectedHost, ConnectionManager.serverAddress)) {
+                // Check if a connection is already established
+                if (ConnectionManager.connectionEstablished) {
+                    // Stop the current connection before attempting a new one
+                    MainActivity.connectionManager.shutdown();
+                    notifyUser("Disconnected from: " + ConnectionManager.serverAddress, "#c3cf1b");
+                }
+
+                // Start the new connection process in the background
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+                executor.execute(() -> {
+                    MainActivity.connectionManager = new ConnectionManager(selectedHost);
+
+                    // Try to initialize the connection in the background
+                    boolean connectionInitialized = MainActivity.connectionManager.initializeConnection();
+
+                    if (connectionInitialized) {
+                        bkgrdNotifyUser("Connected to: " + selectedHost, "#3fcf1b");
+                        Intent intent = new Intent(ServersPage.this, InteractionPage.class);
+                        startActivity(intent);
+                    } else {
+                        bkgrdNotifyUser("Connection failed", "#c73a30");
+                        ConnectionManager.serverAddress = "";
+                    }
+                });
+            } else {
+                notifyUser("Already connected", "#3fcf1b");
+            }
+        });
+    }
 
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
+            Intent intent = new Intent(ServersPage.this, MainActivity.class);
+            startActivity(intent);
             super.onBackPressed();
         }
     }
@@ -168,6 +195,4 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
-
-
 }

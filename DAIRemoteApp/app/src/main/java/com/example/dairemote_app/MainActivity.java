@@ -48,6 +48,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
+    public void drawerSetup(int page) {
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
+        toolbar = findViewById(R.id.toolbar);
+
+        setSupportActionBar(toolbar);
+
+        // Remove the app name from tool bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("");
+        }
+
+        navigationView.bringToFront();
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // Select the home icon by default when opening navigation menu
+        navigationView.setCheckedItem(page);
+    }
+
     @Override
     protected void onDestroy() {
         // Clean up the connection when activity is destroyed
@@ -64,29 +87,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        drawerLayout = findViewById(R.id.drawer_layout);
-        navigationView = findViewById(R.id.nav_view);
-        toolbar = findViewById(R.id.toolbar);
+        drawerSetup(R.id.nav_home);
 
-        setSupportActionBar(toolbar);
         // Initially Hide the toolbar notification
         TextView toolbarNotif = findViewById(R.id.toolbarNotification);
         toolbarNotif.setVisibility(View.GONE);
-
-        // Remove the app name from tool bar
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("");
-        }
-
-        navigationView.bringToFront();
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-
-        navigationView.setNavigationItemSelectedListener(this);
-
-        // Select the home icon by default when opening navigation menu
-        navigationView.setCheckedItem(R.id.nav_home);
 
         remotePage = findViewById(R.id.DAIRemoteLogoBtn);
         remotePage.setOnClickListener(new View.OnClickListener() {
@@ -98,7 +103,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         @Override
                         public void run() {
                             // Scale back to normal size
-                            v.animate().scaleX(1f).scaleY(1f)
+                            v.animate().scaleX(1f)
+                                    .scaleY(1f)
                                     .setDuration(150) // Duration of the scale down animation
                                     .start();
                     }

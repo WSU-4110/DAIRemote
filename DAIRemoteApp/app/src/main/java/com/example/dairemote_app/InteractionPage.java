@@ -56,6 +56,29 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         finish();
     }
 
+    public void drawerSetup(int page) {
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
+        toolbar = findViewById(R.id.toolbar);
+
+        setSupportActionBar(toolbar);
+
+        // Remove the app name from tool bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("");
+        }
+
+        navigationView.bringToFront();
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // Select the home icon by default when opening navigation menu
+        navigationView.setCheckedItem(page);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (!ConnectionManager.connectionEstablished) {
@@ -176,23 +199,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             }
         });
 
-        drawerLayout = findViewById(R.id.drawer_layout);
-        navigationView = findViewById(R.id.nav_view);
-        toolbar = findViewById(R.id.toolbar);
-
-        setSupportActionBar(toolbar);
-
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("");
-        }
-
-        navigationView.bringToFront();
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-
-        navigationView.setNavigationItemSelectedListener(this);
-        navigationView.setCheckedItem(R.id.nav_remote);
+        drawerSetup(R.id.nav_remote);
 
         keyboardImgBtn = findViewById(R.id.keyboardImgBtn);
         editText = findViewById(R.id.editText);
@@ -373,7 +380,9 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
     @Override
     public void onBackPressed() {
-        if (!(editText.getVisibility() == View.VISIBLE)) {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else if (!(editText.getVisibility() == View.VISIBLE)) {
             Intent intent = new Intent(InteractionPage.this, MainActivity.class);
             startActivity(intent);
         } else {

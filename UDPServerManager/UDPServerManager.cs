@@ -126,29 +126,7 @@ namespace UDPServerManagerForm
                 // Check if the received message is the handshake request
                 if (handshakeMessage.StartsWith("Connection requested"))
                 {
-                    SendUdpMessage("Wait");
-                    string ip = remoteEP.Address.ToString();
-                    if (LoadDeviceHistory(ip))
-                    {
-                        string approvalMessage = "Approved";
-                        byte[] approvalBytes = Encoding.ASCII.GetBytes(approvalMessage);
-                        udpServer.Send(approvalBytes, approvalBytes.Length, remoteEP);
-                        return true;
-                    } else
-                    {
-                        UDPServerManagerForm form = new UDPServerManagerForm();
-                        DialogResult connect = MessageBox.Show($"Allow ({remoteEP.Address}:{remoteEP.Port}) to connect?",
-                            "Pending Connection", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
-
-                        if (form.HandleConnectionResult(connect, udpServer, remoteEP))
-                        {
-                            string deviceName = ExtractDeviceName(handshakeMessage);
-                            SaveDeviceHistory(ip, deviceName);
-                            return true;
-                        }
-                    }
-                    return false;
+                    return awaitApproval(ExtractDeviceName(handshakeMessage));
                 }
                 return false;
             }
@@ -162,6 +140,38 @@ namespace UDPServerManagerForm
                 Debug.WriteLine("Error: UdpClient has been disposed: " + e.Message);
                 return false;
             }
+        }
+
+        public bool awaitApproval(string deviceName)
+        {
+            Debug.WriteLine("Checking for approval...");
+            SendUdpMessage("Wait");
+            string ip = remoteEP.Address.ToString();
+            if (LoadDeviceHistory(ip))
+            {
+                string approvalMessage = "Approved";
+                byte[] approvalBytes = Encoding.ASCII.GetBytes(approvalMessage);
+                udpServer.Send(approvalBytes, approvalBytes.Length, remoteEP);
+
+                Debug.WriteLine("Approval granted, prior history");
+                return true;
+            }
+            else
+            {
+                UDPServerManagerForm form = new UDPServerManagerForm();
+                DialogResult connect = MessageBox.Show($"Allow ({remoteEP.Address}:{remoteEP.Port}) to connect?",
+                    "Pending Connection", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+
+                if (form.HandleConnectionResult(connect, udpServer, remoteEP))
+                {
+                    SaveDeviceHistory(ip, deviceName);
+
+                    Debug.WriteLine("Approval granted by user");
+                    return true;
+                }
+            }
+            return false;
         }
 
         // Method to handle the initial handshake
@@ -224,7 +234,7 @@ namespace UDPServerManagerForm
         {
             try
             {
-                udpServer.Client.ReceiveTimeout = 15000; // 15-second timeout for receive
+                udpServer.Client.ReceiveTimeout = 16000; // 15-second timeout for receive
 
                 DateTime lastHeartbeatTime = DateTime.Now;
                 TimeSpan heartbeatTimeout = TimeSpan.FromSeconds(60);
@@ -289,6 +299,10 @@ namespace UDPServerManagerForm
                 SendUdpMessage("Hello, I'm " + Environment.MachineName);
                 Debug.WriteLine("Sent response to broadcast");
                 InitiateHandshake();
+            }
+            else if (receivedData.StartsWith("Connection requested"))
+            {
+                awaitApproval(ExtractDeviceName(receivedData));
             }
             else
             {
