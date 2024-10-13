@@ -2,7 +2,6 @@ package com.example.dairemote_app;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -87,12 +86,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             }
         });
 
-        // Retrieve the selected IP address
-        SharedPreferences sharedPreferences = getSharedPreferences("AppPreferences", MODE_PRIVATE);
-        String selectedIp = sharedPreferences.getString("selected_ip", ""); // Default to empty if not found
-        Log.d("InteractionPage", "Selected IP: " + selectedIp);
-
-
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
         toolbar = findViewById(R.id.toolbar);
@@ -134,12 +127,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Retrieve the selected IP address
-                SharedPreferences sharedPreferences = getSharedPreferences("AppPreferences", MODE_PRIVATE);
-                String selectedIp = sharedPreferences.getString("selected_ip", "");
-
                 // Start UDP client to send data to the server
-                new UDPClient(selectedIp, "Hi!").execute();
+                new UDPClient("Hi!").execute();
             }
         });
 
@@ -197,13 +186,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     }
 
     private class UDPClient extends AsyncTask<Void, Void, String> {
-        private final String serverAddress;
+        private final String serverAddress = ""; // Replace with PC's IP
         private final int serverPort = 11000;
         private String messageToSend;
         private String serverResponse = "No response";
 
-        public UDPClient(String serverAddress, String message) {
-            this.serverAddress = serverAddress;
+        public UDPClient(String message) {
             this.messageToSend = message;
         }
 
@@ -246,10 +234,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     private void sendTouchCoordinates(String msg, float x, float y) {
         String message = msg + ": " + x + ", " + y;
 
-        // Retrieve the selected IP address
-        SharedPreferences sharedPreferences = getSharedPreferences("AppPreferences", MODE_PRIVATE);
-        String selectedIp = sharedPreferences.getString("selected_ip", "");
-
-        new UDPClient(selectedIp, message).execute(); // Send the message using UDP client
+        new UDPClient(message).execute(); // Send the message using UDP client
     }
 }
