@@ -27,6 +27,8 @@ namespace DAIRemote
             this.Load += DAIRemoteApplicationUI_Load;
             this.FormClosing += DAIRemoteApplicationUI_FormClosing;
             this.StartPosition = FormStartPosition.CenterScreen;
+
+            LoadStartupSetting();   // Checks onStartup default value to set
         }
 
         private void DAIRemoteApplicationUI_Load(object sender, EventArgs e)
@@ -154,9 +156,17 @@ namespace DAIRemote
             }
         }
 
+        private bool IsAppInStartup()
+        {
+            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", false))
+            {
+                return key.GetValue("DAIRemote") != null;
+            }
+        }
+
         private void LoadStartupSetting()
         {
-            checkBoxStartup.Checked = Properties.Settings.Default.LaunchAtStartup;
+            checkBoxStartup.Checked = IsAppInStartup();
         }
     }
 }
