@@ -117,10 +117,6 @@ namespace DAIRemote
             {
                 RemoveFromStartup(startupKey, appName, appPath);
             }
-
-            // Save the setting to project properties
-            Properties.Settings.Default.LaunchAtStartup = checkBoxStartup.Checked;
-            Properties.Settings.Default.Save();
         }
 
         private void AddToStartup(string startupKey, string appName, string appPath)
