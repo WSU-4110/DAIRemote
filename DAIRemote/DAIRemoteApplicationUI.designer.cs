@@ -25,6 +25,7 @@
             BtnShowAudioOutputs = new Button();
             button1 = new Button();
             profileNameTextBox = new TextBox();
+            checkBoxStartup = new CheckBox();
             SuspendLayout();
             // 
             // BtnSaveDisplayConfig
@@ -70,12 +71,24 @@
             profileNameTextBox.Size = new Size(200, 23);
             profileNameTextBox.TabIndex = 3;
             // 
+            // checkBoxStartup
+            // 
+            checkBoxStartup.AutoSize = true;
+            checkBoxStartup.Location = new Point(24, 366);
+            checkBoxStartup.Name = "checkBoxStartup";
+            checkBoxStartup.Size = new Size(184, 19);
+            checkBoxStartup.TabIndex = 4;
+            checkBoxStartup.Text = "Launch application on startup";
+            checkBoxStartup.UseVisualStyleBackColor = true;
+            checkBoxStartup.CheckedChanged += checkBoxStartup_CheckedChanged;
+            // 
             // DAIRemoteApplicationUI
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(225, 246, 225);
             ClientSize = new Size(300, 450);
+            Controls.Add(checkBoxStartup);
             Controls.Add(profileNameTextBox);
             Controls.Add(button1);
             Controls.Add(BtnSaveDisplayConfig);
@@ -93,5 +106,6 @@
         private Button BtnShowAudioOutputs;
         private Button button1;
         private TextBox profileNameTextBox;
+        private CheckBox checkBoxStartup;
     }
 }

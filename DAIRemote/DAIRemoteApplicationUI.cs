@@ -1,5 +1,6 @@
 using AudioManager;
 using DisplayProfileManager;
+using Microsoft.Win32;
 using UDPServerManagerForm;
 
 namespace DAIRemote
@@ -98,6 +99,64 @@ namespace DAIRemote
         private void BtnLoadDisplayConfig_Click(object sender, EventArgs e)
         {
             DisplayConfig.SetDisplaySettings("displayConfig" + ".json");
+        }
+
+        private void checkBoxStartup_CheckedChanged(object sender, EventArgs e)
+        {
+            string startupKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
+            string appName = "DAIRemote";
+            string appPath = Application.ExecutablePath;
+
+            if (checkBoxStartup.Checked)
+            {
+                AddToStartup(startupKey, appName, appPath);
+            }
+            else
+            {
+                RemoveFromStartup(startupKey, appName, appPath);
+            }
+
+            // Save the setting to project properties
+            Properties.Settings.Default.LaunchAtStartup = checkBoxStartup.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void AddToStartup(string startupKey, string appName, string appPath)
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(startupKey, true))
+                {
+                    key.SetValue(appName, $"\"{appPath}\"");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error adding to startup: " + ex.Message);
+            }
+        }
+
+        private void RemoveFromStartup(string startupKey, string appName, string appPath)
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(startupKey, true))
+                {
+                    if (key.GetValue(appName) != null)
+                    {
+                        key.DeleteValue(appName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error removing from startup: " + ex.Message);
+            }
+        }
+
+        private void LoadStartupSetting()
+        {
+            checkBoxStartup.Checked = Properties.Settings.Default.LaunchAtStartup;
         }
     }
 }
