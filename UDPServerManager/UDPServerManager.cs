@@ -348,13 +348,13 @@ namespace UDPServerManagerForm
         {
             var parts = command.Split(new[] { ' ' }, 2);
             var action = parts[0];
-            var currentPos = MouseOperations.GetCursorPosition();
 
             Debug.WriteLine(action);
             switch (action)
             {
                 case "MOUSE_MOVE":
                     var moveParts = parts[1].Split(' ');
+                    var currentPos = MouseOperations.GetCursorPosition();
 
                     if (moveParts.Length >= 2)
                     {
