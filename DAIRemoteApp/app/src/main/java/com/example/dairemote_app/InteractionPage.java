@@ -43,11 +43,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     NavigationView navigationView;
     Toolbar toolbar;
     Toolbar keyboardToolbar;
-    Button winBtn;
-    Button ctrlBtn;
-    Button shiftBtn;
-    Button fnBtn;
-    Button moreOpts;
+    TextView winBtn;
+    TextView ctrlBtn;
+    TextView shiftBtn;
+    TextView fnBtn;
+    TextView moreOpts;
+    TextView altBtn;
 
     public void startHome() {
         Intent intent = new Intent(InteractionPage.this, MainActivity.class);
@@ -206,6 +207,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         winBtn = findViewById(R.id.winKey);
         ctrlBtn = findViewById(R.id.ctrlKey);
         shiftBtn = findViewById(R.id.shiftKey);
+        altBtn = findViewById(R.id.altKey);
         fnBtn = findViewById(R.id.fnKey);
         moreOpts = findViewById(R.id.moreOpt);
 

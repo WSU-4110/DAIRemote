@@ -95,139 +95,162 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="90dp">
 
                 <androidx.appcompat.widget.Toolbar
                     android:id="@+id/keyboardToolbar"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:background="@color/material_dynamic_neutral50"
                     android:minHeight="?attr/actionBarSize"
                     android:theme="?attr/actionBarTheme"
-                    android:visibility="invisible"
+                    android:visibility="visible"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <Button
-                    android:id="@+id/shiftKey"
-                    android:layout_width="wrap_content"
+                <GridLayout
+                    android:id="@+id/keyboardExtraButtonsGrid"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:backgroundTint="@android:color/transparent"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="13dp"
-                    android:paddingLeft="0dp"
-                    android:paddingTop="0dp"
-                    android:paddingRight="0dp"
-                    android:paddingBottom="0dp"
-                    android:text="SHIFT"
-                    android:textAllCaps="true"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                    android:textColor="#000000"
-                    android:visibility="invisible"
+                    android:layout_gravity="center"
+                    android:alignmentMode="alignBounds"
+                    android:columnCount="6"
+                    android:gravity="center"
+                    android:rowCount="3"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/ctrlKey"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
-                <Button
-                    android:id="@+id/fnKey"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:backgroundTint="@android:color/transparent"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="13dp"
-                    android:paddingStart="27dp"
-                    android:paddingLeft="0dp"
-                    android:paddingTop="0dp"
-                    android:paddingEnd="27dp"
-                    android:paddingRight="0dp"
-                    android:paddingBottom="0dp"
-                    android:text="FN"
-                    android:textAllCaps="true"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                    android:textColor="#000000"
-                    android:visibility="invisible"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/shiftKey"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <TextView
+                        android:id="@+id/winKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="0"
+                        android:layout_column="0"
+                        android:text="WIN" />
 
-                <Button
-                    android:id="@+id/moreOpt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:backgroundTint="@android:color/transparent"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="13dp"
-                    android:paddingStart="20dp"
-                    android:paddingLeft="0dp"
-                    android:paddingTop="0dp"
-                    android:paddingEnd="20dp"
-                    android:paddingRight="0dp"
-                    android:paddingBottom="0dp"
-                    android:text="..."
-                    android:textAllCaps="true"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                    android:textColor="#000000"
-                    android:visibility="invisible"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="@+id/keyboardToolbar"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <TextView
+                        android:id="@+id/fnKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="0"
+                        android:layout_column="1"
+                        android:text="FN" />
 
-                <Button
-                    android:id="@+id/ctrlKey"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:backgroundTint="@android:color/transparent"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="13dp"
-                    android:paddingStart="20dp"
-                    android:paddingLeft="0dp"
-                    android:paddingTop="0dp"
-                    android:paddingEnd="20dp"
-                    android:paddingRight="0dp"
-                    android:paddingBottom="0dp"
-                    android:text="CTRL"
-                    android:textAllCaps="true"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                    android:textColor="#000000"
-                    android:visibility="invisible"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/winKey"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <TextView
+                        android:id="@+id/ctrlKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="0"
+                        android:layout_column="2"
+                        android:text="CTRL" />
 
-                <Button
-                    android:id="@+id/winKey"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:backgroundTint="@android:color/transparent"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="13dp"
-                    android:paddingStart="25dp"
-                    android:paddingLeft="0dp"
-                    android:paddingTop="0dp"
-                    android:paddingEnd="25dp"
-                    android:paddingRight="0dp"
-                    android:paddingBottom="0dp"
-                    android:text="WIN"
-                    android:textAllCaps="true"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                    android:textColor="#000000"
-                    android:visibility="invisible"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/keyboardToolbar"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <TextView
+                        android:id="@+id/shiftKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="0"
+                        android:layout_column="3"
+                        android:text="SHIFT" />
+
+                    <TextView
+                        android:id="@+id/altKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="0"
+                        android:layout_column="4"
+                        android:text="ALT" />
+
+                    <TextView
+                        android:id="@+id/moreOpt"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="0"
+                        android:layout_column="5"
+                        android:text="..." />
+
+                    <TextView
+                        android:id="@+id/f1Key"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="1"
+                        android:layout_column="0"
+                        android:text="F1" />
+
+                    <TextView
+                        android:id="@+id/f2Key"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="1"
+                        android:layout_column="1"
+                        android:text="F2" />
+
+                    <TextView
+                        android:id="@+id/f3Key"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="1"
+                        android:layout_column="2"
+                        android:text="F3" />
+
+                    <TextView
+                        android:id="@+id/f4Key"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="1"
+                        android:layout_column="3"
+                        android:text="F4" />
+
+                    <TextView
+                        android:id="@+id/f5Key"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="1"
+                        android:layout_column="4"
+                        android:text="F5" />
+
+                    <TextView
+                        android:id="@+id/f6Key"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="1"
+                        android:layout_column="5"
+                        android:text="F6" />
+
+                    <TextView
+                        android:id="@+id/f7Key"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="2"
+                        android:layout_column="0"
+                        android:text="F7" />
+
+                    <TextView
+                        android:id="@+id/f8Key"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="2"
+                        android:layout_column="1"
+                        android:text="F8" />
+
+                    <TextView
+                        android:id="@+id/f9Key"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="2"
+                        android:layout_column="2"
+                        android:text="F9" />
+
+                    <TextView
+                        android:id="@+id/f10Key"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="2"
+                        android:layout_column="3"
+                        android:text="F10" />
+
+                    <TextView
+                        android:id="@+id/f11Key"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="2"
+                        android:layout_column="4"
+                        android:text="F11" />
+
+                    <TextView
+                        android:id="@+id/f12Key"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="2"
+                        android:layout_column="5"
+                        android:text="F12" />
+                </GridLayout>
+
             </androidx.constraintlayout.widget.ConstraintLayout>
-
         </FrameLayout>
 
         <EditText
@@ -293,9 +316,11 @@
             android:textColor="@color/white"
             android:textSize="15sp"
             android:typeface="normal"
+            android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.drawerlayout.widget.DrawerLayout>
