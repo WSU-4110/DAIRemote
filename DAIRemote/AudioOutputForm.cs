@@ -6,12 +6,30 @@ using NAudio.CoreAudioApi;
 
 namespace DAIRemote
 {
-    public partial class AudioOutputForm : System.Windows.Forms.Form
+    public interface IAudioDeviceFactory
+    {
+        List<string> GetAudioDevices();
+    }
+
+    public class NAudioDeviceFactory : IAudioDeviceFactory
+    {
+        public List<string> GetAudioDevices()
+        {
+            var enumerator = new MMDeviceEnumerator();
+            var devices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+            return devices.Select(d => d.FriendlyName).ToList();
+        }
+    }
+
+    public partial class AudioOutputForm : Form
     {
         private ComboBox audioDeviceComboBox;
+        private IAudioDeviceFactory audioDeviceFactory;
 
-        public AudioOutputForm()
+        // Inject the factory through the constructor
+        public AudioOutputForm(IAudioDeviceFactory factory)
         {
+            this.audioDeviceFactory = factory;
             InitializeComponent();
             LoadAudioDevices();
         }
@@ -20,17 +38,17 @@ namespace DAIRemote
         {
             audioDeviceComboBox = new ComboBox();
             SuspendLayout();
-             
+
             audioDeviceComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             audioDeviceComboBox.FormattingEnabled = true;
-            audioDeviceComboBox.Location = new Point(12, 100);
+            audioDeviceComboBox.Location = new System.Drawing.Point(12, 250);
             audioDeviceComboBox.Name = "audioDeviceComboBox";
-            audioDeviceComboBox.Size = new Size(260, 33);
+            audioDeviceComboBox.Size = new System.Drawing.Size(260, 33);
+            audioDeviceComboBox.BackColor = System.Drawing.Color.Gray;
             audioDeviceComboBox.TabIndex = 0;
             audioDeviceComboBox.DropDown += audioDeviceComboBox_DropDown;
-            audioDeviceComboBox.SelectedIndexChanged += audioDeviceComboBox_SelectedIndexChanged;
-            
-            ClientSize = new Size(284, 100);
+
+            ClientSize = new System.Drawing.Size(284, 100);
             Controls.Add(audioDeviceComboBox);
             Name = "AudioOutputForm";
             Text = "Audio Output Switcher";
@@ -38,32 +56,36 @@ namespace DAIRemote
             ResumeLayout(false);
         }
 
-        private void LoadAudioDevices()
-        {
-            var devices = GetAudioDevices();
-            audioDeviceComboBox.DataSource = devices;
-        }
-
-        public List<string> GetAudioDevices()
-        {
-            var enumerator = new MMDeviceEnumerator();
-            var devices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
-            return devices.Select(d => d.FriendlyName).ToList();
-        }
-
-        private void audioDeviceComboBox_DropDown(object sender, EventArgs e)
+        private void AudioOutputForm_Load(object sender, EventArgs e)
         {
             LoadAudioDevices();
         }
 
-        private void audioDeviceComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        // Use the factory to load available audio devices into the ComboBox
+        private void LoadAudioDevices()
         {
-
+            var devices = audioDeviceFactory.GetAudioDevices();
+            audioDeviceComboBox.DataSource = devices;
         }
 
-        private void AudioOutputForm_Load(object sender, EventArgs e)
+        // Refresh device list when dropdown is opened
+        private void audioDeviceComboBox_DropDown(object sender, EventArgs e)
         {
+            LoadAudioDevices();
+        }
+    }
 
+    public static class Program
+    {
+        [STAThread]
+        public static void Main()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            // Create a factory and pass it to the form
+            IAudioDeviceFactory audioFactory = new NAudioDeviceFactory();
+            Application.Run(new AudioOutputForm(audioFactory));
         }
     }
 }
