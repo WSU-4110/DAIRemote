@@ -104,7 +104,7 @@
                     android:background="@color/material_dynamic_neutral50"
                     android:minHeight="?attr/actionBarSize"
                     android:theme="?attr/actionBarTheme"
-                    android:visibility="invisible"
+                    android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -254,21 +254,24 @@
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="1"
                         android:layout_column="0"
-                        android:text="SUP" />
+                        android:paddingLeft="20dp"
+                        android:drawableLeft="@drawable/keyboard_toolbar_soundup" />
 
                     <TextView
                         android:id="@+id/soundDownKey"
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="1"
                         android:layout_column="1"
-                        android:text="SDOW" />
+                        android:paddingLeft="20dp"
+                        android:drawableLeft="@drawable/keyboard_toolbar_sounddown" />
 
                     <TextView
                         android:id="@+id/muteKey"
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="1"
                         android:layout_column="2"
-                        android:text="MUTE" />
+                        android:paddingLeft="20dp"
+                        android:drawableLeft="@drawable/keyboard_toolbar_soundmute" />
 
                     <TextView
                         android:id="@+id/tabKey"
@@ -282,7 +285,8 @@
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="1"
                         android:layout_column="4"
-                        android:text="UP" />
+                        android:paddingLeft="20dp"
+                        android:drawableLeft="@drawable/keyboard_toolbar_arrowup" />
 
                     <TextView
                         android:id="@+id/escKey"
@@ -317,21 +321,24 @@
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="2"
                         android:layout_column="3"
-                        android:text="LEFT" />
+                        android:paddingLeft="20dp"
+                        android:drawableLeft="@drawable/keyboard_toolbar_arrowleft" />
 
                     <TextView
                         android:id="@+id/downKey"
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="2"
                         android:layout_column="4"
-                        android:text="DOWN" />
+                        android:paddingLeft="20dp"
+                        android:drawableLeft="@drawable/keyboard_toolbar_arrowdown" />
 
                     <TextView
                         android:id="@+id/rightKey"
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="2"
                         android:layout_column="5"
-                        android:text="RIGHT" />
+                        android:paddingLeft="20dp"
+                        android:drawableLeft="@drawable/keyboard_toolbar_arrowright" />
                 </GridLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
