@@ -373,6 +373,19 @@ namespace UDPServerManagerForm
                     Thread.Sleep(25);
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);
                     break;
+                case "KEYBOARD_WRITE":
+                    string key = parts[1];
+                    if (key.Length > 1)
+                    {
+                        // Special keys such as {F1}, {ENTER}, etc.
+                        SendKeys.SendWait(key);
+                    }
+                    else
+                    {
+                        key = Regex.Replace(key, "[+^%~(){}]", "{$0}");
+                        SendKeys.SendWait(key);
+                    }
+                    break;
                 case "MOUSE_LMB_HOLD":
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
                     Thread.Sleep(25);
@@ -385,23 +398,6 @@ namespace UDPServerManagerForm
                 case "MOUSE_SCROLL":
                     int scrollAmount = (int)float.Parse(parts[1]);
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.Wheel, scrollAmount);
-                    break;
-                case "KEYBOARD_WRITE":
-                    string key = parts.Length > 1 ? parts[1] : "";
-                    if (key == "")
-                    {
-                        SendKeys.SendWait("{SPACE}");
-                    } else
-                    {
-                        key = Regex.Replace(key, "[+^%~(){}]", "{$0}");
-                        SendKeys.SendWait(key);
-                    }
-                    break;
-                case "KEYBOARD_DELETE":
-                    SendKeys.SendWait("{BACKSPACE}");
-                    break;
-                case "KEYBOARD_ENTER":
-                    SendKeys.SendWait("{ENTER}");
                     break;
                 default:
                     Console.WriteLine("Unknown command: " + command);

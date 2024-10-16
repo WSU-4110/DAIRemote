@@ -232,12 +232,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     if (cursorPosition > 0) {
                         editText.getText().delete(cursorPosition - 1, cursorPosition);
                     }
-                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_DELETE")) {
+                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE {BACKSPACE}")) {
                         startHome();
                     }
                     return true;
                 } else if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_ENTER")) {
+                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE {ENTER}")) {
                         startHome();
                     }
                     toggleKeyboardToolbar(false);
@@ -341,6 +341,51 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                 fnBtn.setVisibility(View.GONE);
                 moreOpts.setVisibility(View.GONE);
             }
+        }
+    }
+
+    public void extraToolbarOnClick(View view) {
+       String msg = "";
+       int viewID = view.getId();
+        if(viewID == R.id.winKey) {
+            msg = "WIN";
+        } else if(viewID == R.id.fnKey) {
+            msg = "FN";
+        } else if(viewID == R.id.altKey) {
+            msg = "ALT";
+        } else if(viewID == R.id.ctrlKey) {
+            msg = "CTRL";
+        } else if(viewID == R.id.shiftKey) {
+            msg = "SHIFT";
+        } else if(viewID == R.id.moreOpt) {
+            msg = "MORE OPTIONS IMPLEMENT HANDLING FOR 2ND PAGE";
+        } else if(viewID == R.id.f1Key) {
+            msg = "{F1}";
+        } else if(viewID == R.id.f2Key) {
+            msg = "{F2}";
+        } else if(viewID == R.id.f3Key) {
+            msg = "{F3}";
+        } else if(viewID == R.id.f4Key) {
+            msg = "{F4}";
+        } else if(viewID == R.id.f5Key) {
+            msg = "{F5}";
+        } else if(viewID == R.id.f6Key) {
+            msg = "{F6}";
+        } else if(viewID == R.id.f7Key) {
+            msg = "{F7}";
+        } else if(viewID == R.id.f8Key) {
+            msg = "{F8}";
+        } else if(viewID == R.id.f9Key) {
+            msg = "{F9}";
+        } else if(viewID == R.id.f10Key) {
+            msg = "{F10}";
+        } else if(viewID == R.id.f11Key) {
+            msg = "{F11}";
+        } else if(viewID == R.id.f12Key) {
+            msg = "{F12}";
+        }
+        if(!msg.isEmpty()) {
+            MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE " + msg);
         }
     }
 
