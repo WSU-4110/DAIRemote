@@ -6,16 +6,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/material_dynamic_neutral20"
-    tools:context=".InteractionPage"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    tools:context=".InteractionPage">
 
     <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/nav_view"
+        android:layout_gravity="start"
         app:headerLayout="@layout/main_menu_header"
-        app:menu="@menu/main_menu"
-        android:layout_gravity="start"/>
+        app:menu="@menu/main_menu" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -23,32 +23,62 @@
 
         <include
             android:id="@+id/toolbar"
-            layout="@layout/toolbar"/>
+            layout="@layout/toolbar" />
 
         <ImageButton
             android:id="@+id/keyboardImgBtn"
-            android:layout_width="59dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="45dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
             android:layout_marginTop="-1dp"
+            android:layout_marginEnd="35dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Keyboard icon to pull system keyboard"
             android:src="@drawable/keyboard_light_icon"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/touchpadFrame" />
+
+        <ImageButton
+            android:id="@+id/udptest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="35dp"
+            android:layout_marginTop="-1dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Send message to host"
+            android:padding="12dp"
+            android:src="@drawable/udpmsg_icon"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/touchpadFrame" />
 
         <ImageButton
-            android:id="@+id/udptest"
-            android:layout_width="59dp"
-            android:layout_height="48dp"
+            android:id="@+id/audiocycle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="35dp"
             android:layout_marginTop="-1dp"
-            android:layout_marginEnd="45dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Send message to host"
-            android:src="@drawable/udpmsg_icon"
+            android:contentDescription="Cycle audio"
+            android:padding="12dp"
+            android:src="@drawable/audio_cycle_icon"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/udptest"
+            app:layout_constraintTop_toBottomOf="@+id/touchpadFrame" />
+
+        <ImageButton
+            android:id="@+id/displays"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="35dp"
+            android:layout_marginTop="-1dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Display profiles"
+            android:padding="12dp"
+            android:src="@drawable/display_profile_icon"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/audiocycle"
             app:layout_constraintTop_toBottomOf="@+id/touchpadFrame" />
 
         <FrameLayout
@@ -61,24 +91,165 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" >
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/keyboardToolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/material_dynamic_neutral50"
+                    android:minHeight="?attr/actionBarSize"
+                    android:theme="?attr/actionBarTheme"
+                    android:visibility="invisible"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/shiftKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:backgroundTint="@android:color/transparent"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="13dp"
+                    android:paddingLeft="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingRight="0dp"
+                    android:paddingBottom="0dp"
+                    android:text="SHIFT"
+                    android:textAllCaps="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textColor="#000000"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/ctrlKey"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/fnKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:backgroundTint="@android:color/transparent"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="13dp"
+                    android:paddingStart="27dp"
+                    android:paddingLeft="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingEnd="27dp"
+                    android:paddingRight="0dp"
+                    android:paddingBottom="0dp"
+                    android:text="FN"
+                    android:textAllCaps="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textColor="#000000"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/shiftKey"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/moreOpt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:backgroundTint="@android:color/transparent"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="13dp"
+                    android:paddingStart="20dp"
+                    android:paddingLeft="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingEnd="20dp"
+                    android:paddingRight="0dp"
+                    android:paddingBottom="0dp"
+                    android:text="..."
+                    android:textAllCaps="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textColor="#000000"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/keyboardToolbar"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/ctrlKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:backgroundTint="@android:color/transparent"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="13dp"
+                    android:paddingStart="20dp"
+                    android:paddingLeft="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingEnd="20dp"
+                    android:paddingRight="0dp"
+                    android:paddingBottom="0dp"
+                    android:text="CTRL"
+                    android:textAllCaps="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textColor="#000000"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/winKey"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/winKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:backgroundTint="@android:color/transparent"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="13dp"
+                    android:paddingStart="25dp"
+                    android:paddingLeft="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingEnd="25dp"
+                    android:paddingRight="0dp"
+                    android:paddingBottom="0dp"
+                    android:text="WIN"
+                    android:textAllCaps="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textColor="#000000"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/keyboardToolbar"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </FrameLayout>
 
         <EditText
             android:id="@+id/editText"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginStart="75dp"
-            android:layout_marginTop="300dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="350dp"
+            android:layout_marginEnd="5dp"
+            android:autofillHints=""
+            android:background="@android:color/transparent"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:visibility="visible"
-            android:inputType="text"
+            android:inputType="text|textVisiblePassword"
+            android:singleLine="true"
+            android:textAlignment="center"
             android:textColor="@color/white"
-            android:background="@android:color/transparent"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="LabelFor" />
 
         <!--<TextView
             android:id="@+id/responseTextView"
@@ -98,12 +269,13 @@
 
         <ImageButton
             android:id="@+id/interactionsHelp"
-            android:layout_width="59dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="45dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="35dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Send message to host"
+            android:contentDescription="Provide mouse simulation instructions"
             android:elevation="8dp"
+            android:padding="12dp"
             android:src="@drawable/interactions_help_icon"
             app:layout_constraintBottom_toTopOf="@+id/touchpadFrame"
             app:layout_constraintEnd_toEndOf="parent"
@@ -113,15 +285,15 @@
             android:id="@+id/interationsHelpTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="75dp"
             android:layout_marginTop="222dp"
             android:fontFamily="@font/audiowide"
-            android:text="To simulate input:\nTap with 1 finger to left-click\n"
+            android:text="To simulate input:\nTap with 1 finger to left-click\nTap with 2 fingers to right-click\nDrag with 2 fingers to scroll\nLong-press and move to drag\nTap once to release drag"
+            android:textAlignment="center"
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="15sp"
-            android:textStyle="bold"
             android:typeface="normal"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

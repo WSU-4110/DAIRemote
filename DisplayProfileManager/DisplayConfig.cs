@@ -1274,8 +1274,7 @@ namespace DisplayProfileManager
                     additionalInfo = additionalInfo
                 };
 
-                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                string folderPath = Path.Combine(appDataPath, "DAIRemote");
+                string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
 
                 if (!Directory.Exists(folderPath))
                 {

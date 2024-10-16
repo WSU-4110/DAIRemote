@@ -1,6 +1,6 @@
 using AudioManager;
 using DisplayProfileManager;
-using UDPServerManager;
+using UDPServerManagerForm;
 
 namespace DAIRemote
 {

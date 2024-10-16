@@ -14,10 +14,10 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="68dp"
-        android:layout_height="54dp"
+        android:layout_width="41dp"
+        android:layout_height="40dp"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="22dp"
+        android:layout_marginTop="34dp"
         android:src="@drawable/menu_header_phone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -27,11 +27,12 @@
         android:layout_width="215dp"
         android:layout_height="31dp"
         android:layout_marginStart="7dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="34dp"
         android:fontFamily="@font/audiowide"
         android:text="Test"
         android:textColor="@color/white"
         android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/imageView"
         app:layout_constraintTop_toTopOf="parent" />
 
