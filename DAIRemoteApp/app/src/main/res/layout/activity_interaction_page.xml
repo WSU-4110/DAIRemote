@@ -104,7 +104,7 @@
                     android:background="@color/material_dynamic_neutral50"
                     android:minHeight="?attr/actionBarSize"
                     android:theme="?attr/actionBarTheme"
-                    android:visibility="visible"
+                    android:visibility="invisible"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -248,6 +248,90 @@
                         android:layout_row="2"
                         android:layout_column="5"
                         android:text="F12" />
+
+                    <TextView
+                        android:id="@+id/soundUpKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="1"
+                        android:layout_column="0"
+                        android:text="SUP" />
+
+                    <TextView
+                        android:id="@+id/soundDownKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="1"
+                        android:layout_column="1"
+                        android:text="SDOW" />
+
+                    <TextView
+                        android:id="@+id/muteKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="1"
+                        android:layout_column="2"
+                        android:text="MUTE" />
+
+                    <TextView
+                        android:id="@+id/tabKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="1"
+                        android:layout_column="3"
+                        android:text="TAB" />
+
+                    <TextView
+                        android:id="@+id/upKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="1"
+                        android:layout_column="4"
+                        android:text="UP" />
+
+                    <TextView
+                        android:id="@+id/escKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="1"
+                        android:layout_column="5"
+                        android:text="ESC" />
+
+                    <TextView
+                        android:id="@+id/insertKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="2"
+                        android:layout_column="0"
+                        android:text="INSERT" />
+
+                    <TextView
+                        android:id="@+id/deleteKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="2"
+                        android:layout_column="1"
+                        android:text="DELETE" />
+
+                    <TextView
+                        android:id="@+id/printScreenKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="2"
+                        android:layout_column="2"
+                        android:text="PRNTSCRN" />
+
+                    <TextView
+                        android:id="@+id/leftKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="2"
+                        android:layout_column="3"
+                        android:text="LEFT" />
+
+                    <TextView
+                        android:id="@+id/downKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="2"
+                        android:layout_column="4"
+                        android:text="DOWN" />
+
+                    <TextView
+                        android:id="@+id/rightKey"
+                        style="@style/KeyboardExtrasStyle"
+                        android:layout_row="2"
+                        android:layout_column="5"
+                        android:text="RIGHT" />
                 </GridLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
