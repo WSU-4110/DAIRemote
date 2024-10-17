@@ -14,7 +14,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -43,11 +42,23 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     NavigationView navigationView;
     Toolbar toolbar;
     Toolbar keyboardToolbar;
-    Button winBtn;
-    Button ctrlBtn;
-    Button shiftBtn;
-    Button fnBtn;
-    Button moreOpts;
+    TextView moreOpts;
+    private int currentPageIndex = 0;
+    private String[][][] keyboardExtraRows = {
+            { // Page 1
+                    {"F1", "F2", "F3", "F4", "F5", "F6"}, // Row 1
+                    {"F7", "F8", "F9", "F10", "F11", "F12"} // Row 2
+            },
+            { // Page 2
+                    {"SUP", "SDOWN", "MUTE", "TAB", "UP", "ESC"},
+                    {"INSERT", "DELETE", "PRNTSCRN", "LEFT", "DOWN", "RIGHT"}
+            }
+    };
+
+    private TextView[] p1r2Buttons = new TextView[6];
+    private TextView[] p1r3Buttons = new TextView[6];
+    private TextView[] p2r2Buttons = new TextView[6];
+    private TextView[] p2r3Buttons = new TextView[6];
 
     public void startHome() {
         Intent intent = new Intent(InteractionPage.this, MainActivity.class);
@@ -203,11 +214,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         keyboardImgBtn = findViewById(R.id.keyboardImgBtn);
         editText = findViewById(R.id.editText);
         keyboardToolbar = findViewById(R.id.keyboardToolbar);
-        winBtn = findViewById(R.id.winKey);
-        ctrlBtn = findViewById(R.id.ctrlKey);
-        shiftBtn = findViewById(R.id.shiftKey);
-        fnBtn = findViewById(R.id.fnKey);
+
+        // Initialize row 2 and 3 button arrays for keyboardToolbar
+        initButtonRows();
+
         moreOpts = findViewById(R.id.moreOpt);
+        moreOpts.setOnClickListener(v -> keyboardExtraNextPage());
 
         keyboardImgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -230,12 +242,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     if (cursorPosition > 0) {
                         editText.getText().delete(cursorPosition - 1, cursorPosition);
                     }
-                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_DELETE")) {
+                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE {BS}")) {
                         startHome();
                     }
                     return true;
                 } else if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_ENTER")) {
+                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE {~}")) {
                         startHome();
                     }
                     toggleKeyboardToolbar(false);
@@ -299,7 +311,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
         interactionHelp = findViewById(R.id.interactionsHelp);
         interactionsHelpText = findViewById(R.id.interationsHelpTextView);
-        interactionsHelpText.setVisibility(View.GONE);
 
         interactionHelp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -324,20 +335,168 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         if (open) {
             if (keyboardToolbar != null && !(keyboardToolbar.getVisibility() == View.VISIBLE)) {
                 keyboardToolbar.setVisibility(View.VISIBLE);
-                winBtn.setVisibility(View.VISIBLE);
-                ctrlBtn.setVisibility(View.VISIBLE);
-                shiftBtn.setVisibility(View.VISIBLE);
-                fnBtn.setVisibility(View.VISIBLE);
-                moreOpts.setVisibility(View.VISIBLE);
+                keyboardExtraSetRowVisibility(currentPageIndex);
             }
         } else {
             if (keyboardToolbar != null && keyboardToolbar.getVisibility() == View.VISIBLE) {
                 keyboardToolbar.setVisibility(View.GONE);
-                winBtn.setVisibility(View.GONE);
-                ctrlBtn.setVisibility(View.GONE);
-                shiftBtn.setVisibility(View.GONE);
-                fnBtn.setVisibility(View.GONE);
-                moreOpts.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    // This is used in styles but does not count as a usage for some reason
+    // DO NOT DELETE
+    public void extraToolbarOnClick(View view) {
+        String msg = "";
+        int viewID = view.getId();
+        if(viewID == R.id.moreOpt) {
+            // Place holder to do nothing,
+            // on click listener will be done instead and is setup
+        } else if(viewID == R.id.winKey) {
+            msg = "WIN";
+        } else if(viewID == R.id.fnKey) {
+            msg = "FN";
+        } else if(viewID == R.id.altKey) {
+            msg = "ALT";
+        } else if(viewID == R.id.ctrlKey) {
+            msg = "CTRL";
+        } else if(viewID == R.id.shiftKey) {
+            msg = "SHIFT";
+        } else {
+            if (currentPageIndex == 0) {
+                if(viewID == R.id.f1Key) {
+                    msg = "{F1}";
+                } else if(viewID == R.id.f2Key) {
+                    msg = "{F2}";
+                } else if(viewID == R.id.f3Key) {
+                    msg = "{F3}";
+                } else if(viewID == R.id.f4Key) {
+                    msg = "{F4}";
+                } else if(viewID == R.id.f5Key) {
+                    msg = "{F5}";
+                } else if(viewID == R.id.f6Key) {
+                    msg = "{F6}";
+                } else if(viewID == R.id.f7Key) {
+                    msg = "{F7}";
+                } else if(viewID == R.id.f8Key) {
+                    msg = "{F8}";
+                } else if(viewID == R.id.f9Key) {
+                    msg = "{F9}";
+                } else if(viewID == R.id.f10Key) {
+                    msg = "{F10}";
+                } else if(viewID == R.id.f11Key) {
+                    msg = "{F11}";
+                } else if(viewID == R.id.f12Key) {
+                    msg = "{F12}";
+                }
+            } else if (currentPageIndex == 1) {
+                if(viewID == R.id.soundUpKey) {
+                    msg = "SOUND UP";
+                } else if(viewID == R.id.soundDownKey) {
+                    msg = "SOUND DOWN";
+                } else if(viewID == R.id.muteKey) {
+                    msg = "SOUND MUTE";
+                } else if(viewID == R.id.tabKey) {
+                    msg = "{TAB}";
+                } else if(viewID == R.id.upKey) {
+                    msg = "{UP}";
+                } else if(viewID == R.id.escKey) {
+                    msg = "{ESC}";
+                } else if(viewID == R.id.insertKey) {
+                    msg = "{INS}";
+                } else if(viewID == R.id.deleteKey) {
+                    msg = "{DEL}";
+                } else if(viewID == R.id.printScreenKey) {
+                    msg = "{PRTSC}";
+                } else if(viewID == R.id.leftKey) {
+                    msg = "{LEFT}";
+                } else if(viewID == R.id.downKey) {
+                    msg = "{DOWN}";
+                } else if(viewID == R.id.rightKey) {
+                    msg = "{RIGHT}";
+                }
+            }
+        }
+
+        if(!msg.isEmpty()) {
+            MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE " + msg);
+            Log.d("KeyboardToolbar", "KEYBOARD_WRITE " + msg);
+        }
+    }
+
+    private void initButtonRows() {
+        // Keyboard extra toolbar Page 1 Row 2
+        p1r2Buttons[0] = findViewById(R.id.f1Key);
+        p1r2Buttons[1] = findViewById(R.id.f2Key);
+        p1r2Buttons[2] = findViewById(R.id.f3Key);
+        p1r2Buttons[3] = findViewById(R.id.f4Key);
+        p1r2Buttons[4] = findViewById(R.id.f5Key);
+        p1r2Buttons[5] = findViewById(R.id.f6Key);
+
+        // Keyboard extra toolbar Page 1 Row 3
+        p1r3Buttons[0] = findViewById(R.id.f7Key);
+        p1r3Buttons[1] = findViewById(R.id.f8Key);
+        p1r3Buttons[2] = findViewById(R.id.f9Key);
+        p1r3Buttons[3] = findViewById(R.id.f10Key);
+        p1r3Buttons[4] = findViewById(R.id.f11Key);
+        p1r3Buttons[5] = findViewById(R.id.f12Key);
+
+        // PAGE 2
+
+        // Keyboard extra toolbar Page 2 Row 2
+        p2r2Buttons[0] = findViewById(R.id.soundUpKey);
+        p2r2Buttons[1] = findViewById(R.id.soundDownKey);
+        p2r2Buttons[2] = findViewById(R.id.muteKey);
+        p2r2Buttons[3] = findViewById(R.id.tabKey);
+        p2r2Buttons[4] = findViewById(R.id.upKey);
+        p2r2Buttons[5] = findViewById(R.id.escKey);
+
+        // Keyboard extra toolbar Page 2 Row 3
+        p2r3Buttons[0] = findViewById(R.id.insertKey);
+        p2r3Buttons[1] = findViewById(R.id.deleteKey);
+        p2r3Buttons[2] = findViewById(R.id.printScreenKey);
+        p2r3Buttons[3] = findViewById(R.id.leftKey);
+        p2r3Buttons[4] = findViewById(R.id.downKey);
+        p2r3Buttons[5] = findViewById(R.id.rightKey);
+    }
+
+    private void keyboardExtraNextPage() {
+        currentPageIndex = (currentPageIndex + 1) % keyboardExtraRows.length;
+        keyboardExtraSetRowVisibility(currentPageIndex);
+    }
+
+    private void keyboardExtraSetRowVisibility(int pageIndex) {
+        // Hide row 2 & 3 buttons initially
+        if (pageIndex == 0) {
+            for (TextView button : p2r2Buttons) {
+                button.setVisibility(View.GONE);
+            }
+            for (TextView button : p2r3Buttons) {
+                button.setVisibility(View.GONE);
+            }
+        } else {
+            for (TextView button : p1r2Buttons) {
+                button.setVisibility(View.GONE);
+            }
+            for (TextView button : p1r3Buttons) {
+                button.setVisibility(View.GONE);
+            }
+        }
+
+        // Show buttons for the current page
+        if (pageIndex == 0) {
+            for (TextView button : p1r2Buttons) {
+                button.setVisibility(View.VISIBLE);
+            }
+            for (TextView button : p1r3Buttons) {
+                button.setVisibility(View.VISIBLE);
+            }
+        } else if (pageIndex == 1) {
+            for (TextView button : p2r2Buttons) {
+                button.setVisibility(View.VISIBLE);
+            }
+            for (TextView button : p2r3Buttons) {
+                button.setVisibility(View.VISIBLE);
             }
         }
     }

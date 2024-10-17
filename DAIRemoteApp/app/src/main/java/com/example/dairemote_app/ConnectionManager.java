@@ -25,6 +25,7 @@ public class ConnectionManager {
     public static String serverAddress;
     public static int serverPort;
     public static String serverResponse;
+    public static String heartbeatAck = "";
     public static HostSearchCallback callback;
     public static boolean connectionEstablished = false;
     public static int declineCount = 0;
@@ -42,18 +43,68 @@ public class ConnectionManager {
         this.executorService = Executors.newCachedThreadPool();
     }
 
+    // Reconnect to the server
+    public void connect(String message) {
+        // Use Future to wait for the result of the asynchronous task
+        executorService.submit(() -> {
+            try {
+                InetAddress serverAddr = InetAddress.getByName(serverAddress);
+                byte[] sendData = message.getBytes();
+                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, serverPort);
+                udpSocket.send(sendPacket);
+                Log.d("ConnectionManager", "Connecting and sending message: " + message);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e("ConnectionManager", "Error connecting: " + e.getMessage());
+            }
+        });
+    }
+
+    // Utility to get the device name
+    public static String getDeviceName() {
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (model.startsWith(manufacturer)) {
+            return model;
+        } else {
+            return manufacturer + " " + model;
+        }
+    }
+
+    // Wait for server response
+    public void waitForResponse(int timeout) {
+        try {
+            udpSocket.setSoTimeout(timeout);
+            byte[] receiveData = new byte[200];
+            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+
+            udpSocket.receive(receivePacket);
+
+            serverResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
+            Log.d("ConnectionManager", "Server response: " + serverResponse);
+
+        } catch (SocketTimeoutException e) {
+            Log.e("ConnectionManager", "No response received within the timeout: " + e.getMessage());
+            serverResponse = "";
+        } catch (Exception e) {
+            Log.e("ConnectionManager", "Error waiting for response: " + e.getMessage());
+            serverResponse = "";
+        }
+    }
+
     // Initialize connection
     public boolean initializeConnection() {
         serverResponse = "";
         int broadcastCount = 0;
         while (serverResponse.isEmpty()) {
-            Log.d("ConnectionManager", "Waiting for broadcast response...");
             connect("Connection requested by " + getDeviceName());
             broadcastCount += 1;
             if (broadcastCount == 1) {
                 waitForResponse(25);
+            } else if (broadcastCount > 5) {
+                Log.d("ConnectionManager", "Timed out waiting for connection response...");
             } else {
-                waitForResponse(10000);
+                waitForResponse(2500);
             }
         }
         return finishConnection();
@@ -71,6 +122,7 @@ public class ConnectionManager {
                 ConnectionManager.declineCount = 0;
                 return true;
             } else if (serverResponse.equalsIgnoreCase("Connection attempt declined.")) {
+                resetConnectionManager();
                 Log.d("ConnectionManager", "Denied connection");
             }
         } else if (serverResponse.equalsIgnoreCase("Approved")) {
@@ -92,16 +144,19 @@ public class ConnectionManager {
             public void run() {
                 sendHeartbeat();
             }
-        }, 0, 15, TimeUnit.SECONDS); // Initial delay 0, and 15-second delay after each execution
+        }, 0, 2, TimeUnit.SECONDS); // Initial delay 0, and 10-second delay after each execution
     }
 
     public void sendHeartbeat() {
+        if (!connectionEstablished) return;
+
         if (!sendHostMessage("DroidHeartBeat")) {
             return;
         }
 
-        waitForResponse(10000);
+        waitForResponse(3000);
         if (!serverResponse.equalsIgnoreCase("HeartBeat Ack")) {
+            resetConnectionManager();
             initializeConnection();
         }
     }
@@ -175,11 +230,11 @@ public class ConnectionManager {
                     DatagramPacket receivePacket = new DatagramPacket(recBuf, recBuf.length);
                     socket.receive(receivePacket); // Blocks until a response is received
 
-                    serverResponse = new String(receivePacket.getData()).trim();
+                    String serverReply = new String(receivePacket.getData()).trim();
                     String serverIp = receivePacket.getAddress().getHostAddress();
-                    Log.i("ConnectionManager", "Response from server: " + serverResponse + " at " + serverIp);
+                    Log.i("ConnectionManager", "Response from server: " + serverReply + " at " + serverIp);
 
-                    if (serverResponse.contains("Hello, I'm")) {
+                    if (serverReply.contains("Hello, I'm")) {
                         hosts.add(serverIp);
                     }
                 } catch (SocketTimeoutException e) {
@@ -207,56 +262,7 @@ public class ConnectionManager {
         }
     }
 
-    // Reconnect to the server
-    public void connect(String message) {
-        // Use Future to wait for the result of the asynchronous task
-        executorService.submit(() -> {
-            try {
-                InetAddress serverAddr = InetAddress.getByName(serverAddress);
-                byte[] sendData = message.getBytes();
-                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, serverPort);
-                udpSocket.send(sendPacket);
-                Log.d("ConnectionManager", "Connecting and sending message: " + message);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.e("ConnectionManager", "Error connecting: " + e.getMessage());
-            }
-        });
-    }
-
-    // Utility to get the device name
-    public static String getDeviceName() {
-        String manufacturer = Build.MANUFACTURER;
-        String model = Build.MODEL;
-        if (model.startsWith(manufacturer)) {
-            return model;
-        } else {
-            return manufacturer + " " + model;
-        }
-    }
-
-    // Wait for server response
-    public void waitForResponse(int timeout) {
-        try {
-            udpSocket.setSoTimeout(timeout);
-            byte[] receiveData = new byte[200];
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-
-            udpSocket.receive(receivePacket);
-
-            serverResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
-            Log.d("ConnectionManager", "Server response: " + serverResponse);
-
-        } catch (SocketTimeoutException e) {
-            Log.e("ConnectionManager", "No response received within the timeout: " + e.getMessage());
-        } catch (Exception e) {
-            Log.e("ConnectionManager", "Error waiting for response: " + e.getMessage());
-        }
-    }
-
-    // Shutdown the connection
-    public void shutdown() {
-        sendHostMessage("Shutdown requested");
+    public void resetConnectionManager() {
         try {
             Thread.sleep(125);
         } catch (InterruptedException e) {
@@ -272,5 +278,12 @@ public class ConnectionManager {
         }
         connectionEstablished = false;
         serverAddress = "";
+        serverResponse = "";
+    }
+
+    // Shutdown the connection
+    public void shutdown() {
+        sendHostMessage("Shutdown requested");
+        resetConnectionManager();
     }
 }

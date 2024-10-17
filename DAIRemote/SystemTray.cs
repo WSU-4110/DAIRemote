@@ -5,6 +5,8 @@
         private NotifyIcon trayIcon;
         private ContextMenuStrip trayMenu;
         private Form form;
+        private FileSystemWatcher profileDirWatcher;
+        private string profilesFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
 
         public TrayIconManager(Form form)
         {
@@ -22,14 +24,52 @@
                 Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
             };
 
-            string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
+            profileDirWatcher = new FileSystemWatcher(@profilesFolderPath);
+            profileDirWatcher.NotifyFilter = NotifyFilters.FileName;
+            profileDirWatcher.Created += OnProfilesChanged;
+            profileDirWatcher.Deleted += OnProfilesChanged;
+            profileDirWatcher.Renamed += OnProfilesChanged;
+            profileDirWatcher.EnableRaisingEvents = true;
 
-            if (!Directory.Exists(folderPath))
+            PopulateContextMenu();
+
+            trayIcon = new NotifyIcon
             {
-                Directory.CreateDirectory(folderPath);
+                Text = "DAIRemote",
+                Icon = new Icon("Resources/DAIRemoteLogo.ico"),
+                ContextMenuStrip = trayMenu,
+                Visible = true
+            };
+
+            trayIcon.DoubleClick += (s, e) => ShowForm();
+        }
+
+        private void OnProfilesChanged(object sender, FileSystemEventArgs e)
+        {
+            if (form.InvokeRequired)
+            {
+                form.BeginInvoke((MethodInvoker)delegate
+                {
+                    PopulateContextMenu();
+                });
+            }
+            else
+            {
+                PopulateContextMenu();
+            }
+        }
+
+        private void PopulateContextMenu()
+        {
+            // Clear existing items
+            trayMenu.Items.Clear();
+
+            if (!Directory.Exists(profilesFolderPath))
+            {
+                Directory.CreateDirectory(profilesFolderPath);
             }
 
-            string[] jsonFiles = Directory.GetFiles(folderPath);
+            string[] jsonFiles = Directory.GetFiles(profilesFolderPath);
 
             foreach (string jsonFile in jsonFiles)
             {
@@ -52,16 +92,6 @@
 
             trayMenu.Items.Add(showMenuItem);
             trayMenu.Items.Add(exitMenuItem);
-
-            trayIcon = new NotifyIcon
-            {
-                Text = "DAIRemote",
-                Icon = new Icon("Resources/DAIRemoteLogo.ico"),
-                ContextMenuStrip = trayMenu,
-                Visible = true
-            };
-
-            trayIcon.DoubleClick += (s, e) => ShowForm();
         }
 
         public void HideIcon()

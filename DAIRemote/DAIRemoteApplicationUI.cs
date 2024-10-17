@@ -1,5 +1,6 @@
 using AudioManager;
 using DisplayProfileManager;
+using Microsoft.Win32;
 using UDPServerManagerForm;
 
 namespace DAIRemote
@@ -26,6 +27,8 @@ namespace DAIRemote
             this.Load += DAIRemoteApplicationUI_Load;
             this.FormClosing += DAIRemoteApplicationUI_FormClosing;
             this.StartPosition = FormStartPosition.CenterScreen;
+
+            LoadStartupSetting();   // Checks onStartup default value to set
         }
 
         private void DAIRemoteApplicationUI_Load(object sender, EventArgs e)
@@ -98,6 +101,68 @@ namespace DAIRemote
         private void BtnLoadDisplayConfig_Click(object sender, EventArgs e)
         {
             DisplayConfig.SetDisplaySettings("displayConfig" + ".json");
+        }
+
+        private void checkBoxStartup_CheckedChanged(object sender, EventArgs e)
+        {
+            string startupKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
+            string appName = "DAIRemote";
+            string appPath = Application.ExecutablePath;
+
+            if (checkBoxStartup.Checked)
+            {
+                AddToStartup(startupKey, appName, appPath);
+            }
+            else
+            {
+                RemoveFromStartup(startupKey, appName, appPath);
+            }
+        }
+
+        private void AddToStartup(string startupKey, string appName, string appPath)
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(startupKey, true))
+                {
+                    key.SetValue(appName, $"\"{appPath}\"");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error adding to startup: " + ex.Message);
+            }
+        }
+
+        private void RemoveFromStartup(string startupKey, string appName, string appPath)
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(startupKey, true))
+                {
+                    if (key.GetValue(appName) != null)
+                    {
+                        key.DeleteValue(appName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error removing from startup: " + ex.Message);
+            }
+        }
+
+        private bool IsAppInStartup()
+        {
+            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", false))
+            {
+                return key.GetValue("DAIRemote") != null;
+            }
+        }
+
+        private void LoadStartupSetting()
+        {
+            checkBoxStartup.Checked = IsAppInStartup();
         }
     }
 }

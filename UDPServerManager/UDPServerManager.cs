@@ -122,6 +122,15 @@ namespace UDPServerManagerForm
                 if (handshakeMessage.StartsWith("Connection requested"))
                 {
                     return awaitApproval(ExtractDeviceName(handshakeMessage));
+                } 
+                else if (handshakeMessage.StartsWith("Hello, I'm"))
+                {
+                    Debug.WriteLine($"Received client broadcast from {remoteEP.Address}:{remoteEP.Port}: {handshakeMessage}");
+                    // Send an approval message back to the client
+                    SendUdpMessage("Hello, I'm " + Environment.MachineName);
+
+                    Debug.WriteLine($"Sent reply to client's broadcast at {remoteEP.Address}:{remoteEP.Port}\nAwaiting handshake...");
+                    return false;
                 }
                 return false;
             }
@@ -170,37 +179,6 @@ namespace UDPServerManagerForm
             return false;
         }
 
-        // Method to handle the initial handshake
-        public bool clientSearch()
-        {
-            try
-            {
-                byte[] handshakeData = udpServer.Receive(ref remoteEP);
-                string handshakeMessage = Encoding.ASCII.GetString(handshakeData);
-
-                if (handshakeMessage.StartsWith("Hello, I'm"))
-                {
-                    Debug.WriteLine($"Received client broadcast from {remoteEP.Address}:{remoteEP.Port}: {handshakeMessage}");
-                    // Send an approval message back to the client
-                    SendUdpMessage("Hello, I'm " + Environment.MachineName);
-
-                    Debug.WriteLine($"Sent reply to client's broadcast at {remoteEP.Address}:{remoteEP.Port}");
-                    return true;
-                }
-                return false;
-            }
-            catch (SocketException e)
-            {
-                Debug.WriteLine("Error during handshake: " + e.Message);
-                return false;
-            }
-            catch (ObjectDisposedException e)
-            {
-                Debug.WriteLine("Error: UdpClient has been disposed: " + e.Message);
-                return false;
-            }
-        }
-
         // Method to start checking for handshake attempts in the background
         public async Task CheckForHandshake()
         {
@@ -208,14 +186,6 @@ namespace UDPServerManagerForm
             {
                 try
                 {
-                    bool foundClient = await Task.Run(() => clientSearch());
-
-                    if (foundClient)
-                    {
-                        Debug.WriteLine("Awaiting handshake...");
-                        continue;
-                    }
-
                     bool handshakeSuccessful = await Task.Run(() => InitiateHandshake());
 
                     if (handshakeSuccessful)
@@ -348,13 +318,13 @@ namespace UDPServerManagerForm
         {
             var parts = command.Split(new[] { ' ' }, 2);
             var action = parts[0];
-            var currentPos = MouseOperations.GetCursorPosition();
 
             Debug.WriteLine(action);
             switch (action)
             {
                 case "MOUSE_MOVE":
                     var moveParts = parts[1].Split(' ');
+                    var currentPos = MouseOperations.GetCursorPosition();
 
                     if (moveParts.Length >= 2)
                     {
@@ -373,6 +343,19 @@ namespace UDPServerManagerForm
                     Thread.Sleep(25);
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);
                     break;
+                case "KEYBOARD_WRITE":
+                    string key = parts[1];
+                    if (key.Length > 1)
+                    {
+                        // Special keys such as {F1}, {ENTER}, etc.
+                        SendKeys.SendWait(key);
+                    }
+                    else
+                    {
+                        key = Regex.Replace(key, "[+^%~(){}]", "{$0}");
+                        SendKeys.SendWait(key);
+                    }
+                    break;
                 case "MOUSE_LMB_HOLD":
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
                     Thread.Sleep(25);
@@ -385,23 +368,6 @@ namespace UDPServerManagerForm
                 case "MOUSE_SCROLL":
                     int scrollAmount = (int)float.Parse(parts[1]);
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.Wheel, scrollAmount);
-                    break;
-                case "KEYBOARD_WRITE":
-                    string key = parts.Length > 1 ? parts[1] : "";
-                    if (key == "")
-                    {
-                        SendKeys.SendWait("{SPACE}");
-                    } else
-                    {
-                        key = Regex.Replace(key, "[+^%~(){}]", "{$0}");
-                        SendKeys.SendWait(key);
-                    }
-                    break;
-                case "KEYBOARD_DELETE":
-                    SendKeys.SendWait("{BACKSPACE}");
-                    break;
-                case "KEYBOARD_ENTER":
-                    SendKeys.SendWait("{ENTER}");
                     break;
                 default:
                     Console.WriteLine("Unknown command: " + command);
