@@ -97,17 +97,7 @@ namespace DAIRemote
 
         private void BtnLoadDisplayConfig_Click(object sender, EventArgs e)
         {
-            string fileName = profileNameTextBox.Text;
-            if (fileName != "")
-            {
-                DisplayConfig.SetDisplaySettings(fileName + ".json");
-            }
-            else
-            {
-                MessageBox.Show("Invalid input, name cannot be empty");
-            }
-
-            profileNameTextBox.Clear();
+            DisplayConfig.SetDisplaySettings("displayConfig" + ".json");
         }
     }
 }

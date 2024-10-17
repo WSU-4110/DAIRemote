@@ -1020,15 +1020,6 @@ namespace DisplayProfileManager
 
         public static bool SetDisplaySettings(string fileName)
         {
-            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string folderPath = Path.Combine(appDataPath, "DAIRemote");
-
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-            fileName = Path.Combine(folderPath, fileName);
-
             debugMsg("Loading display settings from file: " + fileName);
             if (!File.Exists(fileName))
             {
@@ -1304,28 +1295,6 @@ namespace DisplayProfileManager
 
             return false;
         }
-
-        /*public static bool DeleteDisplaySettings(string fileName)
-        {
-            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string folderPath = Path.Combine(appDataPath, "DAIRemote");
-
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-            fileName = Path.Combine(folderPath, fileName);
-
-            debugMsg("Deleting display settings on file: " + fileName);
-            if (!File.Exists(fileName))
-            {
-                Debug.WriteLine("ERROR: Display settings file does not exist: " + fileName);
-                return false;
-            }
-
-            File.Delete(fileName);
-            return false;
-        }*/
         static void Main(string[] args)
         {
 
