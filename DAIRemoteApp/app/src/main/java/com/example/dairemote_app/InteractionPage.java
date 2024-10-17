@@ -311,7 +311,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
         interactionHelp = findViewById(R.id.interactionsHelp);
         interactionsHelpText = findViewById(R.id.interationsHelpTextView);
-        interactionsHelpText.setVisibility(View.GONE);
 
         interactionHelp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -345,6 +344,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         }
     }
 
+    // This is used in styles but does not count as a usage for some reason
+    // DO NOT DELETE
     public void extraToolbarOnClick(View view) {
         String msg = "";
         int viewID = view.getId();

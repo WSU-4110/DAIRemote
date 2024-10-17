@@ -122,6 +122,15 @@ namespace UDPServerManagerForm
                 if (handshakeMessage.StartsWith("Connection requested"))
                 {
                     return awaitApproval(ExtractDeviceName(handshakeMessage));
+                } 
+                else if (handshakeMessage.StartsWith("Hello, I'm"))
+                {
+                    Debug.WriteLine($"Received client broadcast from {remoteEP.Address}:{remoteEP.Port}: {handshakeMessage}");
+                    // Send an approval message back to the client
+                    SendUdpMessage("Hello, I'm " + Environment.MachineName);
+
+                    Debug.WriteLine($"Sent reply to client's broadcast at {remoteEP.Address}:{remoteEP.Port}\nAwaiting handshake...");
+                    return false;
                 }
                 return false;
             }
@@ -170,37 +179,6 @@ namespace UDPServerManagerForm
             return false;
         }
 
-        // Method to handle the initial handshake
-        public bool clientSearch()
-        {
-            try
-            {
-                byte[] handshakeData = udpServer.Receive(ref remoteEP);
-                string handshakeMessage = Encoding.ASCII.GetString(handshakeData);
-
-                if (handshakeMessage.StartsWith("Hello, I'm"))
-                {
-                    Debug.WriteLine($"Received client broadcast from {remoteEP.Address}:{remoteEP.Port}: {handshakeMessage}");
-                    // Send an approval message back to the client
-                    SendUdpMessage("Hello, I'm " + Environment.MachineName);
-
-                    Debug.WriteLine($"Sent reply to client's broadcast at {remoteEP.Address}:{remoteEP.Port}");
-                    return true;
-                }
-                return false;
-            }
-            catch (SocketException e)
-            {
-                Debug.WriteLine("Error during handshake: " + e.Message);
-                return false;
-            }
-            catch (ObjectDisposedException e)
-            {
-                Debug.WriteLine("Error: UdpClient has been disposed: " + e.Message);
-                return false;
-            }
-        }
-
         // Method to start checking for handshake attempts in the background
         public async Task CheckForHandshake()
         {
@@ -208,14 +186,6 @@ namespace UDPServerManagerForm
             {
                 try
                 {
-                    bool foundClient = await Task.Run(() => clientSearch());
-
-                    if (foundClient)
-                    {
-                        Debug.WriteLine("Awaiting handshake...");
-                        continue;
-                    }
-
                     bool handshakeSuccessful = await Task.Run(() => InitiateHandshake());
 
                     if (handshakeSuccessful)
