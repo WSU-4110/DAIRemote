@@ -1,7 +1,9 @@
 package com.example.dairemote_app;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;

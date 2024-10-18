@@ -25,7 +25,6 @@ public class ConnectionManager {
     public static String serverAddress;
     public static int serverPort;
     public static String serverResponse;
-    public static String heartbeatAck = "";
     public static HostSearchCallback callback;
     public static boolean connectionEstablished = false;
     public static int declineCount = 0;

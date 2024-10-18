@@ -2,8 +2,10 @@ package com.example.dairemote_app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -16,6 +18,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -42,6 +45,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     NavigationView navigationView;
     Toolbar toolbar;
     Toolbar keyboardToolbar;
+    GridLayout keyboardExtraBtnsLayout;
     TextView moreOpts;
     private int currentPageIndex = 0;
     private String[][][] keyboardExtraRows = {
@@ -59,6 +63,15 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     private TextView[] p1r3Buttons = new TextView[6];
     private TextView[] p2r2Buttons = new TextView[6];
     private TextView[] p2r3Buttons = new TextView[6];
+
+    boolean winActive = false;
+    boolean ctrlActive = false;
+    boolean shiftActive = false;
+    boolean altActive = false;
+    boolean fnActive = false;
+    boolean modifierToggled = false;
+    StringBuilder keyCombination = new StringBuilder();
+    int parenthesesCount = 0;
 
     public void startHome() {
         Intent intent = new Intent(InteractionPage.this, MainActivity.class);
@@ -214,6 +227,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         keyboardImgBtn = findViewById(R.id.keyboardImgBtn);
         editText = findViewById(R.id.editText);
         keyboardToolbar = findViewById(R.id.keyboardToolbar);
+        keyboardExtraBtnsLayout = findViewById(R.id.keyboardExtraButtonsGrid);
 
         // Initialize row 2 and 3 button arrays for keyboardToolbar
         initButtonRows();
@@ -268,8 +282,11 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (count > before) {
                     char addedChar = s.charAt(start + count - 1);
-                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE " + addedChar)) {
+                    if (!modifierToggled && !MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE " + addedChar)) {
                         startHome();
+                    } else if (modifierToggled) {
+                        keyCombination.append(addedChar);
+                        Log.d("KeyCombination", keyCombination.toString());
                     }
                 }
             }
@@ -335,13 +352,27 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         if (open) {
             if (keyboardToolbar != null && !(keyboardToolbar.getVisibility() == View.VISIBLE)) {
                 keyboardToolbar.setVisibility(View.VISIBLE);
+                keyboardExtraBtnsLayout.setVisibility(View.VISIBLE);
                 keyboardExtraSetRowVisibility(currentPageIndex);
             }
         } else {
             if (keyboardToolbar != null && keyboardToolbar.getVisibility() == View.VISIBLE) {
                 keyboardToolbar.setVisibility(View.GONE);
+                keyboardExtraBtnsLayout.setVisibility(View.GONE);
             }
         }
+    }
+
+    private void resetKeyboardModifiers() {
+        ctrlActive = false;
+        shiftActive = false;
+        altActive = false;
+        fnActive = false;
+        modifierToggled = false;
+        parenthesesCount = 0;
+        keyCombination.setLength(0);
+
+        editText.setText("");
     }
 
     // This is used in styles but does not count as a usage for some reason
@@ -349,19 +380,55 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     public void extraToolbarOnClick(View view) {
         String msg = "";
         int viewID = view.getId();
+
         if(viewID == R.id.moreOpt) {
             // Place holder to do nothing,
             // on click listener will be done instead and is setup
         } else if(viewID == R.id.winKey) {
-            msg = "WIN";
+            if (!winActive) {
+                winActive = true;
+                modifierToggled = true;
+                keyCombination.append("^{ESC}(");
+                parenthesesCount += 1;
+            } else {
+                modifierToggled = false;
+            }
         } else if(viewID == R.id.fnKey) {
-            msg = "FN";
+            if (!fnActive) {
+                fnActive = true;
+                modifierToggled = true;
+                keyCombination.append("FN+");
+                parenthesesCount += 1;
+            } else {
+                modifierToggled = false;
+            }
         } else if(viewID == R.id.altKey) {
-            msg = "ALT";
+            if (!altActive) {
+                altActive = true;
+                modifierToggled = true;
+                keyCombination.append("%(");
+                parenthesesCount += 1;
+            } else {
+                modifierToggled = false;
+            }
         } else if(viewID == R.id.ctrlKey) {
-            msg = "CTRL";
+            if (!ctrlActive) {
+                ctrlActive = true;
+                modifierToggled = true;
+                keyCombination.append("^(");
+                parenthesesCount += 1;
+            } else {
+                modifierToggled = false;
+            }
         } else if(viewID == R.id.shiftKey) {
-            msg = "SHIFT";
+            if (!shiftActive) {
+                shiftActive = true;
+                modifierToggled = true;
+                keyCombination.append("+(");
+                parenthesesCount += 1;
+            } else {
+                modifierToggled = false;
+            }
         } else {
             if (currentPageIndex == 0) {
                 if(viewID == R.id.f1Key) {
@@ -418,7 +485,37 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             }
         }
 
-        if(!msg.isEmpty()) {
+        view.setBackgroundColor(Color.LTGRAY);
+        if (!modifierToggled) {
+            new Handler().postDelayed(() -> {
+                view.setBackgroundColor(Color.TRANSPARENT);
+            }, 75); // Delay in milliseconds
+        }
+
+        if (!modifierToggled && !keyCombination.toString().isEmpty()) {
+            Log.d("tryinggg", "tryinggg ");
+            if (keyCombination.toString().contains("(")) {
+                for (int i = 0; i < parenthesesCount; i++) {
+                    keyCombination.append(")");
+                }
+            }
+
+            MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE " + keyCombination);
+            Log.d("KeyboardToolbar", "KEYBOARD_WRITE " + keyCombination);
+
+            resetKeyboardModifiers();
+
+            new Handler().postDelayed(() -> {
+                for (int i = 0; i < keyboardExtraBtnsLayout.getChildCount(); i++) {
+                    View child = keyboardExtraBtnsLayout.getChildAt(i);
+                    if (child instanceof TextView) {
+                        child.setBackgroundColor(Color.TRANSPARENT);
+                    }
+                }
+            }, 10);
+        } else if(modifierToggled && !msg.isEmpty()) {
+            keyCombination.append(msg);
+        } else if (!msg.isEmpty()) {
             MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE " + msg);
             Log.d("KeyboardToolbar", "KEYBOARD_WRITE " + msg);
         }
@@ -522,6 +619,19 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     editText.setText("");
                     v.clearFocus();
                     v.setVisibility(View.GONE);
+
+                    // Remove any highlighting of keyboard toolbar buttons if there are any
+                    new Handler().postDelayed(() -> {
+                        for (int i = 0; i < keyboardExtraBtnsLayout.getChildCount(); i++) {
+                            View child = keyboardExtraBtnsLayout.getChildAt(i);
+                            if (child instanceof TextView) {
+                                child.setBackgroundColor(Color.TRANSPARENT);
+                            }
+                        }
+                    }, 200); // Delay in milliseconds
+
+                    // Reset keyboard toolbar variables
+                    resetKeyboardModifiers();
 
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     if (imm != null) {
