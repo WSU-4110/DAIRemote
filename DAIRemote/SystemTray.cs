@@ -55,6 +55,11 @@ namespace DAIRemote
             Image aboutIcon = Image.FromFile("Resources/AboutIcon.ico");
             Image exitIcon = Image.FromFile("Resources/ExitIcon.ico");
             Image turnOffAllMonitorsIcon = Image.FromFile("Resources/TurnOffAllMonitors.ico");
+            Image deleteProfileIcon = Image.FromFile("Resources/DeleteProfile.ico");
+
+            ToolStripMenuItem deleteProfileMenuItem = new ToolStripMenuItem("Delete Profile", deleteProfileIcon);
+            AddDeleteProfiles(deleteProfileMenuItem);
+            menu.Items.Add(deleteProfileMenuItem);
 
             var turnOffAllMonitorsItem = new ToolStripMenuItem("Turn Off All Monitors", turnOffAllMonitorsIcon, TurnOffMonitors);
             var aboutMenuItem = new ToolStripMenuItem("About", aboutIcon, onAboutClick);
@@ -67,6 +72,52 @@ namespace DAIRemote
             menu.Items.Add(exitMenuItem);
 
             return menu;
+        }
+
+        private void AddDeleteProfiles(ToolStripMenuItem deleteProfileMenuItem)
+        {
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string folderPath = Path.Combine(appDataPath, "DAIRemote");
+            Image MonitorIcon = Image.FromFile("Resources/MonitorIcon.ico");
+
+            if (Directory.Exists(folderPath))
+            {
+                string[] profiles = Directory.GetFiles(folderPath, "*.json");
+
+                foreach (string profile in profiles)
+                {
+                    string profileName = Path.GetFileNameWithoutExtension(profile);
+                    var deleteProfileSubItem = new ToolStripMenuItem(profileName, MonitorIcon, (s, e) => DeleteProfile(profile));
+                    deleteProfileMenuItem.DropDownItems.Add(deleteProfileSubItem);
+                }
+            }
+        }
+
+        private void DeleteProfile(string profilePath)
+        {
+            if (File.Exists(profilePath))
+            {
+                File.Delete(profilePath);
+                MessageBox.Show($"Profile {Path.GetFileNameWithoutExtension(profilePath)} has been deleted.", "Profile Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                addedProfiles.Clear();
+                trayMenu.Items.Clear();
+                trayMenu = CreateContextMenu();
+                trayIcon.ContextMenuStrip = trayMenu;
+            }
+        }
+
+        public void RefreshDeleteProfileMenu()
+        {
+            foreach (ToolStripMenuItem item in trayMenu.Items.OfType<ToolStripMenuItem>())
+            {
+                if (item.Text == "Delete Profile")
+                {
+                    item.DropDownItems.Clear();
+                    AddDeleteProfiles(item);
+                    break;
+                }
+            }
         }
 
         public void AddDisplayProfiles(ContextMenuStrip menu)

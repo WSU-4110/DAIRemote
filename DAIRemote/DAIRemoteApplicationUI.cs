@@ -88,6 +88,7 @@ namespace DAIRemote
             {
                 DisplayConfig.SaveDisplaySettings($"{fileName}.json");
                 trayIconManager.AddDisplayProfiles(trayIconManager.GetContextMenu());
+                trayIconManager.RefreshDeleteProfileMenu();
                 profileNameTextBox.Clear();
             }
             else
