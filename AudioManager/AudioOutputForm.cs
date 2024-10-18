@@ -26,8 +26,8 @@ namespace AudioManager
                 TabIndex = 0,
             };
 
-            audioDeviceComboBox.DropDown += audioDeviceComboBox_DropDown;
-            audioDeviceComboBox.SelectedIndexChanged += audioDeviceComboBox_SelectedIndexChanged;
+            audioDeviceComboBox.DropDown += AudioDeviceComboBox_DropDown;
+            audioDeviceComboBox.SelectedIndexChanged += AudioDeviceComboBox_SelectedIndexChanged;
 
             ClientSize = new Size(284, 100);
             Controls.Add(audioDeviceComboBox);
@@ -39,23 +39,23 @@ namespace AudioManager
 
         private void LoadAudioDevices()
         {
-            var devices = GetAudioDevices();
+            List<string> devices = GetAudioDevices();
             audioDeviceComboBox.DataSource = devices;
         }
 
-        public List<string> GetAudioDevices()
+        public static List<string> GetAudioDevices()
         {
-            var enumerator = new MMDeviceEnumerator();
-            var devices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+            MMDeviceEnumerator enumerator = new();
+            MMDeviceCollection devices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
             return devices.Select(d => d.FriendlyName).ToList();
         }
 
-        private void audioDeviceComboBox_DropDown(object sender, EventArgs e)
+        private void AudioDeviceComboBox_DropDown(object sender, EventArgs e)
         {
             LoadAudioDevices();
         }
 
-        private void audioDeviceComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void AudioDeviceComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }

@@ -6,7 +6,7 @@
         private ContextMenuStrip trayMenu;
         private Form form;
         private FileSystemWatcher profileDirWatcher;
-        private string profilesFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
+        private readonly string profilesFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
 
         public TrayIconManager(Form form)
         {
@@ -24,8 +24,10 @@
                 Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
             };
 
-            profileDirWatcher = new FileSystemWatcher(@profilesFolderPath);
-            profileDirWatcher.NotifyFilter = NotifyFilters.FileName;
+            profileDirWatcher = new FileSystemWatcher(@profilesFolderPath)
+            {
+                NotifyFilter = NotifyFilters.FileName
+            };
             profileDirWatcher.Created += OnProfilesChanged;
             profileDirWatcher.Deleted += OnProfilesChanged;
             profileDirWatcher.Renamed += OnProfilesChanged;
@@ -76,19 +78,17 @@
                 // Create menu item for each JSON file
                 string fileName = Path.GetFileNameWithoutExtension(jsonFile);
 
-                var jsonMenuItem = new ToolStripMenuItem(fileName, null, (sender, e) =>
-                {
+                ToolStripMenuItem jsonMenuItem = new(fileName, null, (sender, e) =>
                     // Handle click event
-                    DisplayProfileManager.DisplayConfig.SetDisplaySettings(jsonFile);
-                });
+                    DisplayProfileManager.DisplayConfig.SetDisplaySettings(jsonFile));
 
                 trayMenu.Items.Add(jsonMenuItem);
             }
 
             trayMenu.Items.Add(new ToolStripSeparator());
 
-            var showMenuItem = new ToolStripMenuItem("Show", null, OnShow);
-            var exitMenuItem = new ToolStripMenuItem("Exit", null, OnExit);
+            ToolStripMenuItem showMenuItem = new("Show", null, OnShow);
+            ToolStripMenuItem exitMenuItem = new("Exit", null, OnExit);
 
             trayMenu.Items.Add(showMenuItem);
             trayMenu.Items.Add(exitMenuItem);

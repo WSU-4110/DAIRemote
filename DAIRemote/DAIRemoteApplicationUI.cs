@@ -7,15 +7,17 @@ namespace DAIRemote
 {
     public partial class DAIRemoteApplicationUI : Form
     {
-        private TrayIconManager trayIconManager;
+        private readonly TrayIconManager trayIconManager;
         private AudioOutputForm audioForm;
         private Panel audioFormPanel;
 
         public DAIRemoteApplicationUI()
         {
-            UDPServerHost udpServer = new UDPServerHost();
-            Thread udpThread = new Thread(() => udpServer.hostUDPServer());
-            udpThread.IsBackground = true;
+            UDPServerHost udpServer = new();
+            Thread udpThread = new(() => udpServer.HostUDPServer())
+            {
+                IsBackground = true
+            };
             udpThread.Start();
 
             InitializeComponent();
@@ -103,7 +105,7 @@ namespace DAIRemote
             DisplayConfig.SetDisplaySettings("displayConfig" + ".json");
         }
 
-        private void checkBoxStartup_CheckedChanged(object sender, EventArgs e)
+        private void CheckBoxStartup_CheckedChanged(object sender, EventArgs e)
         {
             string startupKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
             string appName = "DAIRemote";
@@ -115,7 +117,7 @@ namespace DAIRemote
             }
             else
             {
-                RemoveFromStartup(startupKey, appName, appPath);
+                RemoveFromStartup(startupKey, appName);
             }
         }
 
@@ -123,10 +125,8 @@ namespace DAIRemote
         {
             try
             {
-                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(startupKey, true))
-                {
-                    key.SetValue(appName, $"\"{appPath}\"");
-                }
+                using RegistryKey key = Registry.CurrentUser.OpenSubKey(startupKey, true);
+                key.SetValue(appName, $"\"{appPath}\"");
             }
             catch (Exception ex)
             {
@@ -134,16 +134,14 @@ namespace DAIRemote
             }
         }
 
-        private void RemoveFromStartup(string startupKey, string appName, string appPath)
+        private void RemoveFromStartup(string startupKey, string appName)
         {
             try
             {
-                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(startupKey, true))
+                using RegistryKey key = Registry.CurrentUser.OpenSubKey(startupKey, true);
+                if (key.GetValue(appName) != null)
                 {
-                    if (key.GetValue(appName) != null)
-                    {
-                        key.DeleteValue(appName);
-                    }
+                    key.DeleteValue(appName);
                 }
             }
             catch (Exception ex)
@@ -154,10 +152,8 @@ namespace DAIRemote
 
         private bool IsAppInStartup()
         {
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", false))
-            {
-                return key.GetValue("DAIRemote") != null;
-            }
+            using RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", false);
+            return key.GetValue("DAIRemote") != null;
         }
 
         private void LoadStartupSetting()

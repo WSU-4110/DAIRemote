@@ -80,7 +80,7 @@
             checkBoxStartup.TabIndex = 4;
             checkBoxStartup.Text = "Launch application on startup";
             checkBoxStartup.UseVisualStyleBackColor = true;
-            checkBoxStartup.CheckedChanged += checkBoxStartup_CheckedChanged;
+            checkBoxStartup.CheckedChanged += CheckBoxStartup_CheckedChanged;
             // 
             // DAIRemoteApplicationUI
             // 
