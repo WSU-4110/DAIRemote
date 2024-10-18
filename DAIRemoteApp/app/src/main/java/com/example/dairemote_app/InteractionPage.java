@@ -48,7 +48,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     GridLayout keyboardExtraBtnsLayout;
     TextView moreOpts;
     private int currentPageIndex = 0;
-    private String[][][] keyboardExtraRows = {
+    private final String[][][] keyboardExtraRows = {
             { // Page 1
                     {"F1", "F2", "F3", "F4", "F5", "F6"}, // Row 1
                     {"F7", "F8", "F9", "F10", "F11", "F12"} // Row 2
@@ -59,10 +59,10 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             }
     };
 
-    private TextView[] p1r2Buttons = new TextView[6];
-    private TextView[] p1r3Buttons = new TextView[6];
-    private TextView[] p2r2Buttons = new TextView[6];
-    private TextView[] p2r3Buttons = new TextView[6];
+    private final TextView[] p1r2Buttons = new TextView[6];
+    private final TextView[] p1r3Buttons = new TextView[6];
+    private final TextView[] p2r2Buttons = new TextView[6];
+    private final TextView[] p2r3Buttons = new TextView[6];
 
     boolean winActive = false;
     boolean ctrlActive = false;
@@ -381,10 +381,10 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         String msg = "";
         int viewID = view.getId();
 
-        if(viewID == R.id.moreOpt) {
+        if (viewID == R.id.moreOpt) {
             // Place holder to do nothing,
             // on click listener will be done instead and is setup
-        } else if(viewID == R.id.winKey) {
+        } else if (viewID == R.id.winKey) {
             if (!winActive) {
                 winActive = true;
                 modifierToggled = true;
@@ -393,7 +393,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             } else {
                 modifierToggled = false;
             }
-        } else if(viewID == R.id.fnKey) {
+        } else if (viewID == R.id.fnKey) {
             if (!fnActive) {
                 fnActive = true;
                 modifierToggled = true;
@@ -402,7 +402,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             } else {
                 modifierToggled = false;
             }
-        } else if(viewID == R.id.altKey) {
+        } else if (viewID == R.id.altKey) {
             if (!altActive) {
                 altActive = true;
                 modifierToggled = true;
@@ -411,7 +411,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             } else {
                 modifierToggled = false;
             }
-        } else if(viewID == R.id.ctrlKey) {
+        } else if (viewID == R.id.ctrlKey) {
             if (!ctrlActive) {
                 ctrlActive = true;
                 modifierToggled = true;
@@ -420,7 +420,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             } else {
                 modifierToggled = false;
             }
-        } else if(viewID == R.id.shiftKey) {
+        } else if (viewID == R.id.shiftKey) {
             if (!shiftActive) {
                 shiftActive = true;
                 modifierToggled = true;
@@ -431,55 +431,55 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             }
         } else {
             if (currentPageIndex == 0) {
-                if(viewID == R.id.f1Key) {
+                if (viewID == R.id.f1Key) {
                     msg = "{F1}";
-                } else if(viewID == R.id.f2Key) {
+                } else if (viewID == R.id.f2Key) {
                     msg = "{F2}";
-                } else if(viewID == R.id.f3Key) {
+                } else if (viewID == R.id.f3Key) {
                     msg = "{F3}";
-                } else if(viewID == R.id.f4Key) {
+                } else if (viewID == R.id.f4Key) {
                     msg = "{F4}";
-                } else if(viewID == R.id.f5Key) {
+                } else if (viewID == R.id.f5Key) {
                     msg = "{F5}";
-                } else if(viewID == R.id.f6Key) {
+                } else if (viewID == R.id.f6Key) {
                     msg = "{F6}";
-                } else if(viewID == R.id.f7Key) {
+                } else if (viewID == R.id.f7Key) {
                     msg = "{F7}";
-                } else if(viewID == R.id.f8Key) {
+                } else if (viewID == R.id.f8Key) {
                     msg = "{F8}";
-                } else if(viewID == R.id.f9Key) {
+                } else if (viewID == R.id.f9Key) {
                     msg = "{F9}";
-                } else if(viewID == R.id.f10Key) {
+                } else if (viewID == R.id.f10Key) {
                     msg = "{F10}";
-                } else if(viewID == R.id.f11Key) {
+                } else if (viewID == R.id.f11Key) {
                     msg = "{F11}";
-                } else if(viewID == R.id.f12Key) {
+                } else if (viewID == R.id.f12Key) {
                     msg = "{F12}";
                 }
             } else if (currentPageIndex == 1) {
-                if(viewID == R.id.soundUpKey) {
+                if (viewID == R.id.soundUpKey) {
                     msg = "SOUND UP";
-                } else if(viewID == R.id.soundDownKey) {
+                } else if (viewID == R.id.soundDownKey) {
                     msg = "SOUND DOWN";
-                } else if(viewID == R.id.muteKey) {
+                } else if (viewID == R.id.muteKey) {
                     msg = "SOUND MUTE";
-                } else if(viewID == R.id.tabKey) {
+                } else if (viewID == R.id.tabKey) {
                     msg = "{TAB}";
-                } else if(viewID == R.id.upKey) {
+                } else if (viewID == R.id.upKey) {
                     msg = "{UP}";
-                } else if(viewID == R.id.escKey) {
+                } else if (viewID == R.id.escKey) {
                     msg = "{ESC}";
-                } else if(viewID == R.id.insertKey) {
+                } else if (viewID == R.id.insertKey) {
                     msg = "{INS}";
-                } else if(viewID == R.id.deleteKey) {
+                } else if (viewID == R.id.deleteKey) {
                     msg = "{DEL}";
-                } else if(viewID == R.id.printScreenKey) {
+                } else if (viewID == R.id.printScreenKey) {
                     msg = "{PRTSC}";
-                } else if(viewID == R.id.leftKey) {
+                } else if (viewID == R.id.leftKey) {
                     msg = "{LEFT}";
-                } else if(viewID == R.id.downKey) {
+                } else if (viewID == R.id.downKey) {
                     msg = "{DOWN}";
-                } else if(viewID == R.id.rightKey) {
+                } else if (viewID == R.id.rightKey) {
                     msg = "{RIGHT}";
                 }
             }
@@ -513,7 +513,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     }
                 }
             }, 10);
-        } else if(modifierToggled && !msg.isEmpty()) {
+        } else if (modifierToggled && !msg.isEmpty()) {
             keyCombination.append(msg);
         } else if (!msg.isEmpty()) {
             MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE " + msg);

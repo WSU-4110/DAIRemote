@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ConnectionManager {
     public static ScheduledExecutorService heartbeatScheduler;
-    private ExecutorService executorService;
+    private final ExecutorService executorService;
     public static DatagramSocket udpSocket;
     public static String serverAddress;
     public static int serverPort;

@@ -1,10 +1,7 @@
 package com.example.dairemote_app;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
-import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -17,15 +14,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.net.InetAddress;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -37,7 +31,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
     NavigationView navigationView;
     Toolbar toolbar;
 
-	private List<String> availableHosts = new ArrayList<>();
+    private List<String> availableHosts = new ArrayList<>();
     private ArrayAdapter<String> adapter;
     private String selectedHost = null;
     private TextView connectionStatus;
@@ -84,7 +78,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         });
     }
 
-	@Override
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_servers_page);
@@ -161,7 +155,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         });
     }
 
-	@Override
+    @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);

@@ -98,18 +98,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View v) {
                 v.animate().scaleX(1.2f).scaleY(1.2f) // Scale the button up to 120% of its original size
-                    .setDuration(150) // Duration of the scale up animation
-                    .withEndAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            // Scale back to normal size
-                            v.animate().scaleX(1f)
-                                    .scaleY(1f)
-                                    .setDuration(150) // Duration of the scale down animation
-                                    .start();
-                    }
-                })
-                .start();
+                        .setDuration(150) // Duration of the scale up animation
+                        .withEndAction(new Runnable() {
+                            @Override
+                            public void run() {
+                                // Scale back to normal size
+                                v.animate().scaleX(1f)
+                                        .scaleY(1f)
+                                        .setDuration(150) // Duration of the scale down animation
+                                        .start();
+                            }
+                        })
+                        .start();
                 // Initialize the connection manager
                 // Establish connection to host if not already established and not declined prior
                 if (!ConnectionManager.connectionEstablished) {
