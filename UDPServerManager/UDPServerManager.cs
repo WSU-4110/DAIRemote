@@ -29,11 +29,11 @@ namespace UDPServerManagerForm
             public DateTime Timestamp { get; set; }
         }
 
-        public void SaveDeviceHistory(string ipAddress, string deviceName="")
+        public void SaveDeviceHistory(string ipAddress, string deviceName = "")
         {
             // Ensure the directory exists
-            string filePath = GetFilePath("deviceHistory.json"); 
-            
+            string filePath = GetFilePath("deviceHistory.json");
+
             var ipData = new DeviceHistoryEntry
             {
                 DeviceName = deviceName,
@@ -122,7 +122,7 @@ namespace UDPServerManagerForm
                 if (handshakeMessage.StartsWith("Connection requested"))
                 {
                     return awaitApproval(ExtractDeviceName(handshakeMessage));
-                } 
+                }
                 else if (handshakeMessage.StartsWith("Hello, I'm"))
                 {
                     Debug.WriteLine($"Received client broadcast from {remoteEP.Address}:{remoteEP.Port}: {handshakeMessage}");
@@ -246,7 +246,7 @@ namespace UDPServerManagerForm
                             // Handle received data
                             HandleReceivedData(receivedData, ref lastHeartbeatTime);
                         }
-                        
+
                     }
                     catch (SocketException e)
                     {
