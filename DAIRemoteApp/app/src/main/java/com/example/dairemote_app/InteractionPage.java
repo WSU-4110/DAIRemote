@@ -21,6 +21,7 @@ import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -74,9 +75,14 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     int parenthesesCount = 0;
 
     public void startHome() {
+        notifyUser(InteractionPage.this, "Connection lost");
         Intent intent = new Intent(InteractionPage.this, MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    public void notifyUser(Context context, String msg) {
+        runOnUiThread(() -> Toast.makeText(context, msg, Toast.LENGTH_SHORT).show());
     }
 
     public void drawerSetup(int page) {

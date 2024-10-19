@@ -137,7 +137,7 @@ public class ConnectionManager {
 
     public void startHeartbeat() {
         // Create a ScheduledExecutorService to run heartbeat with a delay after each execution
-        heartbeatScheduler = Executors.newScheduledThreadPool(2);
+        heartbeatScheduler = Executors.newScheduledThreadPool(1);
         heartbeatScheduler.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
