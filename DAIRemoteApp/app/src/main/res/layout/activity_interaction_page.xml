@@ -25,61 +25,52 @@
             android:id="@+id/toolbar"
             layout="@layout/toolbar" />
 
-        <ImageButton
-            android:id="@+id/keyboardImgBtn"
-            android:layout_width="wrap_content"
+        <GridLayout
+            android:id="@+id/InteractionShortcuts"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:layout_marginTop="-1dp"
-            android:layout_marginEnd="35dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Keyboard icon to pull system keyboard"
-            android:src="@drawable/keyboard_light_icon"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_gravity="center_horizontal"
+            android:columnCount="4"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/touchpadFrame" />
-
-        <ImageButton
-            android:id="@+id/udptest"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="35dp"
-            android:layout_marginTop="-1dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Send message to host"
-            android:padding="12dp"
-            android:src="@drawable/udpmsg_icon"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/touchpadFrame" />
+            app:layout_constraintTop_toBottomOf="@+id/touchpadFrame">
 
-        <ImageButton
-            android:id="@+id/audiocycle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="35dp"
-            android:layout_marginTop="-1dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Cycle audio"
-            android:padding="12dp"
-            android:src="@drawable/audio_cycle_icon"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/udptest"
-            app:layout_constraintTop_toBottomOf="@+id/touchpadFrame" />
+            <ImageButton
+                style="@style/InteractionShortcutsStyle"
+                android:id="@+id/udptest"
+                android:layout_row="0"
+                android:layout_column="0"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Send message to host"
+                android:src="@drawable/udpmsg_icon" />
 
-        <ImageButton
-            android:id="@+id/displays"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="35dp"
-            android:layout_marginTop="-1dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Display profiles"
-            android:padding="12dp"
-            android:src="@drawable/display_profile_icon"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/audiocycle"
-            app:layout_constraintTop_toBottomOf="@+id/touchpadFrame" />
+            <ImageButton
+                style="@style/InteractionShortcutsStyle"
+                android:id="@+id/audiocycle"
+                android:layout_row="0"
+                android:layout_column="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Cycle audio"
+                android:src="@drawable/audio_cycle_icon" />
+
+            <ImageButton
+                style="@style/InteractionShortcutsStyle"
+                android:id="@+id/displays"
+                android:layout_row="0"
+                android:layout_column="2"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Display profiles"
+                android:src="@drawable/display_profile_icon" />
+
+            <ImageButton
+                style="@style/InteractionShortcutsStyle"
+                android:id="@+id/keyboardImgBtn"
+                android:layout_row="0"
+                android:layout_column="3"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Keyboard icon to pull system keyboard"
+                android:src="@drawable/keyboard_light_icon" />
+        </GridLayout>
 
         <FrameLayout
             android:id="@+id/touchpadFrame"
