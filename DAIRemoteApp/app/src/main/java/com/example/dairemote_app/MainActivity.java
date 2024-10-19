@@ -1,7 +1,9 @@
 package com.example.dairemote_app;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -113,6 +115,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // Initialize the connection manager
                 // Establish connection to host if not already established and not declined prior
                 if (!ConnectionManager.connectionEstablished) {
+
+                    WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                    WifiManager.MulticastLock multicastLock = wifi.createMulticastLock("multicastLock");
+                    multicastLock.acquire();
+
                     ConnectionManager.hostSearchInBackground(new HostSearchCallback() {
                         @Override
                         public void onHostFound(List<String> serverIps) {
@@ -131,6 +138,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 // Ensure notifyUser runs on the main (UI) thread
                                 bkgrdNotifyUser("Denied connection", "#c73a30");
                             } else {
+                                multicastLock.release();
+
                                 bkgrdNotifyUser("Connection approved", "#3fcf1b");
                                 Intent intent = new Intent(MainActivity.this, InteractionPage.class);
                                 startActivity(intent);

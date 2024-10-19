@@ -261,7 +261,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     }
                     return true;
                 } else if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE {~}")) {
+                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE {ENTER}")) {
                         startHome();
                     }
                     toggleKeyboardToolbar(false);
