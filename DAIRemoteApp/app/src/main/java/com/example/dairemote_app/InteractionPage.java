@@ -3,7 +3,6 @@ package com.example.dairemote_app;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -23,12 +22,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
@@ -164,11 +164,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     return false;
                 }
             });
-            float startX, startY, x, y, deltaX, deltaY, currentX, currentY;
+            float startX, startY, x, y, deltaX, deltaY, currentX, currentY, deltaT;
             long startTime;
             final int CLICK_THRESHOLD = 125; // Maximum time to register
             boolean rmbDetected = false;    // Suppress movement during rmb
             boolean scrolling = false; // Suppress other inputs during scroll
+            final float mouseSensitivity = 1;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -185,8 +186,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         x = event.getX();
                         y = event.getY();
 
-                        deltaX = x - currentX;
-                        deltaY = y - currentY;
+                        deltaX = (x - currentX)*mouseSensitivity;
+                        deltaY = (y - currentY)*mouseSensitivity;
                         if (!rmbDetected && !scrolling) {
                             if (!MainActivity.connectionManager.sendHostMessage("MOUSE_MOVE " + deltaX + " " + deltaY)) {
                                 startHome();
@@ -209,7 +210,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
                         deltaX = currentX - x;
                         deltaY = currentY - y;
-                        if (event.getPointerCount() == 2 && (System.currentTimeMillis() - startTime < CLICK_THRESHOLD)) {
+                        deltaT = System.currentTimeMillis() - startTime;
+                        if (event.getPointerCount() == 2 && (deltaT < CLICK_THRESHOLD && deltaT > 10)) {
                             if (!MainActivity.connectionManager.sendHostMessage("MOUSE_RMB")) {
                                 startHome();
                             }
@@ -234,6 +236,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         editText = findViewById(R.id.editText);
         keyboardToolbar = findViewById(R.id.keyboardToolbar);
         keyboardExtraBtnsLayout = findViewById(R.id.keyboardExtraButtonsGrid);
+        TextView keyboardTextInputView = findViewById(R.id.keyboardInputView);
 
         // Initialize row 2 and 3 button arrays for keyboardToolbar
         initButtonRows();
@@ -250,8 +253,23 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
-                toggleKeyboardToolbar(true);
+
             }
+        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content).getRootView(), (v, insets) -> {
+            if (insets.isVisible(WindowInsetsCompat.Type.ime())) {
+                // Keyboard is visible
+                toggleKeyboardToolbar(true);
+                keyboardTextInputView.setVisibility(View.VISIBLE);
+            } else {
+                // Keyboard is not visible
+                toggleKeyboardToolbar(false);
+                clearEditText();
+                keyboardTextInputView.setText("");
+                keyboardTextInputView.setVisibility(View.GONE);
+            }
+            return insets;
         });
 
         editText.setOnKeyListener(new View.OnKeyListener() {
@@ -261,6 +279,10 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     int cursorPosition = editText.getSelectionStart();
                     if (cursorPosition > 0) {
                         editText.getText().delete(cursorPosition - 1, cursorPosition);
+                        String textViewText = keyboardTextInputView.getText().toString();
+                        if (textViewText.length() > 0) {
+                            keyboardTextInputView.setText(textViewText.substring(0, textViewText.length() - 1));
+                        }
                     }
                     if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE {BS}")) {
                         startHome();
@@ -270,7 +292,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE {ENTER}")) {
                         startHome();
                     }
-                    toggleKeyboardToolbar(false);
                     return true;
                 }
                 return false;
@@ -294,27 +315,13 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         keyCombination.append(addedChar);
                         Log.d("KeyCombination", keyCombination.toString());
                     }
+                    keyboardTextInputView.setText(s.toString());
                 }
             }
 
             @Override
             public void afterTextChanged(Editable s) {
                 // Empty
-            }
-        });
-
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    drawerLayout.closeDrawer(GravityCompat.START);
-                } else if (editText.getVisibility() == View.VISIBLE) {
-                    clearEditText();
-                    toggleKeyboardToolbar(false);
-                } else {
-                    setEnabled(false);
-                    onBackPressed();
-                }
             }
         });
 
@@ -602,54 +609,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                 button.setVisibility(View.VISIBLE);
             }
         }
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            View v = getCurrentFocus();
-
-            if (v instanceof EditText) {
-                Rect outRect = new Rect();
-                v.getGlobalVisibleRect(outRect);
-
-                Rect toolbarRect = new Rect();
-                View keyboardToolbar = findViewById(R.id.keyboardToolbar);
-                if (keyboardToolbar != null) {
-                    keyboardToolbar.getGlobalVisibleRect(toolbarRect);
-                }
-
-                if (!outRect.contains((int) event.getRawX(), (int) event.getRawY()) &&
-                        !toolbarRect.contains((int) event.getRawX(), (int) event.getRawY())) {
-
-                    editText.setText("");
-                    v.clearFocus();
-                    v.setVisibility(View.GONE);
-
-                    // Remove any highlighting of keyboard toolbar buttons if there are any
-                    new Handler().postDelayed(() -> {
-                        for (int i = 0; i < keyboardExtraBtnsLayout.getChildCount(); i++) {
-                            View child = keyboardExtraBtnsLayout.getChildAt(i);
-                            if (child instanceof TextView) {
-                                child.setBackgroundColor(Color.TRANSPARENT);
-                            }
-                        }
-                    }, 200); // Delay in milliseconds
-
-                    // Reset keyboard toolbar variables
-                    resetKeyboardModifiers();
-
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    if (imm != null) {
-                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                    }
-
-                    toggleKeyboardToolbar(false);
-                }
-            }
-        }
-
-        return super.dispatchTouchEvent(event);
     }
 
     @Override
