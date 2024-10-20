@@ -1,7 +1,9 @@
 package com.example.dairemote_app;
 
+
 import android.os.Build;
 import android.util.Log;
+
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -18,7 +20,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+
 public class ConnectionManager {
+    private static ConnectionManager instance;
     public static ScheduledExecutorService heartbeatScheduler;
     private ExecutorService executorService;
     public static DatagramSocket udpSocket;
@@ -30,7 +34,8 @@ public class ConnectionManager {
     public static boolean connectionEstablished = false;
     public static int declineCount = 0;
 
-    public ConnectionManager(String serverAddress) {
+
+    private ConnectionManager(String serverAddress) {
         try {
             udpSocket = new DatagramSocket();
         } catch (SocketException e) {
@@ -38,10 +43,23 @@ public class ConnectionManager {
             Log.e("ConnectionManager", "Error initializing DatagramSocket: " + e.getMessage());
         }
 
+
         ConnectionManager.serverAddress = serverAddress;
         serverPort = 11000;
         this.executorService = Executors.newCachedThreadPool();
     }
+
+
+    // Static method to return the Singleton instance
+    public static ConnectionManager getInstance(String serverAddress) {
+        if (instance == null) {
+            instance = new ConnectionManager(serverAddress);
+        }
+        return instance;
+    }
+
+
+
 
     // Reconnect to the server
     public void connect(String message) {
@@ -60,6 +78,7 @@ public class ConnectionManager {
         });
     }
 
+
     // Utility to get the device name
     public static String getDeviceName() {
         String manufacturer = Build.MANUFACTURER;
@@ -71,6 +90,7 @@ public class ConnectionManager {
         }
     }
 
+
     // Wait for server response
     public void waitForResponse(int timeout) {
         try {
@@ -78,10 +98,13 @@ public class ConnectionManager {
             byte[] receiveData = new byte[200];
             DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 
+
             udpSocket.receive(receivePacket);
+
 
             serverResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
             Log.d("ConnectionManager", "Server response: " + serverResponse);
+
 
         } catch (SocketTimeoutException e) {
             Log.e("ConnectionManager", "No response received within the timeout: " + e.getMessage());
@@ -91,6 +114,7 @@ public class ConnectionManager {
             serverResponse = "";
         }
     }
+
 
     // Initialize connection
     public boolean initializeConnection() {
@@ -109,6 +133,7 @@ public class ConnectionManager {
         }
         return finishConnection();
     }
+
 
     public boolean finishConnection() {
         if (serverResponse.equalsIgnoreCase("Wait")) {
@@ -136,6 +161,7 @@ public class ConnectionManager {
         return false;
     }
 
+
     public void startHeartbeat() {
         // Create a ScheduledExecutorService to run heartbeat with a delay after each execution
         heartbeatScheduler = Executors.newScheduledThreadPool(2);
@@ -147,12 +173,15 @@ public class ConnectionManager {
         }, 0, 2, TimeUnit.SECONDS); // Initial delay 0, and 10-second delay after each execution
     }
 
+
     public void sendHeartbeat() {
         if (!connectionEstablished) return;
+
 
         if (!sendHostMessage("DroidHeartBeat")) {
             return;
         }
+
 
         waitForResponse(3000);
         if (!serverResponse.equalsIgnoreCase("HeartBeat Ack")) {
@@ -161,11 +190,13 @@ public class ConnectionManager {
         }
     }
 
+
     public static void stopHeartbeat() {
         if (heartbeatScheduler != null && !heartbeatScheduler.isShutdown()) {
             heartbeatScheduler.shutdown();
         }
     }
+
 
     // Send message to the server
     public boolean sendHostMessage(String msg) {
@@ -180,6 +211,7 @@ public class ConnectionManager {
         }
         return false;
     }
+
 
     public static void sendMessage(String message) {
         if (udpSocket != null) {
@@ -197,6 +229,7 @@ public class ConnectionManager {
         }
     }
 
+
     // Broadcast to search for hosts in the background
     public static void hostSearchInBackground(HostSearchCallback hostSearchCallback) {
         callback = hostSearchCallback;
@@ -204,6 +237,7 @@ public class ConnectionManager {
         // Perform the host search
         executor.execute(ConnectionManager::hostSearch);
     }
+
 
     // Broadcast to search for hosts
     public static void hostSearch() {
@@ -223,6 +257,7 @@ public class ConnectionManager {
             DatagramPacket packet = new DatagramPacket(sendData, sendData.length, broadcastAddress, port);
             socket.send(packet);
 
+
             socket.setSoTimeout(225); // Millisecond timeout for responses and to break out of loop
             while (true) {
                 try {
@@ -230,9 +265,11 @@ public class ConnectionManager {
                     DatagramPacket receivePacket = new DatagramPacket(recBuf, recBuf.length);
                     socket.receive(receivePacket); // Blocks until a response is received
 
+
                     String serverReply = new String(receivePacket.getData()).trim();
                     String serverIp = receivePacket.getAddress().getHostAddress();
                     Log.i("ConnectionManager", "Response from server: " + serverReply + " at " + serverIp);
+
 
                     if (serverReply.contains("Hello, I'm")) {
                         hosts.add(serverIp);
@@ -248,6 +285,7 @@ public class ConnectionManager {
                 callback.onError("No hosts found");
             }
 
+
         } catch (SocketException e) {
             e.printStackTrace();
             Log.e("ConnectionManager", "Error initializing DatagramSocket: " + e.getMessage());
@@ -261,6 +299,7 @@ public class ConnectionManager {
             }
         }
     }
+
 
     public void resetConnectionManager() {
         try {
@@ -280,6 +319,7 @@ public class ConnectionManager {
         serverAddress = "";
         serverResponse = "";
     }
+
 
     // Shutdown the connection
     public void shutdown() {

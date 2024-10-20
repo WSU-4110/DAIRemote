@@ -1,10 +1,8 @@
 package com.example.dairemote_app;
 
-import android.annotation.SuppressLint;
+
 import android.content.Intent;
 import android.graphics.Color;
-import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -13,57 +11,72 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+
 import com.google.android.material.navigation.NavigationView;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.net.InetAddress;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+
+
+
 public class ServersPage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
 
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     Toolbar toolbar;
 
-	private List<String> availableHosts = new ArrayList<>();
+
+    private List<String> availableHosts = new ArrayList<>();
     private ArrayAdapter<String> adapter;
     private String selectedHost = null;
     private TextView connectionStatus;
+
+
+
 
     public void drawerSetup(int page) {
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
         toolbar = findViewById(R.id.toolbar);
 
+
         setSupportActionBar(toolbar);
+
 
         // Remove the app name from tool bar
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
 
+
         navigationView.bringToFront();
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
+
         navigationView.setNavigationItemSelectedListener(this);
+
 
         // Select the home icon by default when opening navigation menu
         navigationView.setCheckedItem(page);
     }
+
 
     public void notifyUser(String msg, String color) {
         TextView toolbarNotif = findViewById(R.id.toolbarNotification);
@@ -71,9 +84,11 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         toolbarNotif.setTextColor(Color.parseColor(color));
         toolbarNotif.setVisibility(View.VISIBLE);
 
+
         // Hide notification after 5 seconds
         toolbarNotif.postDelayed(() -> toolbarNotif.setVisibility(View.GONE), 5000);
     }
+
 
     public void bkgrdNotifyUser(String msg, String color) {
         runOnUiThread(new Runnable() {
@@ -84,15 +99,19 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         });
     }
 
-	@Override
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_servers_page);
 
+
         drawerSetup(R.id.nav_server);
+
 
         connectionStatus = findViewById(R.id.toolbarNotification);
         ListView hostListView = findViewById(R.id.hostList);
+
 
         // Adapter for the ListView to display the available hosts
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_single_choice, availableHosts);
@@ -100,6 +119,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         hostListView.setOnItemClickListener((parent, view, position, id) -> {
             selectedHost = availableHosts.get(position);
         });
+
 
         // Perform host search in the background
         ConnectionManager.hostSearchInBackground(new HostSearchCallback() {
@@ -109,6 +129,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
                     availableHosts.clear();
                     availableHosts.addAll(hosts);
                     adapter.notifyDataSetChanged();
+
 
                     // Check if any host matches current connection and select it
                     if (ConnectionManager.serverAddress != null && !ConnectionManager.serverAddress.isEmpty()) {
@@ -122,11 +143,13 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
                 });
             }
 
+
             @Override
             public void onError(String error) {
                 Log.e("HostListActivity", "Error: " + error);
             }
         });
+
 
         hostListView.setOnItemClickListener((parent, view, position, id) -> {
             selectedHost = availableHosts.get(position);
@@ -138,13 +161,17 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
                     notifyUser("Disconnected from: " + ConnectionManager.serverAddress, "#c3cf1b");
                 }
 
+
                 // Start the new connection process in the background
                 ExecutorService executor = Executors.newSingleThreadExecutor();
                 executor.execute(() -> {
-                    MainActivity.connectionManager = new ConnectionManager(selectedHost);
+                    // Using Singleton Instance of ConnectionManager
+                    MainActivity.connectionManager = ConnectionManager.getInstance(selectedHost);
+
 
                     // Try to initialize the connection in the background
                     boolean connectionInitialized = MainActivity.connectionManager.initializeConnection();
+
 
                     if (connectionInitialized) {
                         bkgrdNotifyUser("Connected to: " + selectedHost, "#3fcf1b");
@@ -161,7 +188,8 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         });
     }
 
-	@Override
+
+    @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
@@ -172,11 +200,13 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         }
     }
 
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         Intent intent;
         int itemId = item.getItemId();
         Log.d("Navigation", "Item selected: " + itemId);
+
 
         if (itemId == R.id.nav_home) {
             intent = new Intent(this, MainActivity.class);
@@ -192,7 +222,9 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
             startActivity(intent);
         }
 
+
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 }
+
