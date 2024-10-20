@@ -1,4 +1,10 @@
-﻿namespace DAIRemote
+﻿using DisplayProfileManager;
+using System;
+using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
+
+namespace DAIRemote
 {
     public class TrayIconManager
     {
@@ -8,20 +14,42 @@
         private FileSystemWatcher profileDirWatcher;
         private string profilesFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
 
+        private Image aboutIcon;
+        private Image DAIRemoteLogo;
+        private Image deleteProfileIcon;
+        private Image exitIcon;
+        private Image monitorIcon;
+        private Image saveProfileIcon;
+        private Image turnOffAllMonitorsIcon;
+
         public TrayIconManager(Form form)
         {
             this.form = form;
+            aboutIcon = Image.FromFile("Resources/About.ico");
+            DAIRemoteLogo = Image.FromFile("Resources/DAIRemoteLogo.ico");
+            deleteProfileIcon = Image.FromFile("Resources/DeleteProfile.ico");
+            exitIcon = Image.FromFile("Resources/Exit.ico");
+            monitorIcon = Image.FromFile("Resources/Monitor.ico");
+            saveProfileIcon = Image.FromFile("Resources/SaveProfile.ico");
+            turnOffAllMonitorsIcon = Image.FromFile("Resources/TurnOffAllMonitors.ico");
+
+            if (!Directory.Exists(profilesFolderPath))
+            {
+                Directory.CreateDirectory(profilesFolderPath); 
+            }
+
             InitializeTrayIcon();
         }
 
         private void InitializeTrayIcon()
         {
-            trayMenu = new ContextMenuStrip
+            trayMenu = CreateTrayMenu();
+            trayIcon = new NotifyIcon
             {
-                BackColor = Color.FromArgb(50, 50, 50),
-                ForeColor = System.Drawing.Color.White,
-                ShowImageMargin = false,
-                Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
+                Text = "DAIRemote",
+                Icon = new Icon("Resources/DAIRemoteLogo.ico"),
+                ContextMenuStrip = trayMenu,
+                Visible = true
             };
 
             profileDirWatcher = new FileSystemWatcher(@profilesFolderPath);
@@ -31,67 +59,96 @@
             profileDirWatcher.Renamed += OnProfilesChanged;
             profileDirWatcher.EnableRaisingEvents = true;
 
-            PopulateContextMenu();
+            trayIcon.DoubleClick += (s, e) => ShowForm();
+        }
 
-            trayIcon = new NotifyIcon
+        private ContextMenuStrip CreateTrayMenu()
+        {
+            ContextMenuStrip menu = new ContextMenuStrip
             {
-                Text = "DAIRemote",
-                Icon = new Icon("Resources/DAIRemoteLogo.ico"),
-                ContextMenuStrip = trayMenu,
-                Visible = true
+                ForeColor = System.Drawing.Color.Black,
+                ShowImageMargin = true,
+                Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
             };
 
-            trayIcon.DoubleClick += (s, e) => ShowForm();
+            PopulateTrayMenu(menu);
+
+            return menu;
         }
 
         private void OnProfilesChanged(object sender, FileSystemEventArgs e)
         {
+            ContextMenuStrip newMenu = CreateTrayMenu();
+
             if (form.InvokeRequired)
             {
                 form.BeginInvoke((MethodInvoker)delegate
                 {
-                    PopulateContextMenu();
+                    trayIcon.ContextMenuStrip = newMenu;
                 });
             }
             else
             {
-                PopulateContextMenu();
+                trayIcon.ContextMenuStrip = newMenu;
             }
         }
 
-        private void PopulateContextMenu()
+        private void PopulateTrayMenu(ContextMenuStrip menu)
         {
             // Clear existing items
-            trayMenu.Items.Clear();
+            menu.Items.Clear();
 
-            if (!Directory.Exists(profilesFolderPath))
+            ToolStripLabel loadProfilesLabel = new ToolStripLabel("Loaded Profiles")
             {
-                Directory.CreateDirectory(profilesFolderPath);
-            }
+                Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
+                ForeColor = Color.Gray
+            };
 
-            string[] jsonFiles = Directory.GetFiles(profilesFolderPath);
+            menu.Items.Add(loadProfilesLabel);
+            menu.Items.Add(new ToolStripSeparator());
 
-            foreach (string jsonFile in jsonFiles)
+            AddDisplayProfiles(menu);
+
+            // Add menu items
+            ToolStripMenuItem aboutMenuItem = new ToolStripMenuItem("About", aboutIcon, OnAboutClick);
+            ToolStripMenuItem exitMenuItem = new ToolStripMenuItem("Exit", exitIcon, OnExit);
+            menu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add(aboutMenuItem);
+            menu.Items.Add(exitMenuItem);
+        }
+
+        private void AddDisplayProfiles(ContextMenuStrip menu)
+        {
+            // Assuming jsonFiles holds the paths of the profile files
+            string[] jsonProfiles = Directory.GetFiles(profilesFolderPath, "*.json"); // Adjust the filter as needed
+
+            foreach (string jsonProfile in jsonProfiles)
             {
-                // Create menu item for each JSON file
-                string fileName = Path.GetFileNameWithoutExtension(jsonFile);
+                // Get the file name without extension for display
+                string fileName = Path.GetFileNameWithoutExtension(jsonProfile);
 
-                var jsonMenuItem = new ToolStripMenuItem(fileName, null, (sender, e) =>
+                // Create a menu item for each JSON file
+                var jsonMenuItem = new ToolStripMenuItem(fileName, monitorIcon, (sender, e) =>
                 {
-                    // Handle click event
-                    DisplayProfileManager.DisplayConfig.SetDisplaySettings(jsonFile);
+                    // Handle the click event to load the profile
+                    DisplayProfileManager.DisplayConfig.SetDisplaySettings(jsonProfile);
                 });
 
-                trayMenu.Items.Add(jsonMenuItem);
+                // Add the profile menu item to the passed menu
+                menu.Items.Insert(2, jsonMenuItem);
             }
+        }
 
-            trayMenu.Items.Add(new ToolStripSeparator());
+        private void OnAboutClick(object? sender, EventArgs e)
+        {
+            string aboutMessage =
+                          "DAIRemote is a versatile display, audio, and input remote for Windows desktops. It allows users to:\n\n" +
+                          "• Save and load display profiles\n" +
+                          "• Cycle through audio playback devices\n" +
+                          "• Use an Android phone as a keyboard and mouse input\n\n" +
+                          "All of these features can be controlled remotely, providing convenience from wherever you're sitting.";
 
-            var showMenuItem = new ToolStripMenuItem("Show", null, OnShow);
-            var exitMenuItem = new ToolStripMenuItem("Exit", null, OnExit);
-
-            trayMenu.Items.Add(showMenuItem);
-            trayMenu.Items.Add(exitMenuItem);
+            MessageBox.Show(aboutMessage, "About DAIRemote", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         public void HideIcon()
