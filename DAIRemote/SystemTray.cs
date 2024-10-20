@@ -13,6 +13,7 @@ namespace DAIRemote
         private Form form;
         private FileSystemWatcher profileDirWatcher;
         private string profilesFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
+        private DisplayConfig displayConfig;
 
         private Image aboutIcon;
         private Image DAIRemoteLogo;
@@ -25,6 +26,8 @@ namespace DAIRemote
         public TrayIconManager(Form form)
         {
             this.form = form;
+            displayConfig = new DisplayConfig();
+
             aboutIcon = Image.FromFile("Resources/About.ico");
             DAIRemoteLogo = Image.FromFile("Resources/DAIRemoteLogo.ico");
             deleteProfileIcon = Image.FromFile("Resources/DeleteProfile.ico");
@@ -110,8 +113,11 @@ namespace DAIRemote
             AddDisplayProfiles(menu);
 
             // Add menu items
+            ToolStripMenuItem turnOffAllMonitorsItem = new ToolStripMenuItem("Turn Off All Monitors", turnOffAllMonitorsIcon, TurnOffMonitors);
             ToolStripMenuItem aboutMenuItem = new ToolStripMenuItem("About", aboutIcon, OnAboutClick);
             ToolStripMenuItem exitMenuItem = new ToolStripMenuItem("Exit", exitIcon, OnExit);
+            menu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add(turnOffAllMonitorsItem);
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(aboutMenuItem);
             menu.Items.Add(exitMenuItem);
@@ -137,6 +143,11 @@ namespace DAIRemote
                 // Add the profile menu item to the passed menu
                 menu.Items.Insert(2, jsonMenuItem);
             }
+        }
+
+        private void TurnOffMonitors(object? sender, EventArgs e)
+        {
+            displayConfig.TurnOffMonitors();
         }
 
         private void OnAboutClick(object? sender, EventArgs e)
