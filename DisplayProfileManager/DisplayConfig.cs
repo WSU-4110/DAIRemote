@@ -1306,7 +1306,7 @@ namespace DisplayProfileManager
             return false;
         }
 
-        /*public static bool DeleteDisplaySettings(string fileName)
+        public static bool DeleteDisplaySettings(string fileName)
         {
             string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             string folderPath = Path.Combine(appDataPath, "DAIRemote");
@@ -1326,7 +1326,7 @@ namespace DisplayProfileManager
 
             File.Delete(fileName);
             return false;
-        }*/
+        }
         static void Main(string[] args)
         {
 

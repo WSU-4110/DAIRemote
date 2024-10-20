@@ -25,15 +25,17 @@
             BtnShowAudioOutputs = new Button();
             button1 = new Button();
             profileNameTextBox = new TextBox();
+            button2 = new Button();
             SuspendLayout();
             // 
             // BtnSaveDisplayConfig
             // 
             BtnSaveDisplayConfig.AccessibleName = "BtnSaveDisplayConfig";
             BtnSaveDisplayConfig.BackColor = Color.LightSkyBlue;
-            BtnSaveDisplayConfig.Location = new Point(20, 42);
+            BtnSaveDisplayConfig.Location = new Point(23, 56);
+            BtnSaveDisplayConfig.Margin = new Padding(3, 4, 3, 4);
             BtnSaveDisplayConfig.Name = "BtnSaveDisplayConfig";
-            BtnSaveDisplayConfig.Size = new Size(200, 40);
+            BtnSaveDisplayConfig.Size = new Size(229, 53);
             BtnSaveDisplayConfig.TabIndex = 0;
             BtnSaveDisplayConfig.Text = "Save Display Config";
             BtnSaveDisplayConfig.UseVisualStyleBackColor = false;
@@ -43,9 +45,10 @@
             // 
             BtnShowAudioOutputs.AccessibleName = "BtnShowAudioOutputs";
             BtnShowAudioOutputs.BackColor = Color.LightSkyBlue;
-            BtnShowAudioOutputs.Location = new Point(20, 88);
+            BtnShowAudioOutputs.Location = new Point(23, 117);
+            BtnShowAudioOutputs.Margin = new Padding(3, 4, 3, 4);
             BtnShowAudioOutputs.Name = "BtnShowAudioOutputs";
-            BtnShowAudioOutputs.Size = new Size(200, 40);
+            BtnShowAudioOutputs.Size = new Size(229, 53);
             BtnShowAudioOutputs.TabIndex = 1;
             BtnShowAudioOutputs.Text = "Show Audio Outputs";
             BtnShowAudioOutputs.UseVisualStyleBackColor = false;
@@ -55,9 +58,10 @@
             // 
             button1.AccessibleName = "BtnLoadDisplayConfig";
             button1.BackColor = Color.LightSkyBlue;
-            button1.Location = new Point(20, 398);
+            button1.Location = new Point(23, 531);
+            button1.Margin = new Padding(3, 4, 3, 4);
             button1.Name = "button1";
-            button1.Size = new Size(200, 40);
+            button1.Size = new Size(229, 53);
             button1.TabIndex = 2;
             button1.Text = "Load Display Config";
             button1.UseVisualStyleBackColor = false;
@@ -65,21 +69,37 @@
             // 
             // profileNameTextBox
             // 
-            profileNameTextBox.Location = new Point(20, 12);
+            profileNameTextBox.Location = new Point(23, 16);
+            profileNameTextBox.Margin = new Padding(3, 4, 3, 4);
             profileNameTextBox.Name = "profileNameTextBox";
-            profileNameTextBox.Size = new Size(200, 23);
+            profileNameTextBox.Size = new Size(228, 27);
             profileNameTextBox.TabIndex = 3;
+            // 
+            // button2
+            // 
+            button2.AccessibleName = "BtnDeleteDisplayConfig";
+            button2.BackColor = Color.LightSkyBlue;
+            button2.Location = new Point(23, 470);
+            button2.Margin = new Padding(3, 4, 3, 4);
+            button2.Name = "button2";
+            button2.Size = new Size(229, 53);
+            button2.TabIndex = 4;
+            button2.Text = "Delete Display Config";
+            button2.UseVisualStyleBackColor = false;
+            button2.Click += BtnDeleteDisplayConfig_Click;
             // 
             // DAIRemoteApplicationUI
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(225, 246, 225);
-            ClientSize = new Size(300, 450);
+            ClientSize = new Size(343, 600);
+            Controls.Add(button2);
             Controls.Add(profileNameTextBox);
             Controls.Add(button1);
             Controls.Add(BtnSaveDisplayConfig);
             Controls.Add(BtnShowAudioOutputs);
+            Margin = new Padding(3, 4, 3, 4);
             Name = "DAIRemoteApplicationUI";
             Text = "DAIRemote";
             Load += DAIRemoteApplicationUI_Load;
@@ -93,5 +113,6 @@
         private Button BtnShowAudioOutputs;
         private Button button1;
         private TextBox profileNameTextBox;
+        private Button button2;
     }
 }
