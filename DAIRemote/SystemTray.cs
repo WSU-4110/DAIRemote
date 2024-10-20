@@ -82,18 +82,17 @@ namespace DAIRemote
 
         private void OnProfilesChanged(object sender, FileSystemEventArgs e)
         {
-            ContextMenuStrip newMenu = CreateTrayMenu();
 
             if (form.InvokeRequired)
             {
                 form.BeginInvoke((MethodInvoker)delegate
                 {
-                    trayIcon.ContextMenuStrip = newMenu;
+                    PopulateTrayMenu(trayMenu);
                 });
             }
             else
             {
-                trayIcon.ContextMenuStrip = newMenu;
+                PopulateTrayMenu(trayMenu);
             }
         }
 
@@ -107,57 +106,21 @@ namespace DAIRemote
                 Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
                 ForeColor = Color.Gray,
                 Enabled = false,
-        };
+            };
 
             ToolStripMenuItem deleteProfilesLabel = new ToolStripMenuItem("Select Profile To Delete")
             {
                 Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
                 ForeColor = Color.Gray,
                 Enabled = false,
-        
             };
+
+            ToolStripMenuItem deleteProfileMenuItem = new ToolStripMenuItem("Delete Profile", deleteProfileIcon);
+            deleteProfileMenuItem.DropDownItems.Clear(); // Clear any previous items
 
             menu.Items.Add(loadProfilesLabel);
             menu.Items.Add(new ToolStripSeparator());
-            AddDisplayProfiles(menu);
-            menu.Items.Add(new ToolStripSeparator());
 
-            // Add menu items
-            ToolStripMenuItem deleteProfileMenuItem = new ToolStripMenuItem("Delete Profile", deleteProfileIcon)
-            {
-                AutoSize = true
-            };
-            deleteProfileMenuItem.DropDownItems.Add(deleteProfilesLabel);
-            deleteProfileMenuItem.DropDownItems.Add(new ToolStripSeparator());
-            AddDisplayProfiles(deleteProfileMenuItem);
-            menu.Items.Add(deleteProfileMenuItem);
-
-
-            ToolStripMenuItem turnOffAllMonitorsItem = new ToolStripMenuItem("Turn Off All Monitors", turnOffAllMonitorsIcon, TurnOffMonitors);
-            ToolStripMenuItem aboutMenuItem = new ToolStripMenuItem("About", aboutIcon, OnAboutClick);
-            ToolStripMenuItem exitMenuItem = new ToolStripMenuItem("Exit", exitIcon, OnExit);
-         
-            menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add(turnOffAllMonitorsItem);
-            menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add(aboutMenuItem);
-            menu.Items.Add(exitMenuItem);
-        }
-
-        private void DeleteProfile(string profilePath)
-        {
-            if (File.Exists(profilePath))
-            {
-                File.Delete(profilePath);
-                MessageBox.Show($"Profile {Path.GetFileNameWithoutExtension(profilePath)} has been deleted.", "Profile Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-
-
-        }
-
-        private void AddDisplayProfiles(ContextMenuStrip menuItem)
-        {
-            // Assuming jsonFiles holds the paths of the profile files
             string[] jsonProfiles = Directory.GetFiles(profilesFolderPath, "*.json"); // Adjust the filter as needed
 
             foreach (string jsonProfile in jsonProfiles)
@@ -173,34 +136,48 @@ namespace DAIRemote
                 });
 
                 // Add the profile menu item to the passed menu
-                menuItem.Items.Insert(2, jsonMenuItem);
-            }
-        }
+                menu.Items.Insert(2, jsonMenuItem);
 
-        private void AddDisplayProfiles(ToolStripMenuItem menuItem)
-        {
-            // Fetch the profiles using your existing method
-            string[] jsonProfiles = Directory.GetFiles(profilesFolderPath, "*.json"); // Adjust this line as needed
-
-            // Clear existing subitems if necessary
-            // menuItem.DropDownItems.Clear();
-
-            // Add a submenu item for each profile
-            foreach (string jsonProfile in jsonProfiles)
-            {
-                string fileName = Path.GetFileNameWithoutExtension(jsonProfile);
-
-                // Create a submenu item for each profile
-                ToolStripMenuItem profileItem = new ToolStripMenuItem(fileName, monitorIcon, (sender, e) =>
+                ToolStripMenuItem profileDeleteItem = new ToolStripMenuItem(fileName, null, (sender, e) =>
                 {
-                    DeleteProfile(jsonProfile); // Call your DeleteProfile method
+                    // Call the method to delete the selected profile
+                    DeleteProfile(jsonProfile); // Pass the path of the profile to delete
                 });
 
-                // Add the profile item to the passed parent menu item
-                menuItem.DropDownItems.Insert(2, profileItem);
+                // Add the delete profile item to the deleteProfileMenuItem's dropdown
+                deleteProfileMenuItem.DropDownItems.Add(profileDeleteItem);
             }
+
+            // Add the deleteProfileMenuItem to the menu after populating profiles
+                menu.Items.Add(new ToolStripSeparator());
+                deleteProfileMenuItem.DropDownItems.Insert(0, deleteProfilesLabel);
+                deleteProfileMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
+                menu.Items.Add(deleteProfileMenuItem);
+
+       
+
+            ToolStripMenuItem turnOffAllMonitorsItem = new ToolStripMenuItem("Turn Off All Monitors", turnOffAllMonitorsIcon, TurnOffMonitors);
+            ToolStripMenuItem aboutMenuItem = new ToolStripMenuItem("About", aboutIcon, OnAboutClick);
+            ToolStripMenuItem exitMenuItem = new ToolStripMenuItem("Exit", exitIcon, OnExit);
+
+            menu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add(turnOffAllMonitorsItem);
+            menu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add(aboutMenuItem);
+            menu.Items.Add(exitMenuItem);
         }
 
+
+        private void DeleteProfile(string profilePath)
+        {
+            if (File.Exists(profilePath))
+            {
+                File.Delete(profilePath);
+                MessageBox.Show($"Profile {Path.GetFileNameWithoutExtension(profilePath)} has been deleted.", "Profile Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+
+        }
 
         private void TurnOffMonitors(object? sender, EventArgs e)
         {
