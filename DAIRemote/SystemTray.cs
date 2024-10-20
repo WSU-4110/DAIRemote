@@ -2,16 +2,31 @@
 {
     public class TrayIconManager
     {
+        private static TrayIconManager instance = null;
+        private static readonly object padlock = new object();
+
         private NotifyIcon trayIcon;
         private ContextMenuStrip trayMenu;
         private Form form;
         private FileSystemWatcher profileDirWatcher;
         private string profilesFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
 
-        public TrayIconManager(Form form)
+        private TrayIconManager(Form form)
         {
             this.form = form;
             InitializeTrayIcon();
+        }
+
+        public static TrayIconManager GetInstance(Form form)
+        {
+            lock (padlock)
+            {
+                if (instance == null)
+                {
+                    instance = new TrayIconManager(form);
+                }
+                return instance;
+            }
         }
 
         private void InitializeTrayIcon()
