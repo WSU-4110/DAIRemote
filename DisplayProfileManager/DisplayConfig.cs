@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace DisplayProfileManager
 {
@@ -1295,6 +1296,30 @@ namespace DisplayProfileManager
 
             return false;
         }
+
+        [DllImport("user32.dll")]
+        private static extern int PostMessage(int hWnd, int hMsg, int wParam, int lParam);
+
+        private const int WM_SYSCOMMAND = 0x0112;
+        private const int SC_MONITORPOWER = 0xF170;
+        private const int MONITOR_OFF = 2;
+        private const int MONITOR_ON = -1;
+        private const int HWND_BROADCAST = 0xFFFF;
+
+        public void TurnOffMonitors()
+        {
+            PostMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, MONITOR_OFF);
+        }
+
+        public void TurnOnMonitors()
+        {
+            Task.Run(() =>
+            {
+                PostMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, MONITOR_ON);
+                System.Threading.Thread.Sleep(100);
+            });
+        }
+
         static void Main(string[] args)
         {
 

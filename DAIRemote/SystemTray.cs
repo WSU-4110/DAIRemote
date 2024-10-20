@@ -72,6 +72,7 @@ namespace DAIRemote
                 ForeColor = System.Drawing.Color.Black,
                 ShowImageMargin = true,
                 Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
+                AutoSize = true,
             };
 
             PopulateTrayMenu(menu);
@@ -104,18 +105,38 @@ namespace DAIRemote
             ToolStripLabel loadProfilesLabel = new ToolStripLabel("Loaded Profiles")
             {
                 Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
-                ForeColor = Color.Gray
+                ForeColor = Color.Gray,
+                Enabled = false,
+        };
+
+            ToolStripMenuItem deleteProfilesLabel = new ToolStripMenuItem("Select Profile To Delete")
+            {
+                Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
+                ForeColor = Color.Gray,
+                Enabled = false,
+        
             };
 
             menu.Items.Add(loadProfilesLabel);
             menu.Items.Add(new ToolStripSeparator());
-
             AddDisplayProfiles(menu);
+            menu.Items.Add(new ToolStripSeparator());
 
             // Add menu items
+            ToolStripMenuItem deleteProfileMenuItem = new ToolStripMenuItem("Delete Profile", deleteProfileIcon)
+            {
+                AutoSize = true
+            };
+            deleteProfileMenuItem.DropDownItems.Add(deleteProfilesLabel);
+            deleteProfileMenuItem.DropDownItems.Add(new ToolStripSeparator());
+            AddDisplayProfiles(deleteProfileMenuItem);
+            menu.Items.Add(deleteProfileMenuItem);
+
+
             ToolStripMenuItem turnOffAllMonitorsItem = new ToolStripMenuItem("Turn Off All Monitors", turnOffAllMonitorsIcon, TurnOffMonitors);
             ToolStripMenuItem aboutMenuItem = new ToolStripMenuItem("About", aboutIcon, OnAboutClick);
             ToolStripMenuItem exitMenuItem = new ToolStripMenuItem("Exit", exitIcon, OnExit);
+         
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(turnOffAllMonitorsItem);
             menu.Items.Add(new ToolStripSeparator());
@@ -123,7 +144,18 @@ namespace DAIRemote
             menu.Items.Add(exitMenuItem);
         }
 
-        private void AddDisplayProfiles(ContextMenuStrip menu)
+        private void DeleteProfile(string profilePath)
+        {
+            if (File.Exists(profilePath))
+            {
+                File.Delete(profilePath);
+                MessageBox.Show($"Profile {Path.GetFileNameWithoutExtension(profilePath)} has been deleted.", "Profile Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+
+        }
+
+        private void AddDisplayProfiles(ContextMenuStrip menuItem)
         {
             // Assuming jsonFiles holds the paths of the profile files
             string[] jsonProfiles = Directory.GetFiles(profilesFolderPath, "*.json"); // Adjust the filter as needed
@@ -141,9 +173,34 @@ namespace DAIRemote
                 });
 
                 // Add the profile menu item to the passed menu
-                menu.Items.Insert(2, jsonMenuItem);
+                menuItem.Items.Insert(2, jsonMenuItem);
             }
         }
+
+        private void AddDisplayProfiles(ToolStripMenuItem menuItem)
+        {
+            // Fetch the profiles using your existing method
+            string[] jsonProfiles = Directory.GetFiles(profilesFolderPath, "*.json"); // Adjust this line as needed
+
+            // Clear existing subitems if necessary
+            // menuItem.DropDownItems.Clear();
+
+            // Add a submenu item for each profile
+            foreach (string jsonProfile in jsonProfiles)
+            {
+                string fileName = Path.GetFileNameWithoutExtension(jsonProfile);
+
+                // Create a submenu item for each profile
+                ToolStripMenuItem profileItem = new ToolStripMenuItem(fileName, monitorIcon, (sender, e) =>
+                {
+                    DeleteProfile(jsonProfile); // Call your DeleteProfile method
+                });
+
+                // Add the profile item to the passed parent menu item
+                menuItem.DropDownItems.Insert(2, profileItem);
+            }
+        }
+
 
         private void TurnOffMonitors(object? sender, EventArgs e)
         {
