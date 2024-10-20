@@ -3,16 +3,20 @@ package com.example.dairemote_app;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -22,6 +26,7 @@ import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -44,6 +49,14 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     Toolbar keyboardToolbar;
     TextView moreOpts;
     private int currentPageIndex = 0;
+
+    // vars for tutorial
+    private boolean tutorialOn = false; // tracks if tutorial is active
+    private int currentStep = 0;
+    private boolean serverNavigationButtonClicked = false; // tracks if main icon button was clicked
+    private boolean nextStepPending = false; // tracks if "Next" was clicked but action is pending
+
+
     private String[][][] keyboardExtraRows = {
             { // Page 1
                     {"F1", "F2", "F3", "F4", "F5", "F6"}, // Row 1
@@ -98,6 +111,14 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_interaction_page);
+
+        // checks if tutorial is still ongoing
+        tutorialOn = getIntent().getBooleanExtra("tutorialOn", false);
+        currentStep = getIntent().getIntExtra("currentStep", 0);
+        if (tutorialOn) {
+            continueTutorial(currentStep);
+        }
+
 
         FrameLayout touchpadFrame = findViewById(R.id.touchpadFrame);
 
@@ -542,6 +563,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             drawerLayout.closeDrawer(GravityCompat.START);
         } else if (!(editText.getVisibility() == View.VISIBLE)) {
             Intent intent = new Intent(InteractionPage.this, MainActivity.class);
+            intent.putExtra("tutorialOn", tutorialOn);
+            intent.putExtra("currentStep", currentStep);
             startActivity(intent);
         } else {
             super.onBackPressed();
@@ -552,13 +575,22 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         Intent intent;
         int itemId = item.getItemId();
-        Log.d("Navigation", "Item selected: " + itemId);
 
         if (itemId == R.id.nav_home) {
             intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         } else if (itemId == R.id.nav_server) {
             intent = new Intent(this, ServersPage.class);
+
+            //  if tutorial is still active on navigation button clicked
+            if (tutorialOn) {
+                serverNavigationButtonClicked = true;
+                checkIfStepCompleted();
+                // passing data of tutorial to interactionPage
+                intent.putExtra("tutorialOn", tutorialOn);
+                intent.putExtra("currentStep", currentStep);
+            }
+
             startActivity(intent);
         } else if (itemId == R.id.nav_help) {
             intent = new Intent(this, InstructionsPage.class);
@@ -571,4 +603,76 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    private void continueTutorial(int step) {
+        // resumes showing tutorial steps
+        showSteps(step);
+    }
+
+    private void showSteps(int step) {
+        switch (step) {
+            case 1:
+                showCustomDialog("Remote Page", "Click the help icon above for instructions on how to use the remote.", Gravity.TOP | Gravity.RIGHT, 100, 200);
+                break;
+            case 2:
+                showCustomDialog("Lower Panel Buttons", "Display Modes, Audio Cycling, Hotkeys, App Keyboard", Gravity.BOTTOM | Gravity.RIGHT, 100, 200);
+                break;
+            case 3:
+                showCustomDialog("ToolBar", "Click on the ToolBar button to navigate between pages.", Gravity.TOP | Gravity.RIGHT, 100, 200);
+                break;
+            default:
+                break;
+        }
+    }
+    // shows pop up for each step in customized position (depending on location of feature)
+    private void showCustomDialog(String title, String message, int gravity, int xOffset, int yOffset) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setMessage(message);
+
+        // PositiveButton representing "Next" for moving to the next step
+        builder.setPositiveButton("Next", (dialog, which) -> {
+            Log.d("Tutorial", "Current Step: " + currentStep);
+
+            if (currentStep == 3) {
+                nextStepPending = true;
+                checkIfStepCompleted();
+            }
+            else {
+                currentStep++;
+                showSteps(currentStep);
+            }
+
+        });
+
+        // NegativeButton representing "Exit Tour" to stop the tutorial
+        builder.setNegativeButton("Exit Tour", (dialog, which) -> {
+            dialog.dismiss();
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // sets custom position
+        Window window = dialog.getWindow();
+        if (window != null) {
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.gravity = gravity;
+            params.x = xOffset;
+            params.y = yOffset;
+            window.setAttributes(params);
+        }
+
+    }
+
+    // checking if specific action was completed for current step
+    private void checkIfStepCompleted() {
+        if (serverNavigationButtonClicked) {
+            nextStepPending = false;
+            currentStep++;
+            showSteps(currentStep);
+        }
+    }
+
+
 }
