@@ -98,7 +98,6 @@ namespace DAIRemote
 
         private void PopulateTrayMenu(ContextMenuStrip menu)
         {
-            // Clear existing items
             menu.Items.Clear();
 
             ToolStripLabel loadProfilesLabel = new ToolStripLabel("Loaded Profiles")
@@ -115,46 +114,55 @@ namespace DAIRemote
                 Enabled = false,
             };
 
+            ToolStripMenuItem saveProfilesLabel = new ToolStripMenuItem("Select Profile To Override")
+            {
+                Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
+                ForeColor = Color.Gray,
+                Enabled = false,
+            };
+
+            ToolStripMenuItem saveProfileMenuItem = new ToolStripMenuItem("Save Profile", saveProfileIcon);
+            saveProfileMenuItem.DropDownItems.Clear();
+
             ToolStripMenuItem deleteProfileMenuItem = new ToolStripMenuItem("Delete Profile", deleteProfileIcon);
-            deleteProfileMenuItem.DropDownItems.Clear(); // Clear any previous items
+            deleteProfileMenuItem.DropDownItems.Clear();
 
             menu.Items.Add(loadProfilesLabel);
             menu.Items.Add(new ToolStripSeparator());
 
-            string[] jsonProfiles = Directory.GetFiles(profilesFolderPath, "*.json"); // Adjust the filter as needed
+            string[] jsonProfiles = Directory.GetFiles(profilesFolderPath, "*.json");
 
             foreach (string jsonProfile in jsonProfiles)
             {
-                // Get the file name without extension for display
                 string fileName = Path.GetFileNameWithoutExtension(jsonProfile);
-
-                // Create a menu item for each JSON file
                 var jsonMenuItem = new ToolStripMenuItem(fileName, monitorIcon, (sender, e) =>
                 {
-                    // Handle the click event to load the profile
                     DisplayProfileManager.DisplayConfig.SetDisplaySettings(jsonProfile);
                 });
 
-                // Add the profile menu item to the passed menu
                 menu.Items.Insert(2, jsonMenuItem);
 
-                ToolStripMenuItem profileDeleteItem = new ToolStripMenuItem(fileName, null, (sender, e) =>
+                ToolStripMenuItem profileDeleteItem = new ToolStripMenuItem(fileName, monitorIcon, (sender, e) =>
                 {
-                    // Call the method to delete the selected profile
-                    DeleteProfile(jsonProfile); // Pass the path of the profile to delete
+                    DeleteProfile(jsonProfile);
                 });
 
-                // Add the delete profile item to the deleteProfileMenuItem's dropdown
+                ToolStripMenuItem profileSaveItem = new ToolStripMenuItem(fileName, monitorIcon, (sender, e) =>
+                {
+                    SaveProfile(jsonProfile);
+                });
+
                 deleteProfileMenuItem.DropDownItems.Add(profileDeleteItem);
+                saveProfileMenuItem.DropDownItems.Add(profileSaveItem);
             }
 
-            // Add the deleteProfileMenuItem to the menu after populating profiles
-                menu.Items.Add(new ToolStripSeparator());
-                deleteProfileMenuItem.DropDownItems.Insert(0, deleteProfilesLabel);
-                deleteProfileMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
-                menu.Items.Add(deleteProfileMenuItem);
-
-       
+            menu.Items.Add(new ToolStripSeparator());
+            deleteProfileMenuItem.DropDownItems.Insert(0, deleteProfilesLabel);
+            deleteProfileMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
+            saveProfileMenuItem.DropDownItems.Insert(0, saveProfilesLabel);
+            saveProfileMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
+            menu.Items.Add(saveProfileMenuItem);
+            menu.Items.Add(deleteProfileMenuItem);
 
             ToolStripMenuItem turnOffAllMonitorsItem = new ToolStripMenuItem("Turn Off All Monitors", turnOffAllMonitorsIcon, TurnOffMonitors);
             ToolStripMenuItem aboutMenuItem = new ToolStripMenuItem("About", aboutIcon, OnAboutClick);
@@ -167,16 +175,14 @@ namespace DAIRemote
             menu.Items.Add(exitMenuItem);
         }
 
+        private void SaveProfile(string profilePath)
+        {
+                DisplayConfig.SaveDisplaySettings(profilePath);
+        }
 
         private void DeleteProfile(string profilePath)
         {
-            if (File.Exists(profilePath))
-            {
                 File.Delete(profilePath);
-                MessageBox.Show($"Profile {Path.GetFileNameWithoutExtension(profilePath)} has been deleted.", "Profile Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-
-
         }
 
         private void TurnOffMonitors(object? sender, EventArgs e)
@@ -198,12 +204,12 @@ namespace DAIRemote
 
         public void HideIcon()
         {
-            trayIcon.Visible = false; // Hide tray icon
+            trayIcon.Visible = false;
         }
 
         public void ShowIcon()
         {
-            trayIcon.Visible = true; // Show tray icon
+            trayIcon.Visible = true;
         }
 
         private void OnShow(object sender, EventArgs e)
@@ -213,15 +219,15 @@ namespace DAIRemote
 
         private void ShowForm()
         {
-            form.Show(); // Show the form
-            form.WindowState = FormWindowState.Normal; // Restore if minimized
-            form.Activate(); // Bring to front
+            form.Show();
+            form.WindowState = FormWindowState.Normal;
+            form.Activate();
         }
 
         private void OnExit(object sender, EventArgs e)
         {
             HideIcon();
-            Application.Exit(); // Exit the application
+            Application.Exit();
         }
     }
 }
