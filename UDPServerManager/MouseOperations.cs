@@ -52,16 +52,10 @@ namespace UDPServerManager
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct MousePoint
+        public struct MousePoint(int x, int y)
         {
-            public int X;
-            public int Y;
-
-            public MousePoint(int x, int y)
-            {
-                X = x;
-                Y = y;
-            }
+            public int X = x;
+            public int Y = y;
         }
     }
 }

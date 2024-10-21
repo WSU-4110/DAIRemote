@@ -1,31 +1,24 @@
 package com.example.dairemote_app;
 
-import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.net.InetAddress;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -37,10 +30,9 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
     NavigationView navigationView;
     Toolbar toolbar;
 
-	private List<String> availableHosts = new ArrayList<>();
+    private final List<String> availableHosts = new ArrayList<>();
     private ArrayAdapter<String> adapter;
     private String selectedHost = null;
-    private TextView connectionStatus;
 
     public void drawerSetup(int page) {
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -65,33 +57,17 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         navigationView.setCheckedItem(page);
     }
 
-    public void notifyUser(String msg, String color) {
-        TextView toolbarNotif = findViewById(R.id.toolbarNotification);
-        toolbarNotif.setText(msg);
-        toolbarNotif.setTextColor(Color.parseColor(color));
-        toolbarNotif.setVisibility(View.VISIBLE);
-
-        // Hide notification after 5 seconds
-        toolbarNotif.postDelayed(() -> toolbarNotif.setVisibility(View.GONE), 5000);
+    public void notifyUser(Context context, String msg) {
+        runOnUiThread(() -> Toast.makeText(context, msg, Toast.LENGTH_SHORT).show());
     }
 
-    public void bkgrdNotifyUser(String msg, String color) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                notifyUser(msg, color);
-            }
-        });
-    }
-
-	@Override
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_servers_page);
 
         drawerSetup(R.id.nav_server);
 
-        connectionStatus = findViewById(R.id.toolbarNotification);
         ListView hostListView = findViewById(R.id.hostList);
 
         // Adapter for the ListView to display the available hosts
@@ -135,7 +111,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
                 if (ConnectionManager.connectionEstablished) {
                     // Stop the current connection before attempting a new one
                     MainActivity.connectionManager.shutdown();
-                    notifyUser("Disconnected from: " + ConnectionManager.serverAddress, "#c3cf1b");
+                    notifyUser(ServersPage.this, "Disconnected from: " + ConnectionManager.serverAddress);
                 }
 
                 // Start the new connection process in the background
@@ -147,21 +123,21 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
                     boolean connectionInitialized = MainActivity.connectionManager.initializeConnection();
 
                     if (connectionInitialized) {
-                        bkgrdNotifyUser("Connected to: " + selectedHost, "#3fcf1b");
+                        notifyUser(ServersPage.this, "Connected to: " + selectedHost);
                         Intent intent = new Intent(ServersPage.this, InteractionPage.class);
                         startActivity(intent);
                     } else {
-                        bkgrdNotifyUser("Connection failed", "#c73a30");
+                        notifyUser(ServersPage.this, "Connection failed");
                         ConnectionManager.serverAddress = "";
                     }
                 });
             } else {
-                notifyUser("Already connected", "#3fcf1b");
+                notifyUser(ServersPage.this, "Already connected");
             }
         });
     }
 
-	@Override
+    @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);

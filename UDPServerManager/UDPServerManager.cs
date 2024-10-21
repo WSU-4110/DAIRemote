@@ -14,7 +14,7 @@ namespace UDPServerManagerForm
         private UdpClient udpServer;
         private IPEndPoint remoteEP;
         private string clientAddress;
-        private int serverPort = 11000;
+        private readonly int serverPort = 11000;
 
         public UDPServerHost()
         {
@@ -29,12 +29,12 @@ namespace UDPServerManagerForm
             public DateTime Timestamp { get; set; }
         }
 
-        public void SaveDeviceHistory(string ipAddress, string deviceName="")
+        public void SaveDeviceHistory(string ipAddress, string deviceName = "")
         {
             // Ensure the directory exists
-            string filePath = GetFilePath("deviceHistory.json"); 
-            
-            var ipData = new DeviceHistoryEntry
+            string filePath = GetFilePath("deviceHistory.json");
+
+            DeviceHistoryEntry ipData = new()
             {
                 DeviceName = deviceName,
                 IpAddress = ipAddress,
@@ -42,7 +42,7 @@ namespace UDPServerManagerForm
             };
 
             // Read the existing JSON file if it exists
-            List<DeviceHistoryEntry> ipList = new List<DeviceHistoryEntry>();
+            List<DeviceHistoryEntry> ipList = [];
             if (File.Exists(filePath))
             {
                 string existingData = File.ReadAllText(filePath);
@@ -66,7 +66,7 @@ namespace UDPServerManagerForm
             List<DeviceHistoryEntry> ipList = JsonSerializer.Deserialize<List<DeviceHistoryEntry>>(existingData);
 
             // Check if any entry in the list has the same IP address
-            foreach (var entry in ipList)
+            foreach (DeviceHistoryEntry entry in ipList)
             {
                 if (entry.IpAddress == ipAddress)
                 {
@@ -83,7 +83,7 @@ namespace UDPServerManagerForm
             if (byIndex >= 0)
             {
                 // Extract everything after "by " as the device name
-                return handshakeMessage.Substring(byIndex + 3).Trim();
+                return handshakeMessage[(byIndex + 3)..].Trim();
             }
             return null;
         }
@@ -121,8 +121,8 @@ namespace UDPServerManagerForm
                 // Check if the received message is the handshake request
                 if (handshakeMessage.StartsWith("Connection requested"))
                 {
-                    return awaitApproval(ExtractDeviceName(handshakeMessage));
-                } 
+                    return AwaitApproval(ExtractDeviceName(handshakeMessage));
+                }
                 else if (handshakeMessage.StartsWith("Hello, I'm"))
                 {
                     Debug.WriteLine($"Received client broadcast from {remoteEP.Address}:{remoteEP.Port}: {handshakeMessage}");
@@ -146,7 +146,7 @@ namespace UDPServerManagerForm
             }
         }
 
-        public bool awaitApproval(string deviceName)
+        public bool AwaitApproval(string deviceName)
         {
             Debug.WriteLine("Checking for approval...");
             SendUdpMessage("Wait");
@@ -163,7 +163,7 @@ namespace UDPServerManagerForm
             }
             else
             {
-                UDPServerManagerForm form = new UDPServerManagerForm();
+                UDPServerManagerForm form = new();
                 DialogResult connect = MessageBox.Show($"Allow ({remoteEP.Address}:{remoteEP.Port}) to connect?",
                     "Pending Connection", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                     MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
@@ -186,7 +186,7 @@ namespace UDPServerManagerForm
             {
                 try
                 {
-                    bool handshakeSuccessful = await Task.Run(() => InitiateHandshake());
+                    bool handshakeSuccessful = await Task.Run(InitiateHandshake);
 
                     if (handshakeSuccessful)
                     {
@@ -203,13 +203,9 @@ namespace UDPServerManagerForm
             }
         }
 
-        public bool isClient(String ipAddress)
+        public bool IsClient(string ipAddress)
         {
-            if (clientAddress != null)
-            {
-                return clientAddress.Equals(ipAddress);
-            }
-            return false;
+            return clientAddress != null && clientAddress.Equals(ipAddress);
         }
 
         // Main message loop once the handshake is successful
@@ -238,7 +234,7 @@ namespace UDPServerManagerForm
                         byte[] data = udpServer.Receive(ref remoteEP);
 
                         // Check if input is by client
-                        if (isClient(remoteEP.Address.ToString()))
+                        if (IsClient(remoteEP.Address.ToString()))
                         {
                             string receivedData = Encoding.ASCII.GetString(data);
                             Debug.WriteLine($"Received: {receivedData}");
@@ -246,7 +242,7 @@ namespace UDPServerManagerForm
                             // Handle received data
                             HandleReceivedData(receivedData, ref lastHeartbeatTime);
                         }
-                        
+
                     }
                     catch (SocketException e)
                     {
@@ -300,11 +296,11 @@ namespace UDPServerManagerForm
             }
             else if (receivedData.StartsWith("Connection requested"))
             {
-                awaitApproval(ExtractDeviceName(receivedData));
+                AwaitApproval(ExtractDeviceName(receivedData));
             }
             else
             {
-                retrieveCommand(receivedData);
+                RetrieveCommand(receivedData);
             }
         }
 
@@ -314,16 +310,16 @@ namespace UDPServerManagerForm
             udpServer.Send(data, data.Length, remoteEP);
         }
 
-        public void retrieveCommand(string command)
+        public void RetrieveCommand(string command)
         {
-            var parts = command.Split(new[] { ' ' }, 2);
-            var action = parts[0];
+            string[] parts = command.Split([' '], 2);
+            string action = parts[0];
 
             Debug.WriteLine(action);
             switch (action)
             {
                 case "MOUSE_MOVE":
-                    var moveParts = parts[1].Split(' ');
+                    string[] moveParts = parts[1].Split(' ');
                     var currentPos = MouseOperations.GetCursorPosition();
 
                     if (moveParts.Length >= 2)
@@ -376,7 +372,7 @@ namespace UDPServerManagerForm
         }
 
         // Method to start the UDP server
-        public async Task hostUDPServer()
+        public async Task HostUDPServer()
         {
             while (true)
             {
