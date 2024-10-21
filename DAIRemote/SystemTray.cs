@@ -129,10 +129,7 @@ namespace DAIRemote
             });
 
             ToolStripMenuItem saveProfileMenuItem = new ToolStripMenuItem("Save Profile", saveProfileIcon);
-            saveProfileMenuItem.DropDownItems.Clear();
-
             ToolStripMenuItem deleteProfileMenuItem = new ToolStripMenuItem("Delete Profile", deleteProfileIcon);
-            deleteProfileMenuItem.DropDownItems.Clear();
 
             menu.Items.Add(loadProfilesLabel);
             menu.Items.Add(new ToolStripSeparator());
