@@ -49,6 +49,10 @@
 		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		<BuildAction>None</BuildAction>
 	</None>
+	  <None Update="Resources\TurnOffAllMonitors.ico">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <BuildAction>None</BuildAction>
+	  </None>
   </ItemGroup>
 
 </Project>

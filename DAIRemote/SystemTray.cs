@@ -248,6 +248,9 @@ namespace DAIRemote
             inputForm.Controls.Add(inputBox);
             inputForm.Controls.Add(okButton);
             inputForm.Controls.Add(cancelButton);
+
+            inputForm.ShowDialog();
+
         }
 
 
