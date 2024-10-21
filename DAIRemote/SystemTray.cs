@@ -22,6 +22,7 @@ namespace DAIRemote
         private Image monitorIcon;
         private Image saveProfileIcon;
         private Image turnOffAllMonitorsIcon;
+        private Image plusIcon;
 
         public TrayIconManager(Form form)
         {
@@ -35,6 +36,7 @@ namespace DAIRemote
             monitorIcon = Image.FromFile("Resources/Monitor.ico");
             saveProfileIcon = Image.FromFile("Resources/SaveProfile.ico");
             turnOffAllMonitorsIcon = Image.FromFile("Resources/TurnOffAllMonitors.ico");
+            plusIcon = Image.FromFile("Resources/AddProfile.ico");
 
             if (!Directory.Exists(profilesFolderPath))
             {
@@ -114,12 +116,17 @@ namespace DAIRemote
                 Enabled = false,
             };
 
-            ToolStripMenuItem saveProfilesLabel = new ToolStripMenuItem("Select Profile To Override")
+            ToolStripMenuItem saveProfilesLabel = new ToolStripMenuItem("Select Profile To Save")
             {
                 Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
                 ForeColor = Color.Gray,
                 Enabled = false,
             };
+
+            ToolStripMenuItem addNewProfile = new ToolStripMenuItem("Add New Profile", plusIcon, (sender, e) =>
+            {
+                SaveNewProfile(profilesFolderPath);
+            });
 
             ToolStripMenuItem saveProfileMenuItem = new ToolStripMenuItem("Save Profile", saveProfileIcon);
             saveProfileMenuItem.DropDownItems.Clear();
@@ -161,6 +168,7 @@ namespace DAIRemote
             deleteProfileMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
             saveProfileMenuItem.DropDownItems.Insert(0, saveProfilesLabel);
             saveProfileMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
+            saveProfileMenuItem.DropDownItems.Insert(2, addNewProfile);
             menu.Items.Add(saveProfileMenuItem);
             menu.Items.Add(deleteProfileMenuItem);
 
@@ -174,6 +182,74 @@ namespace DAIRemote
             menu.Items.Add(aboutMenuItem);
             menu.Items.Add(exitMenuItem);
         }
+
+        private void SaveNewProfile(string profilesFolderPath)
+        {
+            Form inputForm = new Form
+            {
+                Width = 400,
+                Height = 150,
+                Text = "Save New Profile",
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                StartPosition = FormStartPosition.CenterScreen,
+                MinimizeBox = false,
+                MaximizeBox = false
+            };
+
+            Label promptLabel = new Label
+            {
+                Left = 20,
+                Top = 20,
+                Text = "Please enter the profile name:",
+                AutoSize = true
+            };
+
+            TextBox inputBox = new TextBox
+            {
+                Left = 20,
+                Top = 50,
+                Width = 350
+            };
+
+            Button okButton = new Button
+            {
+                Text = "OK",
+                Left = 190,
+                Width = 80,
+                Top = 80,
+                DialogResult = DialogResult.OK
+            };
+            okButton.Click += (sender, e) =>
+            {
+                string userInput = inputBox.Text;
+
+                if (string.IsNullOrEmpty(userInput))
+                {
+                    MessageBox.Show("Profile name cannot be empty.");
+                    return;
+                }
+
+                string profilePath = Path.Combine(profilesFolderPath, $"{userInput}.json");
+                DisplayConfig.SaveDisplaySettings(profilePath);
+                inputForm.Close();
+            };
+
+            Button cancelButton = new Button
+            {
+                Text = "Cancel",
+                Left = 290,
+                Width = 80,
+                Top = 80,
+                DialogResult = DialogResult.Cancel
+            };
+            cancelButton.Click += (sender, e) => inputForm.Close();
+
+            inputForm.Controls.Add(promptLabel);
+            inputForm.Controls.Add(inputBox);
+            inputForm.Controls.Add(okButton);
+            inputForm.Controls.Add(cancelButton);
+        }
+
 
         private void SaveProfile(string profilePath)
         {

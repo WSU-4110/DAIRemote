@@ -45,6 +45,10 @@
 		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		<BuildAction>None</BuildAction>
 	</None>
+	<None Update="Resources\AddProfile.ico">
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		<BuildAction>None</BuildAction>
+	</None>
   </ItemGroup>
 
 </Project>
