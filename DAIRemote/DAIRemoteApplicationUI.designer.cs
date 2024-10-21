@@ -21,11 +21,13 @@
 
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             BtnSaveDisplayConfig = new Button();
             BtnShowAudioOutputs = new Button();
             button1 = new Button();
             profileNameTextBox = new TextBox();
             button2 = new Button();
+            contextMenuStrip1 = new ContextMenuStrip(components);
             SuspendLayout();
             // 
             // BtnSaveDisplayConfig
@@ -88,6 +90,12 @@
             button2.UseVisualStyleBackColor = false;
             button2.Click += BtnDeleteDisplayConfig_Click;
             // 
+            // contextMenuStrip1
+            // 
+            contextMenuStrip1.ImageScalingSize = new Size(20, 20);
+            contextMenuStrip1.Name = "contextMenuStrip1";
+            contextMenuStrip1.Size = new Size(211, 32);
+            // 
             // DAIRemoteApplicationUI
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -114,5 +122,6 @@
         private Button button1;
         private TextBox profileNameTextBox;
         private Button button2;
+        private ContextMenuStrip contextMenuStrip1;
     }
 }
