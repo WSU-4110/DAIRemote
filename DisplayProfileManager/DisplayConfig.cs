@@ -1297,24 +1297,25 @@ namespace DisplayProfileManager
         [DllImport("user32.dll")]
         private static extern int PostMessage(int hWnd, int hMsg, int wParam, int lParam);
 
-        private const int WM_SYSCOMMAND = 0x0112;
-        private const int SC_MONITORPOWER = 0xF170;
-        private const int MONITOR_OFF = 2;
-        private const int MONITOR_ON = -1;
-        private const int HWND_BROADCAST = 0xFFFF;
-
-        public void TurnOffMonitors()
+        public static void DisplayToggleSleep(bool sleep = true)
         {
-            PostMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, MONITOR_OFF);
-        }
-
-        public void TurnOnMonitors()
-        {
-            Task.Run(() =>
+            const int WM_SYSCOMMAND = 0x0112;
+            const int SC_MONITORPOWER = 0xF170;
+            const int HWND_BROADCAST = 0xFFFF;
+            if (sleep)
             {
-                PostMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, MONITOR_ON);
-                System.Threading.Thread.Sleep(100);
-            });
+                // Go into sleep mode (2)
+                PostMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, 2);
+            }
+            else
+            {
+                // Wakeup from sleep mode (-1)
+                Task.Run(() =>
+                {
+                    PostMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, -1);
+                    Thread.Sleep(100);
+                });
+            }
         }
 
         static void Main(string[] args)
