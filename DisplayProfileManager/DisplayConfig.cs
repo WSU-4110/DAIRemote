@@ -1300,7 +1300,7 @@ namespace DisplayProfileManager
         public static bool DeleteDisplaySettings(string fileName)
         {
             string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string folderPath = Path.Combine(appDataPath, "DAIRemote");
+            string folderPath = Path.Combine(appDataPath, "DAIRemote/DisplayProfiles");
 
             if (!Directory.Exists(folderPath))
             {

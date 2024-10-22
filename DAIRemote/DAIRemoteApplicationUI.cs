@@ -100,7 +100,42 @@ namespace DAIRemote
 
         private void BtnLoadDisplayConfig_Click(object sender, EventArgs e)
         {
-            DisplayConfig.SetDisplaySettings("displayConfig" + ".json");
+            contextMenuStrip1.Items.Clear();
+
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string folderPath = Path.Combine(appDataPath, "DAIRemote/DisplayProfiles");
+
+            string[] files = Directory.GetFiles(folderPath);
+
+            foreach (string file in files)
+            {
+                string fName = Path.GetFileName(file);
+                ToolStripMenuItem item = new ToolStripMenuItem(fName);
+                item.Click += (s, args) => DisplayConfig.SetDisplaySettings(fName);
+                contextMenuStrip1.Items.Add(item);
+            }
+
+            contextMenuStrip1.Show(button1, new Point(0, button1.Height));
+        }
+
+        private void BtnDeleteDisplayConfig_Click(object sender, EventArgs e)
+        {
+            contextMenuStrip1.Items.Clear();
+
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string folderPath = Path.Combine(appDataPath, "DAIRemote/DisplayProfiles");
+
+            string[] files = Directory.GetFiles(folderPath);
+
+            foreach (string file in files)
+            {
+                string fName = Path.GetFileName(file);
+                ToolStripMenuItem item = new ToolStripMenuItem(fName);
+                item.Click += (s, args) => DisplayConfig.DeleteDisplaySettings(fName);
+                contextMenuStrip1.Items.Add(item);
+            }
+
+            contextMenuStrip1.Show(button2, new Point(0, button2.Height));
         }
 
         private void checkBoxStartup_CheckedChanged(object sender, EventArgs e)
@@ -163,6 +198,11 @@ namespace DAIRemote
         private void LoadStartupSetting()
         {
             checkBoxStartup.Checked = IsAppInStartup();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
