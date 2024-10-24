@@ -101,10 +101,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // find the help button by its ID
         ImageButton helpButton = findViewById(R.id.helpButton);
         helpButton.setOnClickListener(v -> {
-            if (!tutorialOn) {
-                tutorialOn = true;
-                startTutorial(); // triggers tutorial
-            }
+            startTutorialPopUp("Interactive Tutorial", "Would you like to start the interactive tutorial?", Gravity.CENTER | Gravity.LEFT, 100, -100);
         });
 
         drawerSetup(R.id.nav_home);
@@ -229,6 +226,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    // pop up for giving choice for user to start tutorial or not
+    private void startTutorialPopUp(String title, String message, int gravity, int xOffset, int yOffset) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setMessage(message);
+
+        // PositiveButton representing "Start Tutorial" for starting the tutorial
+        builder.setPositiveButton("Start Tutorial", (dialog, which) -> {
+            if (!tutorialOn) {
+                tutorialOn = true;
+                startTutorial(); // triggers tutorial
+            }
+        });
+
+        // NegativeButton representing "No" to not start the tutorial
+        builder.setNegativeButton("No", (dialog, which) -> {
+            tutorialOn = false;
+            dialog.dismiss();
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // sets custom position
+        Window window = dialog.getWindow();
+        if (window != null) {
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.gravity = gravity;
+            params.x = xOffset;
+            params.y = yOffset;
+            window.setAttributes(params);
+        }
+    }
 
 
 
@@ -242,7 +272,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void showSteps(int step) {
         switch (step) {
             case 0:
-                showCustomDialog("Interactive Tutorial", "Tap on the center icon to connect to your local host. Ensure the desktop application is open.", Gravity.TOP | Gravity.LEFT, 100, 200);
+                showCustomDialog("Main Page", "Tap on the center icon to connect to your local host. Ensure the desktop application is open.", Gravity.TOP | Gravity.LEFT, 100, 200);
                 break;
 
             default:

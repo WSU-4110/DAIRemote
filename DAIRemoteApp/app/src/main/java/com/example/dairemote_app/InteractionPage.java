@@ -340,6 +340,9 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     interactionsHelpText.setVisibility(View.GONE); // Hide the TextView
                 } else {
                     interactionsHelpText.setVisibility(View.VISIBLE); // Show the TextView
+                    tutorialOn = true;
+                    currentStep = 1;
+                    continueTutorial(currentStep);
                 }
             }
         });
@@ -575,6 +578,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         Intent intent;
         int itemId = item.getItemId();
+        Log.d("Navigation", "Item selected: " + itemId);
 
         if (itemId == R.id.nav_home) {
             intent = new Intent(this, MainActivity.class);
@@ -612,7 +616,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     private void showSteps(int step) {
         switch (step) {
             case 1:
-                showCustomDialog("Remote Page", "Click the help icon above for instructions on how to use the remote.", Gravity.TOP | Gravity.RIGHT, 100, 200);
+                showCustomDialog("Remote Page", "If you ever need a refresher, click the help icon above to start the tutorial.", Gravity.TOP | Gravity.RIGHT, 100, 200);
                 break;
             case 2:
                 showCustomDialog("Lower Panel Buttons", "Display Modes, Audio Cycling, Hotkeys, App Keyboard", Gravity.BOTTOM | Gravity.RIGHT, 100, 200);
@@ -647,6 +651,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
         // NegativeButton representing "Exit Tour" to stop the tutorial
         builder.setNegativeButton("Exit Tour", (dialog, which) -> {
+            tutorialOn = false;
             dialog.dismiss();
         });
 

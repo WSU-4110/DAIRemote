@@ -219,7 +219,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
     private void showSteps(int step) {
         switch (step) {
             case 4:
-                showCustomDialog("Servers Page", "A list of all available nearby hosts. If not already connected, select a host from the list and you will be redirect to the Remote Page.", Gravity.BOTTOM | Gravity.RIGHT, 100, 200);
+                showCustomDialog("Servers Page", "A list of all available nearby hosts. If not already connected, select a host from the list and you will be redirected to the Remote Page.", Gravity.BOTTOM | Gravity.RIGHT, 100, 200);
                 break;
             default:
                 break;
@@ -231,14 +231,11 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         builder.setTitle(title);
         builder.setMessage(message);
 
-        // PositiveButton representing "Next" for moving to the next step
-        builder.setPositiveButton("Next", (dialog, which) -> {
+        // PositiveButton representing Finish
+        builder.setPositiveButton("Finish", (dialog, which) -> {
             currentStep++;
             showSteps(currentStep);
-        });
-
-        // NegativeButton representing "Exit Tour" to stop the tutorial
-        builder.setNegativeButton("Exit Tour", (dialog, which) -> {
+            tutorialOn = false;
             dialog.dismiss();
         });
 
