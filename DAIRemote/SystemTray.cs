@@ -1,8 +1,12 @@
 ﻿using DisplayProfileManager;
 using System;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using AudioManager;
+using NAudio.CoreAudioApi;
 
 namespace DAIRemote
 {
@@ -23,12 +27,14 @@ namespace DAIRemote
         private Image saveProfileIcon;
         private Image turnOffAllMonitorsIcon;
         private Image plusIcon;
+        private Image playbackDevicesIcon;
 
         public TrayIconManager(Form form)
         {
             this.form = form;
             displayConfig = new DisplayConfig();
 
+            // Load icons
             aboutIcon = Image.FromFile("Resources/About.ico");
             DAIRemoteLogo = Image.FromFile("Resources/DAIRemoteLogo.ico");
             deleteProfileIcon = Image.FromFile("Resources/DeleteProfile.ico");
@@ -37,10 +43,12 @@ namespace DAIRemote
             saveProfileIcon = Image.FromFile("Resources/SaveProfile.ico");
             turnOffAllMonitorsIcon = Image.FromFile("Resources/TurnOffAllMonitors.ico");
             plusIcon = Image.FromFile("Resources/AddProfile.ico");
+            playbackDevicesIcon = Image.FromFile("Resources/PlaybackDevices.ico");
 
+            // Ensure the profiles directory exists
             if (!Directory.Exists(profilesFolderPath))
             {
-                Directory.CreateDirectory(profilesFolderPath); 
+                Directory.CreateDirectory(profilesFolderPath);
             }
 
             InitializeTrayIcon();
@@ -57,6 +65,7 @@ namespace DAIRemote
                 Visible = true
             };
 
+            // Set up file watcher for profiles
             profileDirWatcher = new FileSystemWatcher(@profilesFolderPath);
             profileDirWatcher.NotifyFilter = NotifyFilters.FileName;
             profileDirWatcher.Created += OnProfilesChanged;
@@ -84,7 +93,6 @@ namespace DAIRemote
 
         private void OnProfilesChanged(object sender, FileSystemEventArgs e)
         {
-
             if (form.InvokeRequired)
             {
                 form.BeginInvoke((MethodInvoker)delegate
@@ -96,8 +104,24 @@ namespace DAIRemote
             {
                 PopulateTrayMenu(trayMenu);
             }
+
         }
 
+        public List<string> GetAudioDevices()
+        {
+            List<string> audioDevices = new List<string>();
+
+            var enumerator = new MMDeviceEnumerator();
+            var defaultDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+            audioDevices.Add(defaultDevice.FriendlyName);
+
+            foreach (var device in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
+            {
+                audioDevices.Add(device.FriendlyName);
+            }
+
+            return audioDevices;
+        }
         private void PopulateTrayMenu(ContextMenuStrip menu)
         {
             menu.Items.Clear();
@@ -169,6 +193,31 @@ namespace DAIRemote
             menu.Items.Add(saveProfileMenuItem);
             menu.Items.Add(deleteProfileMenuItem);
 
+            // Populate Playback Devices
+            ToolStripMenuItem playbackDevicesMenuItem = new ToolStripMenuItem("Playback Devices", playbackDevicesIcon);
+            var devices = GetAudioDevices(); // Get the list of audio devices
+
+            foreach (var device in devices)
+            {
+                playbackDevicesMenuItem.DropDownItems.Add(new ToolStripMenuItem(device));
+            }
+
+            menu.Items.Add(playbackDevicesMenuItem);
+            menu.Items.Add(new ToolStripSeparator());
+
+            ToolStripMenuItem setHotkeyMenuItem = new ToolStripMenuItem("Set Hotkey")
+            {
+                Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
+                ForeColor = Color.Gray,
+                Image = plusIcon
+            };
+            setHotkeyMenuItem.Click += (sender, e) =>
+            {
+                MessageBox.Show("Set Hotkey functionality will be implemented.");
+            };
+
+            menu.Items.Add(setHotkeyMenuItem);
+
             ToolStripMenuItem turnOffAllMonitorsItem = new ToolStripMenuItem("Turn Off All Monitors", turnOffAllMonitorsIcon, TurnOffMonitors);
             ToolStripMenuItem aboutMenuItem = new ToolStripMenuItem("About", aboutIcon, OnAboutClick);
             ToolStripMenuItem exitMenuItem = new ToolStripMenuItem("Exit", exitIcon, OnExit);
@@ -179,6 +228,7 @@ namespace DAIRemote
             menu.Items.Add(aboutMenuItem);
             menu.Items.Add(exitMenuItem);
         }
+
 
         private void SaveNewProfile(string profilesFolderPath)
         {
@@ -253,12 +303,12 @@ namespace DAIRemote
 
         private void SaveProfile(string profilePath)
         {
-                DisplayConfig.SaveDisplaySettings(profilePath);
+            DisplayConfig.SaveDisplaySettings(profilePath);
         }
 
         private void DeleteProfile(string profilePath)
         {
-                File.Delete(profilePath);
+            File.Delete(profilePath);
         }
 
         private void TurnOffMonitors(object? sender, EventArgs e)
