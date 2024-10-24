@@ -30,6 +30,21 @@
                 layout="@layout/toolbar" />
 
             <ImageButton
+                android:id="@+id/helpButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="22dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Provide app instructions"
+                android:elevation="8dp"
+                android:padding="12dp"
+                app:layout_constraintBottom_toTopOf="@+id/textView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.06"
+                app:srcCompat="@drawable/interactions_help_icon" />
+
+            <ImageButton
                 android:id="@+id/DAIRemoteLogoBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
