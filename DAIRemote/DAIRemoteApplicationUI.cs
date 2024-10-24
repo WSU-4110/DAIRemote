@@ -14,12 +14,13 @@ namespace DAIRemote
         public DAIRemoteApplicationUI()
         {
             UDPServerHost udpServer = new UDPServerHost();
-            Thread udpThread = new Thread(() => udpServer.HostUDPServer());
+            Thread udpThread = new Thread(() => udpServer.hostUDPServer());
             udpThread.IsBackground = true;
             udpThread.Start();
 
             InitializeComponent();
             InitializeCustomComponents();
+            InitializeDisplayLoadProfilesLayout();
 
             this.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.Icon = new Icon("Resources/DAIRemoteLogo.ico");
@@ -34,6 +35,44 @@ namespace DAIRemote
         private void DAIRemoteApplicationUI_Load(object sender, EventArgs e)
         {
             this.Hide();
+        }
+
+        private void InitializeDisplayLoadProfilesLayout()
+        {
+            string[] displayProfiles = Directory.GetFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"), "*.json");
+
+            foreach (var profile in displayProfiles)
+            {
+                // Create a button for each profile
+                Button profileButton = new Button
+                {
+                    Text = Path.GetFileNameWithoutExtension(profile), // Set profile name as button text
+                    Width = 150,
+                    Height = 50,
+                    Margin = new Padding(10),
+                    Tag = profile // Store profile name in the Tag for later use on click()
+                };
+
+                // Attach click event handler
+                profileButton.Click += ProfileButton_Click;
+
+                // I'm thinking of having different images depending on certain conditions, let these be for now
+                //profileButton.Image = Image.FromFile("path_to_image");
+                //profileButton.ImageAlign = ContentAlignment.MiddleLeft;
+
+                //Can make it scrollable
+                //flowPanel.AutoScroll = true;
+
+                // Add the button to the DisplayLoadProfilesLayout FlowLayoutPanel
+                DisplayLoadProfilesLayout.Controls.Add(profileButton);
+            }
+        }
+
+        private void ProfileButton_Click(object sender, EventArgs e)
+        {
+            Button clickedButton = sender as Button;
+            string profileName = clickedButton.Tag.ToString(); // Retrieve profile name from Tag
+            DisplayConfig.SetDisplaySettings(profileName);
         }
 
         private void BtnShowAudioOutputs_Click(object sender, EventArgs e)
@@ -96,11 +135,6 @@ namespace DAIRemote
             }
 
             profileNameTextBox.Clear();
-        }
-
-        private void BtnLoadDisplayConfig_Click(object sender, EventArgs e)
-        {
-            DisplayConfig.SetDisplaySettings("displayConfig" + ".json");
         }
 
         private void checkBoxStartup_CheckedChanged(object sender, EventArgs e)

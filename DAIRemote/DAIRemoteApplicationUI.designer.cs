@@ -2,10 +2,10 @@
 {
     partial class DAIRemoteApplicationUI
     {
-       
+
         private System.ComponentModel.IContainer components = null;
 
-        
+
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
@@ -23,9 +23,9 @@
         {
             BtnSaveDisplayConfig = new Button();
             BtnShowAudioOutputs = new Button();
-            button1 = new Button();
             profileNameTextBox = new TextBox();
             checkBoxStartup = new CheckBox();
+            DisplayLoadProfilesLayout = new FlowLayoutPanel();
             SuspendLayout();
             // 
             // BtnSaveDisplayConfig
@@ -52,18 +52,6 @@
             BtnShowAudioOutputs.UseVisualStyleBackColor = false;
             BtnShowAudioOutputs.Click += BtnShowAudioOutputs_Click;
             // 
-            // button1
-            // 
-            button1.AccessibleName = "BtnLoadDisplayConfig";
-            button1.BackColor = Color.LightSkyBlue;
-            button1.Location = new Point(20, 398);
-            button1.Name = "button1";
-            button1.Size = new Size(200, 40);
-            button1.TabIndex = 2;
-            button1.Text = "Load Display Config";
-            button1.UseVisualStyleBackColor = false;
-            button1.Click += BtnLoadDisplayConfig_Click;
-            // 
             // profileNameTextBox
             // 
             profileNameTextBox.Location = new Point(20, 12);
@@ -82,15 +70,23 @@
             checkBoxStartup.UseVisualStyleBackColor = true;
             checkBoxStartup.CheckedChanged += checkBoxStartup_CheckedChanged;
             // 
+            // DisplayLoadProfilesLayout
+            // 
+            DisplayLoadProfilesLayout.AutoSize = true;
+            DisplayLoadProfilesLayout.Location = new Point(10, 250);
+            DisplayLoadProfilesLayout.Name = "DisplayLoadProfilesLayout";
+            DisplayLoadProfilesLayout.Size = new Size(200, 100);
+            DisplayLoadProfilesLayout.TabIndex = 5;
+            // 
             // DAIRemoteApplicationUI
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(225, 246, 225);
             ClientSize = new Size(300, 450);
+            Controls.Add(DisplayLoadProfilesLayout);
             Controls.Add(checkBoxStartup);
             Controls.Add(profileNameTextBox);
-            Controls.Add(button1);
             Controls.Add(BtnSaveDisplayConfig);
             Controls.Add(BtnShowAudioOutputs);
             Name = "DAIRemoteApplicationUI";
@@ -104,8 +100,8 @@
 
         private Button BtnSaveDisplayConfig;
         private Button BtnShowAudioOutputs;
-        private Button button1;
         private TextBox profileNameTextBox;
         private CheckBox checkBoxStartup;
+        private FlowLayoutPanel DisplayLoadProfilesLayout;
     }
 }
