@@ -25,61 +25,52 @@
             android:id="@+id/toolbar"
             layout="@layout/toolbar" />
 
-        <ImageButton
-            android:id="@+id/keyboardImgBtn"
-            android:layout_width="wrap_content"
+        <GridLayout
+            android:id="@+id/InteractionShortcuts"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:layout_marginTop="-1dp"
-            android:layout_marginEnd="35dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Keyboard icon to pull system keyboard"
-            android:src="@drawable/keyboard_light_icon"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_gravity="center_horizontal"
+            android:columnCount="4"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/touchpadFrame" />
-
-        <ImageButton
-            android:id="@+id/udptest"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="35dp"
-            android:layout_marginTop="-1dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Send message to host"
-            android:padding="12dp"
-            android:src="@drawable/udpmsg_icon"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/touchpadFrame" />
+            app:layout_constraintTop_toBottomOf="@+id/touchpadFrame">
 
-        <ImageButton
-            android:id="@+id/audiocycle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="35dp"
-            android:layout_marginTop="-1dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Cycle audio"
-            android:padding="12dp"
-            android:src="@drawable/audio_cycle_icon"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/udptest"
-            app:layout_constraintTop_toBottomOf="@+id/touchpadFrame" />
+            <ImageButton
+                style="@style/InteractionShortcutsStyle"
+                android:id="@+id/udptest"
+                android:layout_row="0"
+                android:layout_column="0"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Send message to host"
+                android:src="@drawable/udpmsg_icon" />
 
-        <ImageButton
-            android:id="@+id/displays"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="35dp"
-            android:layout_marginTop="-1dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Display profiles"
-            android:padding="12dp"
-            android:src="@drawable/display_profile_icon"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/audiocycle"
-            app:layout_constraintTop_toBottomOf="@+id/touchpadFrame" />
+            <ImageButton
+                style="@style/InteractionShortcutsStyle"
+                android:id="@+id/audiocycle"
+                android:layout_row="0"
+                android:layout_column="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Cycle audio"
+                android:src="@drawable/audio_cycle_icon" />
+
+            <ImageButton
+                style="@style/InteractionShortcutsStyle"
+                android:id="@+id/displays"
+                android:layout_row="0"
+                android:layout_column="2"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Display profiles"
+                android:src="@drawable/display_profile_icon" />
+
+            <ImageButton
+                style="@style/InteractionShortcutsStyle"
+                android:id="@+id/keyboardImgBtn"
+                android:layout_row="0"
+                android:layout_column="3"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Keyboard icon to pull system keyboard"
+                android:src="@drawable/keyboard_light_icon" />
+        </GridLayout>
 
         <FrameLayout
             android:id="@+id/touchpadFrame"
@@ -300,21 +291,21 @@
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="2"
                         android:layout_column="0"
-                        android:text="INSERT" />
+                        android:text="INS" />
 
                     <TextView
                         android:id="@+id/deleteKey"
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="2"
                         android:layout_column="1"
-                        android:text="DELETE" />
+                        android:text="DEL" />
 
                     <TextView
                         android:id="@+id/printScreenKey"
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="2"
                         android:layout_column="2"
-                        android:text="PRNTSCRN" />
+                        android:text="PRSC" />
 
                     <TextView
                         android:id="@+id/leftKey"
@@ -342,6 +333,7 @@
                 </GridLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
         </FrameLayout>
 
         <EditText
@@ -353,12 +345,14 @@
             android:layout_marginEnd="5dp"
             android:autofillHints=""
             android:background="@android:color/transparent"
+            android:clickable="false"
+            android:elevation="-1dp"
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:inputType="text|textVisiblePassword"
             android:singleLine="true"
             android:textAlignment="center"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -393,6 +387,23 @@
             android:src="@drawable/interactions_help_icon"
             app:layout_constraintBottom_toTopOf="@+id/touchpadFrame"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/keyboardInputView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="350dp"
+            android:layout_marginEnd="5dp"
+            android:text=""
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="20dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/editText"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView

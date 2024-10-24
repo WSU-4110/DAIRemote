@@ -20,12 +20,11 @@ import java.util.concurrent.TimeUnit;
 
 public class ConnectionManager {
     public static ScheduledExecutorService heartbeatScheduler;
-    private ExecutorService executorService;
+    private final ExecutorService executorService;
     public static DatagramSocket udpSocket;
     public static String serverAddress;
     public static int serverPort;
     public static String serverResponse;
-    public static String heartbeatAck = "";
     public static HostSearchCallback callback;
     public static boolean connectionEstablished = false;
     public static int declineCount = 0;
@@ -138,7 +137,7 @@ public class ConnectionManager {
 
     public void startHeartbeat() {
         // Create a ScheduledExecutorService to run heartbeat with a delay after each execution
-        heartbeatScheduler = Executors.newScheduledThreadPool(2);
+        heartbeatScheduler = Executors.newScheduledThreadPool(1);
         heartbeatScheduler.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
@@ -218,7 +217,7 @@ public class ConnectionManager {
             socket.setBroadcast(true);
             String message = "Hello, I'm " + getDeviceName();
             byte[] sendData = message.getBytes();
-            InetAddress broadcastAddress = InetAddress.getByName("192.168.1.255"); // Broadcast address
+            InetAddress broadcastAddress = InetAddress.getByName("255.255.255.255"); // Broadcast address
             int port = 11000;
             DatagramPacket packet = new DatagramPacket(sendData, sendData.length, broadcastAddress, port);
             socket.send(packet);
