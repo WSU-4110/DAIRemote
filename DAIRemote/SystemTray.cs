@@ -1,4 +1,6 @@
-﻿namespace DAIRemote
+﻿using DisplayProfileManager;
+
+namespace DAIRemote
 {
     public class TrayIconManager
     {
@@ -8,20 +10,45 @@
         private FileSystemWatcher profileDirWatcher;
         private string profilesFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
 
+        private Image aboutIcon;
+        private Image DAIRemoteLogo;
+        private Image deleteProfileIcon;
+        private Image exitIcon;
+        private Image monitorIcon;
+        private Image saveProfileIcon;
+        private Image turnOffAllMonitorsIcon;
+        private Image plusIcon;
+
         public TrayIconManager(Form form)
         {
             this.form = form;
+
+            aboutIcon = Image.FromFile("Resources/About.ico");
+            DAIRemoteLogo = Image.FromFile("Resources/DAIRemoteLogo.ico");
+            deleteProfileIcon = Image.FromFile("Resources/DeleteProfile.ico");
+            exitIcon = Image.FromFile("Resources/Exit.ico");
+            monitorIcon = Image.FromFile("Resources/Monitor.ico");
+            saveProfileIcon = Image.FromFile("Resources/SaveProfile.ico");
+            turnOffAllMonitorsIcon = Image.FromFile("Resources/TurnOffAllMonitors.ico");
+            plusIcon = Image.FromFile("Resources/AddProfile.ico");
+
+            if (!Directory.Exists(profilesFolderPath))
+            {
+                Directory.CreateDirectory(profilesFolderPath);
+            }
+
             InitializeTrayIcon();
         }
 
         private void InitializeTrayIcon()
         {
-            trayMenu = new ContextMenuStrip
+            trayMenu = CreateTrayMenu();
+            trayIcon = new NotifyIcon
             {
-                BackColor = Color.FromArgb(50, 50, 50),
-                ForeColor = System.Drawing.Color.White,
-                ShowImageMargin = false,
-                Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
+                Text = "DAIRemote",
+                Icon = new Icon("Resources/DAIRemoteLogo.ico"),
+                ContextMenuStrip = trayMenu,
+                Visible = true
             };
 
             profileDirWatcher = new FileSystemWatcher(@profilesFolderPath);
@@ -31,17 +58,22 @@
             profileDirWatcher.Renamed += OnProfilesChanged;
             profileDirWatcher.EnableRaisingEvents = true;
 
-            PopulateContextMenu();
+            trayIcon.DoubleClick += (s, e) => ShowForm();
+        }
 
-            trayIcon = new NotifyIcon
+        private ContextMenuStrip CreateTrayMenu()
+        {
+            ContextMenuStrip menu = new ContextMenuStrip
             {
-                Text = "DAIRemote",
-                Icon = new Icon("Resources/DAIRemoteLogo.ico"),
-                ContextMenuStrip = trayMenu,
-                Visible = true
+                ForeColor = Color.Black,
+                ShowImageMargin = true,
+                Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
+                AutoSize = true,
             };
 
-            trayIcon.DoubleClick += (s, e) => ShowForm();
+            PopulateTrayMenu(menu);
+
+            return menu;
         }
 
         private void OnProfilesChanged(object sender, FileSystemEventArgs e)
@@ -50,58 +82,204 @@
             {
                 form.BeginInvoke((MethodInvoker)delegate
                 {
-                    PopulateContextMenu();
+                    PopulateTrayMenu(trayMenu);
                 });
             }
             else
             {
-                PopulateContextMenu();
+                PopulateTrayMenu(trayMenu);
             }
         }
 
-        private void PopulateContextMenu()
+        private void PopulateTrayMenu(ContextMenuStrip menu)
         {
-            // Clear existing items
-            trayMenu.Items.Clear();
+            menu.Items.Clear();
 
-            if (!Directory.Exists(profilesFolderPath))
+            ToolStripLabel loadProfilesLabel = new ToolStripLabel("Loaded Profiles")
             {
-                Directory.CreateDirectory(profilesFolderPath);
-            }
+                Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
+                ForeColor = Color.Gray,
+                Enabled = false,
+            };
 
-            string[] jsonFiles = Directory.GetFiles(profilesFolderPath);
-
-            foreach (string jsonFile in jsonFiles)
+            ToolStripMenuItem deleteProfilesLabel = new ToolStripMenuItem("Select Profile to Delete")
             {
-                // Create menu item for each JSON file
-                string fileName = Path.GetFileNameWithoutExtension(jsonFile);
+                Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
+                ForeColor = Color.Gray,
+                Enabled = false,
+            };
 
-                var jsonMenuItem = new ToolStripMenuItem(fileName, null, (sender, e) =>
+            ToolStripMenuItem saveProfilesLabel = new ToolStripMenuItem("Overwrite profile")
+            {
+                Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
+                ForeColor = Color.Gray,
+                Enabled = false,
+            };
+
+            ToolStripMenuItem addNewProfile = new ToolStripMenuItem("Add New Profile", plusIcon, (sender, e) =>
+            {
+                SaveNewProfile(profilesFolderPath);
+            });
+
+            ToolStripMenuItem saveProfileMenuItem = new ToolStripMenuItem("Save Profile", saveProfileIcon);
+            ToolStripMenuItem deleteProfileMenuItem = new ToolStripMenuItem("Delete Profile", deleteProfileIcon);
+
+            menu.Items.Add(loadProfilesLabel);
+            menu.Items.Add(new ToolStripSeparator());
+
+            string[] jsonProfiles = Directory.GetFiles(profilesFolderPath, "*.json");
+
+            foreach (string jsonProfile in jsonProfiles)
+            {
+                string fileName = Path.GetFileNameWithoutExtension(jsonProfile);
+                var jsonMenuItem = new ToolStripMenuItem(fileName, monitorIcon, (sender, e) =>
                 {
-                    // Handle click event
-                    DisplayProfileManager.DisplayConfig.SetDisplaySettings(jsonFile);
+                    DisplayConfig.SetDisplaySettings(jsonProfile);
                 });
 
-                trayMenu.Items.Add(jsonMenuItem);
+                menu.Items.Insert(2, jsonMenuItem);
+
+                ToolStripMenuItem profileDeleteItem = new ToolStripMenuItem(fileName, monitorIcon, (sender, e) =>
+                {
+                    DeleteProfile(jsonProfile);
+                });
+
+                ToolStripMenuItem profileSaveItem = new ToolStripMenuItem(fileName, monitorIcon, (sender, e) =>
+                {
+                    SaveProfile(jsonProfile);
+                });
+
+                deleteProfileMenuItem.DropDownItems.Add(profileDeleteItem);
+                saveProfileMenuItem.DropDownItems.Add(profileSaveItem);
             }
 
-            trayMenu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add(new ToolStripSeparator());
+            deleteProfileMenuItem.DropDownItems.Insert(0, deleteProfilesLabel);
+            deleteProfileMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
+            saveProfileMenuItem.DropDownItems.Insert(0, addNewProfile);
+            saveProfileMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
+            saveProfileMenuItem.DropDownItems.Insert(2, saveProfilesLabel);
+            saveProfileMenuItem.DropDownItems.Insert(3, new ToolStripSeparator());
+            menu.Items.Add(saveProfileMenuItem);
+            menu.Items.Add(deleteProfileMenuItem);
 
-            var showMenuItem = new ToolStripMenuItem("Show", null, OnShow);
-            var exitMenuItem = new ToolStripMenuItem("Exit", null, OnExit);
+            ToolStripMenuItem turnOffAllMonitorsItem = new ToolStripMenuItem("Turn Off All Monitors", turnOffAllMonitorsIcon, TurnOffMonitors);
+            ToolStripMenuItem aboutMenuItem = new ToolStripMenuItem("About", aboutIcon, OnAboutClick);
+            ToolStripMenuItem exitMenuItem = new ToolStripMenuItem("Exit", exitIcon, OnExit);
 
-            trayMenu.Items.Add(showMenuItem);
-            trayMenu.Items.Add(exitMenuItem);
+            menu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add(turnOffAllMonitorsItem);
+            menu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add(aboutMenuItem);
+            menu.Items.Add(exitMenuItem);
+        }
+
+        private void SaveNewProfile(string profilesFolderPath)
+        {
+            Form inputForm = new Form
+            {
+                Width = 400,
+                Height = 150,
+                Text = "Save New Profile",
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                StartPosition = FormStartPosition.CenterScreen,
+                MinimizeBox = false,
+                MaximizeBox = false
+            };
+
+            Label promptLabel = new Label
+            {
+                Left = 20,
+                Top = 20,
+                Text = "Please enter the profile name:",
+                AutoSize = true
+            };
+
+            TextBox inputBox = new TextBox
+            {
+                Left = 20,
+                Top = 50,
+                Width = 350
+            };
+
+            Button okButton = new Button
+            {
+                Text = "OK",
+                Left = 190,
+                Width = 80,
+                Top = 80,
+                DialogResult = DialogResult.OK
+            };
+            okButton.Click += (sender, e) =>
+            {
+                string userInput = inputBox.Text;
+
+                if (string.IsNullOrEmpty(userInput))
+                {
+                    MessageBox.Show("Profile name cannot be empty.");
+                    return;
+                }
+
+                string profilePath = Path.Combine(profilesFolderPath, $"{userInput}.json");
+                DisplayConfig.SaveDisplaySettings(profilePath);
+                inputForm.Close();
+            };
+
+            Button cancelButton = new Button
+            {
+                Text = "Cancel",
+                Left = 290,
+                Width = 80,
+                Top = 80,
+                DialogResult = DialogResult.Cancel
+            };
+            cancelButton.Click += (sender, e) => inputForm.Close();
+
+            inputForm.Controls.Add(promptLabel);
+            inputForm.Controls.Add(inputBox);
+            inputForm.Controls.Add(okButton);
+            inputForm.Controls.Add(cancelButton);
+
+            inputForm.ShowDialog();
+
+        }
+
+
+        private void SaveProfile(string profilePath)
+        {
+            DisplayConfig.SaveDisplaySettings(profilePath);
+        }
+
+        private void DeleteProfile(string profilePath)
+        {
+            File.Delete(profilePath);
+        }
+
+        private void TurnOffMonitors(object? sender, EventArgs e)
+        {
+            DisplayConfig.DisplayToggleSleep(true);
+        }
+
+        private void OnAboutClick(object? sender, EventArgs e)
+        {
+            string aboutMessage =
+                          "DAIRemote is a versatile display, audio, and input remote for Windows desktops. It allows users to:\n\n" +
+                          "• Save and load display profiles\n" +
+                          "• Cycle through audio playback devices\n" +
+                          "• Use an Android phone as a keyboard and mouse input\n\n" +
+                          "All of these features can be controlled remotely, providing convenience from wherever you're sitting.";
+
+            MessageBox.Show(aboutMessage, "About DAIRemote", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         public void HideIcon()
         {
-            trayIcon.Visible = false; // Hide tray icon
+            trayIcon.Visible = false;
         }
 
         public void ShowIcon()
         {
-            trayIcon.Visible = true; // Show tray icon
+            trayIcon.Visible = true;
         }
 
         private void OnShow(object sender, EventArgs e)
@@ -111,15 +289,15 @@
 
         private void ShowForm()
         {
-            form.Show(); // Show the form
-            form.WindowState = FormWindowState.Normal; // Restore if minimized
-            form.Activate(); // Bring to front
+            form.Show();
+            form.WindowState = FormWindowState.Normal;
+            form.Activate();
         }
 
         private void OnExit(object sender, EventArgs e)
         {
             HideIcon();
-            Application.Exit(); // Exit the application
+            Application.Exit();
         }
     }
 }

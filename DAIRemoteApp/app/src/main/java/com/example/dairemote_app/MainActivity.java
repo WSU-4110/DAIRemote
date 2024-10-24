@@ -1,16 +1,16 @@
 package com.example.dairemote_app;
 
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -39,24 +39,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private boolean mainButtonClicked = false; // tracks if main icon button was clicked
     private boolean nextStepPending = false; // tracks if "Next" was clicked but action is pending
 
-
-    public void notifyUser(String msg, String color) {
-        TextView toolbarNotif = findViewById(R.id.toolbarNotification);
-        toolbarNotif.setText(msg);
-        toolbarNotif.setTextColor(Color.parseColor(color));
-        toolbarNotif.setVisibility(View.VISIBLE);
-
-        // Hide notification after 5 seconds
-        toolbarNotif.postDelayed(() -> toolbarNotif.setVisibility(View.GONE), 5000);
-    }
-
-    public void bkgrdNotifyUser(String msg, String color) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                notifyUser(msg, color);
-            }
-        });
+    public void notifyUser(Context context, String msg) {
+        runOnUiThread(() -> Toast.makeText(context, msg, Toast.LENGTH_SHORT).show());
     }
 
     public void drawerSetup(int page) {
@@ -106,106 +90,99 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         drawerSetup(R.id.nav_home);
 
-        // Initially Hide the toolbar notification
-        TextView toolbarNotif = findViewById(R.id.toolbarNotification);
-        toolbarNotif.setVisibility(View.GONE);
-
         remotePage = findViewById(R.id.DAIRemoteLogoBtn);
-        remotePage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                v.animate().scaleX(1.2f).scaleY(1.2f) // Scale the button up to 120% of its original size
-                        .setDuration(150) // Duration of the scale up animation
-                        .withEndAction(new Runnable() {
-                            @Override
-                            public void run() {
-                                // Scale back to normal size
-                                v.animate().scaleX(1f)
-                                        .scaleY(1f)
-                                        .setDuration(150) // Duration of the scale down animation
-                                        .start();
+        remotePage.setOnClickListener(v -> {
+            v.animate().scaleX(1.2f).scaleY(1.2f) // Scale the button up to 120% of its original size
+                    .setDuration(150) // Duration of the scale up animation
+                    .withEndAction(() -> {
+                        // Scale back to normal size
+                        v.animate().scaleX(1f)
+                                .scaleY(1f)
+                                .setDuration(150) // Duration of the scale down animation
+                                .start();
+                    })
+                    .start();
+
+            if (tutorialOn) {
+                mainButtonClicked = true;
+                checkIfStepCompleted();
+            }
+
+            // Initialize the connection manager
+            // Establish connection to host if not already established and not declined prior
+            if (!ConnectionManager.connectionEstablished) {
+
+                WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                WifiManager.MulticastLock multicastLock = wifi.createMulticastLock("multicastLock");
+                multicastLock.acquire();
+
+                ConnectionManager.hostSearchInBackground(new HostSearchCallback() {
+                    @Override
+                    public void onHostFound(List<String> serverIps) {
+                        if (serverIps.isEmpty()) {
+                            return;
+                        }
+                        Log.i("MainActivity", "Hosts found: " + serverIps);
+
+                        //!! Implement logic to select the host
+                        String selectedHost = serverIps.get(0);
+                        notifyUser(MainActivity.this, "Connecting to " + selectedHost);
+
+                        // Initialize ConnectionManager with the found server IP
+                        connectionManager = new ConnectionManager(selectedHost);
+                        if (!connectionManager.initializeConnection()) {
+                            // Ensure notifyUser runs on the main (UI) thread
+                            notifyUser(MainActivity.this, "Denied connection");
+                        } else {
+                            notifyUser(MainActivity.this, "Connection approved");
+                            Intent intent = new Intent(MainActivity.this, InteractionPage.class);
+
+                            //checks if main button action was taken
+                            if (tutorialOn) {
+                                mainButtonClicked = true;
+                                checkIfStepCompleted();
+                                // passing data of tutorial to interactionPage
+                                intent.putExtra("tutorialOn", tutorialOn);
+                                intent.putExtra("currentStep", currentStep);
                             }
-                        })
-                        .start();
-                if (tutorialOn) {
-                    mainButtonClicked = true;
-                    checkIfStepCompleted();
-                }
 
-                    // Initialize the connection manager
-                // Establish connection to host if not already established and not declined prior
-                if (!ConnectionManager.connectionEstablished) {
-                    ConnectionManager.hostSearchInBackground(new HostSearchCallback() {
-                        @Override
-                        public void onHostFound(List<String> serverIps) {
-                            if (serverIps.isEmpty()) {
-                                return;
-                            }
-                            Log.i("MainActivity", "Hosts found: " + serverIps);
-
-
-                            //!! Implement logic to select the host
-                            String selectedHost = serverIps.get(0);
-                            bkgrdNotifyUser("Connecting to " + selectedHost, "#c3cf1b");
-
-
-                            // Initialize ConnectionManager with the found server IP
-                            connectionManager = new ConnectionManager(selectedHost);
-                            if (!connectionManager.initializeConnection()) {
-                                // Ensure notifyUser runs on the main (UI) thread
-                                bkgrdNotifyUser("Denied connection", "#c73a30");
-                            } else {
-                                bkgrdNotifyUser("Connection approved", "#3fcf1b");
-                                Intent intent = new Intent(MainActivity.this, InteractionPage.class);
-
-                                //checks if main button action was taken
-                                if (tutorialOn) {
-                                    mainButtonClicked = true;
-                                    checkIfStepCompleted();
-                                    // passing data of tutorial to interactionPage
-                                    intent.putExtra("tutorialOn", tutorialOn);
-                                    intent.putExtra("currentStep", currentStep);
-                                }
-
-                                startActivity(intent);
-                            }
+                            startActivity(intent);
                         }
 
-                        @Override
-                        public void onError(String error) {
-                            Log.e("MainActivity", "Error during host search: " + error);
-                            bkgrdNotifyUser("No hosts found", "#c73a30");
-                        }
-                    });
-                } else if (ConnectionManager.connectionEstablished) {
-                    Intent intent = new Intent(MainActivity.this, InteractionPage.class);
-                    startActivity(intent);
-                }
+                        multicastLock.release();
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Log.e("MainActivity", "Error during host search: " + error);
+                        notifyUser(MainActivity.this, "No hosts found");
+                    }
+                });
+            } else {
+                Intent intent = new Intent(MainActivity.this, InteractionPage.class);
+                startActivity(intent);
             }
         });
     }
-
 
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            if (isTaskRoot()) {
-                finishAffinity();
-            } else {
-                super.onBackPressed();
-            }
+        }
+        if (true) {
+            this.moveTaskToBack(true);
+        }
+        else {
+            super.onBackPressed();
         }
     }
-
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         Intent intent;
         int itemId = item.getItemId();
         Log.d("MainActivity", "Item selected: " + itemId);
-
 
         if (itemId == R.id.nav_remote) {
             intent = new Intent(this, InteractionPage.class);
@@ -220,7 +197,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             intent = new Intent(this, AboutPage.class);
             startActivity(intent);
         }
-
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;

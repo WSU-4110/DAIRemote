@@ -14,7 +14,7 @@ namespace DAIRemote
         public DAIRemoteApplicationUI()
         {
             UDPServerHost udpServer = new UDPServerHost();
-            Thread udpThread = new Thread(() => udpServer.hostUDPServer());
+            Thread udpThread = new Thread(() => udpServer.HostUDPServer());
             udpThread.IsBackground = true;
             udpThread.Start();
 
