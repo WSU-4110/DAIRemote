@@ -34,10 +34,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ImageButton remotePage;
 
     // vars for tutorial
-    private boolean tutorialOn = false; // tracks if tutorial is active
-    private int currentStep = 0;
-    private boolean mainButtonClicked = false; // tracks if main icon button was clicked
-    private boolean nextStepPending = false; // tracks if "Next" was clicked but action is pending
+    public static InteractiveTutorial tut;
+    AlertDialog.Builder builder;
 
     public void notifyUser(Context context, String msg) {
         runOnUiThread(() -> Toast.makeText(context, msg, Toast.LENGTH_SHORT).show());
@@ -82,10 +80,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        tut = new InteractiveTutorial();
+
         // find the help button by its ID
         ImageButton helpButton = findViewById(R.id.helpButton);
         helpButton.setOnClickListener(v -> {
-            startTutorialPopUp("Interactive Tutorial", "Would you like to start the interactive tutorial?", Gravity.CENTER | Gravity.LEFT, 100, -100);
+            builder = new AlertDialog.Builder(MainActivity.this);
+            Log.d("InteractiveTutorial", "Popup start tutorial");
+            tut.setCurrentStep(0);
+            tut.showSteps(builder, tut.getCurrentStep());
+            Log.d("InteractiveTutorial", "Start tutorial");
         });
 
         drawerSetup(R.id.nav_home);
@@ -102,11 +106,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 .start();
                     })
                     .start();
-
-            if (tutorialOn) {
-                mainButtonClicked = true;
-                checkIfStepCompleted();
-            }
 
             // Initialize the connection manager
             // Establish connection to host if not already established and not declined prior
@@ -136,16 +135,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         } else {
                             notifyUser(MainActivity.this, "Connection approved");
                             Intent intent = new Intent(MainActivity.this, InteractionPage.class);
-
-                            //checks if main button action was taken
-                            if (tutorialOn) {
-                                mainButtonClicked = true;
-                                checkIfStepCompleted();
-                                // passing data of tutorial to interactionPage
-                                intent.putExtra("tutorialOn", tutorialOn);
-                                intent.putExtra("currentStep", currentStep);
-                            }
-
                             startActivity(intent);
                         }
 
@@ -201,102 +190,4 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
-
-    // pop up for giving choice for user to start tutorial or not
-    private void startTutorialPopUp(String title, String message, int gravity, int xOffset, int yOffset) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(title);
-        builder.setMessage(message);
-
-        // PositiveButton representing "Start Tutorial" for starting the tutorial
-        builder.setPositiveButton("Start Tutorial", (dialog, which) -> {
-            if (!tutorialOn) {
-                tutorialOn = true;
-                startTutorial(); // triggers tutorial
-            }
-        });
-
-        // NegativeButton representing "No" to not start the tutorial
-        builder.setNegativeButton("No", (dialog, which) -> {
-            tutorialOn = false;
-            dialog.dismiss();
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-        // sets custom position
-        Window window = dialog.getWindow();
-        if (window != null) {
-            WindowManager.LayoutParams params = window.getAttributes();
-            params.gravity = gravity;
-            params.x = xOffset;
-            params.y = yOffset;
-            window.setAttributes(params);
-        }
-    }
-
-
-
-    // functions to trigger tutorial
-    private void startTutorial() {
-        currentStep = 0;
-        showSteps(currentStep);
-    }
-
-
-    private void showSteps(int step) {
-        switch (step) {
-            case 0:
-                showCustomDialog("Main Page", "Tap on the center icon to connect to your local host. Ensure the desktop application is open.", Gravity.TOP | Gravity.LEFT, 100, 200);
-                break;
-
-            default:
-                break;
-        }
-    }
-
-
-    // shows pop up for each step in customized position (depending on location of feature)
-    private void showCustomDialog(String title, String message, int gravity, int xOffset, int yOffset) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(title);
-        builder.setMessage(message);
-
-        // PositiveButton representing "Next" for moving to the next step
-        builder.setPositiveButton("Next", (dialog, which) -> {
-            nextStepPending = true;
-            checkIfStepCompleted();
-        });
-
-        // NegativeButton representing "Exit Tour" to stop the tutorial
-        builder.setNegativeButton("Exit Tour", (dialog, which) -> {
-            tutorialOn = false;
-            dialog.dismiss();
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-        // sets custom position
-        Window window = dialog.getWindow();
-        if (window != null) {
-            WindowManager.LayoutParams params = window.getAttributes();
-            params.gravity = gravity;
-            params.x = xOffset;
-            params.y = yOffset;
-            window.setAttributes(params);
-        }
-    }
-
-    // checking if specific action was completed for current step
-    private void checkIfStepCompleted() {
-        if (currentStep == 0 && mainButtonClicked) {
-            nextStepPending = false;
-            currentStep++;
-            showSteps(currentStep);
-        }
-    }
-
-
 }

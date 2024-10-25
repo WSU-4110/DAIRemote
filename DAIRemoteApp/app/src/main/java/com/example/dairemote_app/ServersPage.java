@@ -39,9 +39,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
     private ArrayAdapter<String> adapter;
     private String selectedHost = null;
 
-    // vars for tutorial
-    private boolean tutorialOn = false; // tracks if tutorial is active
-    private int currentStep = 0;
+    AlertDialog.Builder builder;
 
     public void drawerSetup(int page) {
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -75,11 +73,10 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_servers_page);
 
-        // checks if tutorial is still ongoing
-        tutorialOn = getIntent().getBooleanExtra("tutorialOn", false);
-        currentStep = getIntent().getIntExtra("currentStep", 0);
-        if (tutorialOn) {
-            continueTutorial(currentStep);
+        //  if tutorial is still active on navigation button clicked
+        builder = new AlertDialog.Builder(ServersPage.this);
+        if (MainActivity.tut.getTutorialOn()) {
+            MainActivity.tut.showNextStep(builder);
         }
 
         drawerSetup(R.id.nav_server);
@@ -186,48 +183,5 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    private void continueTutorial(int step) {
-        // resumes showing tutorial steps
-        showSteps(step);
-    }
-
-    private void showSteps(int step) {
-        switch (step) {
-            case 4:
-                showCustomDialog("Servers Page", "A list of all available nearby hosts. If not already connected, select a host from the list and you will be redirected to the Remote Page.", Gravity.BOTTOM | Gravity.RIGHT, 100, 200);
-                break;
-            default:
-                break;
-        }
-    }
-    // shows pop up for each step in customized position (depending on location of feature)
-    private void showCustomDialog(String title, String message, int gravity, int xOffset, int yOffset) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(title);
-        builder.setMessage(message);
-
-        // PositiveButton representing Finish
-        builder.setPositiveButton("Finish", (dialog, which) -> {
-            currentStep++;
-            showSteps(currentStep);
-            tutorialOn = false;
-            dialog.dismiss();
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-        // sets custom position
-        Window window = dialog.getWindow();
-        if (window != null) {
-            WindowManager.LayoutParams params = window.getAttributes();
-            params.gravity = gravity;
-            params.x = xOffset;
-            params.y = yOffset;
-            window.setAttributes(params);
-        }
-
     }
 }
