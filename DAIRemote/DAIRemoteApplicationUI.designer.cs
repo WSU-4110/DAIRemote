@@ -76,7 +76,7 @@
             DisplayLoadProfilesLayout.Location = new Point(10, 250);
             DisplayLoadProfilesLayout.Name = "DisplayLoadProfilesLayout";
             DisplayLoadProfilesLayout.Size = new Size(200, 100);
-            DisplayLoadProfilesLayout.TabIndex = 5;
+            DisplayLoadProfilesLayout.TabIndex = 0;
             // 
             // DAIRemoteApplicationUI
             // 

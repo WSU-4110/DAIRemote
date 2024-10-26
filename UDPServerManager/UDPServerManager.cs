@@ -14,7 +14,7 @@ namespace UDPServerManagerForm
         private UdpClient udpServer;
         private IPEndPoint remoteEP;
         private string clientAddress;
-        private readonly int serverPort = 11000;
+        private int serverPort = 11000;
 
         public UDPServerHost()
         {
@@ -34,7 +34,7 @@ namespace UDPServerManagerForm
             // Ensure the directory exists
             string filePath = GetFilePath("deviceHistory.json");
 
-            DeviceHistoryEntry ipData = new()
+            var ipData = new DeviceHistoryEntry
             {
                 DeviceName = deviceName,
                 IpAddress = ipAddress,
@@ -42,7 +42,7 @@ namespace UDPServerManagerForm
             };
 
             // Read the existing JSON file if it exists
-            List<DeviceHistoryEntry> ipList = [];
+            List<DeviceHistoryEntry> ipList = new List<DeviceHistoryEntry>();
             if (File.Exists(filePath))
             {
                 string existingData = File.ReadAllText(filePath);
@@ -66,7 +66,7 @@ namespace UDPServerManagerForm
             List<DeviceHistoryEntry> ipList = JsonSerializer.Deserialize<List<DeviceHistoryEntry>>(existingData);
 
             // Check if any entry in the list has the same IP address
-            foreach (DeviceHistoryEntry entry in ipList)
+            foreach (var entry in ipList)
             {
                 if (entry.IpAddress == ipAddress)
                 {
@@ -83,7 +83,7 @@ namespace UDPServerManagerForm
             if (byIndex >= 0)
             {
                 // Extract everything after "by " as the device name
-                return handshakeMessage[(byIndex + 3)..].Trim();
+                return handshakeMessage.Substring(byIndex + 3).Trim();
             }
             return null;
         }
@@ -121,7 +121,7 @@ namespace UDPServerManagerForm
                 // Check if the received message is the handshake request
                 if (handshakeMessage.StartsWith("Connection requested"))
                 {
-                    return AwaitApproval(ExtractDeviceName(handshakeMessage));
+                    return awaitApproval(ExtractDeviceName(handshakeMessage));
                 }
                 else if (handshakeMessage.StartsWith("Hello, I'm"))
                 {
@@ -146,7 +146,7 @@ namespace UDPServerManagerForm
             }
         }
 
-        public bool AwaitApproval(string deviceName)
+        public bool awaitApproval(string deviceName)
         {
             Debug.WriteLine("Checking for approval...");
             SendUdpMessage("Wait");
@@ -163,7 +163,7 @@ namespace UDPServerManagerForm
             }
             else
             {
-                UDPServerManagerForm form = new();
+                UDPServerManagerForm form = new UDPServerManagerForm();
                 DialogResult connect = MessageBox.Show($"Allow ({remoteEP.Address}:{remoteEP.Port}) to connect?",
                     "Pending Connection", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                     MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
@@ -186,7 +186,7 @@ namespace UDPServerManagerForm
             {
                 try
                 {
-                    bool handshakeSuccessful = await Task.Run(InitiateHandshake);
+                    bool handshakeSuccessful = await Task.Run(() => InitiateHandshake());
 
                     if (handshakeSuccessful)
                     {
@@ -203,9 +203,13 @@ namespace UDPServerManagerForm
             }
         }
 
-        public bool IsClient(string ipAddress)
+        public bool isClient(String ipAddress)
         {
-            return clientAddress != null && clientAddress.Equals(ipAddress);
+            if (clientAddress != null)
+            {
+                return clientAddress.Equals(ipAddress);
+            }
+            return false;
         }
 
         // Main message loop once the handshake is successful
@@ -234,7 +238,7 @@ namespace UDPServerManagerForm
                         byte[] data = udpServer.Receive(ref remoteEP);
 
                         // Check if input is by client
-                        if (IsClient(remoteEP.Address.ToString()))
+                        if (isClient(remoteEP.Address.ToString()))
                         {
                             string receivedData = Encoding.ASCII.GetString(data);
                             Debug.WriteLine($"Received: {receivedData}");
@@ -296,11 +300,11 @@ namespace UDPServerManagerForm
             }
             else if (receivedData.StartsWith("Connection requested"))
             {
-                AwaitApproval(ExtractDeviceName(receivedData));
+                awaitApproval(ExtractDeviceName(receivedData));
             }
             else
             {
-                RetrieveCommand(receivedData);
+                retrieveCommand(receivedData);
             }
         }
 
@@ -310,16 +314,16 @@ namespace UDPServerManagerForm
             udpServer.Send(data, data.Length, remoteEP);
         }
 
-        public void RetrieveCommand(string command)
+        public void retrieveCommand(string command)
         {
-            string[] parts = command.Split([' '], 2);
-            string action = parts[0];
+            var parts = command.Split(new[] { ' ' }, 2);
+            var action = parts[0];
 
             Debug.WriteLine(action);
             switch (action)
             {
                 case "MOUSE_MOVE":
-                    string[] moveParts = parts[1].Split(' ');
+                    var moveParts = parts[1].Split(' ');
                     var currentPos = MouseOperations.GetCursorPosition();
 
                     if (moveParts.Length >= 2)
@@ -372,7 +376,7 @@ namespace UDPServerManagerForm
         }
 
         // Method to start the UDP server
-        public async Task HostUDPServer()
+        public async Task hostUDPServer()
         {
             while (true)
             {

@@ -1,4 +1,8 @@
 ﻿using DisplayProfileManager;
+using System;
+using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace DAIRemote
 {
@@ -9,6 +13,7 @@ namespace DAIRemote
         private Form form;
         private FileSystemWatcher profileDirWatcher;
         private string profilesFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
+        private DisplayConfig displayConfig;
 
         private Image aboutIcon;
         private Image DAIRemoteLogo;
@@ -22,6 +27,7 @@ namespace DAIRemote
         public TrayIconManager(Form form)
         {
             this.form = form;
+            displayConfig = new DisplayConfig();
 
             aboutIcon = Image.FromFile("Resources/About.ico");
             DAIRemoteLogo = Image.FromFile("Resources/DAIRemoteLogo.ico");
@@ -65,7 +71,7 @@ namespace DAIRemote
         {
             ContextMenuStrip menu = new ContextMenuStrip
             {
-                ForeColor = Color.Black,
+                ForeColor = System.Drawing.Color.Black,
                 ShowImageMargin = true,
                 Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
                 AutoSize = true,
@@ -78,6 +84,7 @@ namespace DAIRemote
 
         private void OnProfilesChanged(object sender, FileSystemEventArgs e)
         {
+
             if (form.InvokeRequired)
             {
                 form.BeginInvoke((MethodInvoker)delegate
@@ -102,14 +109,14 @@ namespace DAIRemote
                 Enabled = false,
             };
 
-            ToolStripMenuItem deleteProfilesLabel = new ToolStripMenuItem("Select Profile to Delete")
+            ToolStripMenuItem deleteProfilesLabel = new ToolStripMenuItem("Select Profile To Delete")
             {
                 Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
                 ForeColor = Color.Gray,
                 Enabled = false,
             };
 
-            ToolStripMenuItem saveProfilesLabel = new ToolStripMenuItem("Overwrite profile")
+            ToolStripMenuItem saveProfilesLabel = new ToolStripMenuItem("Select Profile To Save")
             {
                 Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
                 ForeColor = Color.Gray,
@@ -134,7 +141,7 @@ namespace DAIRemote
                 string fileName = Path.GetFileNameWithoutExtension(jsonProfile);
                 var jsonMenuItem = new ToolStripMenuItem(fileName, monitorIcon, (sender, e) =>
                 {
-                    DisplayConfig.SetDisplaySettings(jsonProfile);
+                    DisplayProfileManager.DisplayConfig.SetDisplaySettings(jsonProfile);
                 });
 
                 menu.Items.Insert(2, jsonMenuItem);
@@ -156,10 +163,9 @@ namespace DAIRemote
             menu.Items.Add(new ToolStripSeparator());
             deleteProfileMenuItem.DropDownItems.Insert(0, deleteProfilesLabel);
             deleteProfileMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
-            saveProfileMenuItem.DropDownItems.Insert(0, addNewProfile);
+            saveProfileMenuItem.DropDownItems.Insert(0, saveProfilesLabel);
             saveProfileMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
-            saveProfileMenuItem.DropDownItems.Insert(2, saveProfilesLabel);
-            saveProfileMenuItem.DropDownItems.Insert(3, new ToolStripSeparator());
+            saveProfileMenuItem.DropDownItems.Insert(2, addNewProfile);
             menu.Items.Add(saveProfileMenuItem);
             menu.Items.Add(deleteProfileMenuItem);
 
@@ -257,7 +263,7 @@ namespace DAIRemote
 
         private void TurnOffMonitors(object? sender, EventArgs e)
         {
-            DisplayConfig.DisplayToggleSleep(true);
+            displayConfig.TurnOffMonitors();
         }
 
         private void OnAboutClick(object? sender, EventArgs e)
