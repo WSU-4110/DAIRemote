@@ -43,12 +43,6 @@ public class InteractiveTutorial {
         builder.setMessage(message);
     }
 
-    public void builderSetPosBtn(AlertDialog.Builder builder, String message) {
-        builder.setPositiveButton(message, (dialog, which) -> {
-            //
-        });
-    }
-
     public void builderNextBtn(AlertDialog.Builder builder) {
         builder.setPositiveButton("Next", (dialog, which) -> {
             if(checkIfStepCompleted()) {

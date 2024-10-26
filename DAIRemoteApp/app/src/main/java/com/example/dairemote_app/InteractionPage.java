@@ -43,6 +43,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     EditText editText;
     TextView interactionsHelpText;
     private ImageView interactionHelp;
+    private TextView startTutorial;
     // private TextView responseTextView;
     private ImageView sendButton;
 
@@ -353,6 +354,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
         interactionHelp = findViewById(R.id.interactionsHelp);
         interactionsHelpText = findViewById(R.id.interationsHelpTextView);
+        startTutorial = findViewById(R.id.tutorialStartBtn);
 
         interactionHelp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -361,9 +363,28 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     interactionsHelpText.setVisibility(View.GONE); // Hide the TextView
                 } else {
                     interactionsHelpText.setVisibility(View.VISIBLE); // Show the TextView
-                    MainActivity.tut.setTutorialOn(true);
-                    MainActivity.tut.setCurrentStep(2);
-                    MainActivity.tut.showNextStep(builder);
+
+                    startTutorial.setVisibility(View.VISIBLE);  // Show clickable TextView for starting tutorial
+
+                    startTutorial.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            MainActivity.tut.setTutorialOn(true);
+                            MainActivity.tut.setCurrentStep(1);
+                            MainActivity.tut.showNextStep(builder);
+
+                            // Hide after clicked
+                            startTutorial.setVisibility(View.GONE);
+                        }
+                    });
+
+                    // Hide the button automatically
+                    startTutorial.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            startTutorial.setVisibility(View.GONE);
+                        }
+                    }, 2500);
                 }
             }
         });
