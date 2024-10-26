@@ -1,4 +1,4 @@
-using AudioManager;
+using AudioDeviceManager;
 using DisplayProfileManager;
 using Microsoft.Win32;
 using UDPServerManagerForm;
@@ -10,16 +10,28 @@ namespace DAIRemote
         private TrayIconManager trayIconManager;
         private AudioOutputForm audioForm;
         private Panel audioFormPanel;
+        private AudioDeviceManager.AudioDeviceManager audioManager;
 
         public DAIRemoteApplicationUI()
         {
             UDPServerHost udpServer = new UDPServerHost();
-            Thread udpThread = new Thread(() => udpServer.HostUDPServer());
-            udpThread.IsBackground = true;
+            Thread udpThread = new Thread(() => udpServer.HostUDPServer())
+            {
+                IsBackground = true
+            };
             udpThread.Start();
 
             InitializeComponent();
-            InitializeCustomComponents();
+
+            Task.Run(() =>
+            {
+                this.audioManager = new AudioDeviceManager.AudioDeviceManager();
+
+                this.Invoke((MethodInvoker)(() =>
+                {
+                    InitializeAudioComponents();
+                }));
+            });
 
             this.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.Icon = new Icon("Resources/DAIRemoteLogo.ico");
@@ -38,9 +50,9 @@ namespace DAIRemote
 
         private void BtnShowAudioOutputs_Click(object sender, EventArgs e)
         {
-            if (audioForm == null || audioForm.IsDisposed)
+            if ((audioForm == null || audioForm.IsDisposed) && audioManager != null)
             {
-                audioForm = new AudioOutputForm
+                audioForm = new AudioOutputForm(audioManager)
                 {
                     TopLevel = false,
                     FormBorderStyle = FormBorderStyle.None,
@@ -50,7 +62,7 @@ namespace DAIRemote
                 audioFormPanel.Controls.Add(audioForm);
                 audioForm.Show();
             }
-            else
+            else if (audioForm != null)
             {
                 if (audioForm.Visible)
                 {
@@ -72,7 +84,7 @@ namespace DAIRemote
             }
         }
 
-        private void InitializeCustomComponents()
+        private void InitializeAudioComponents()
         {
             this.audioFormPanel = new Panel
             {
@@ -163,6 +175,11 @@ namespace DAIRemote
         private void LoadStartupSetting()
         {
             checkBoxStartup.Checked = IsAppInStartup();
+        }
+
+        private void BtnCycleAudioOutputs_Click(object sender, EventArgs e)
+        {
+            audioManager.CycleToNextAudioDevice();
         }
     }
 }

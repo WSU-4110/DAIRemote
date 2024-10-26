@@ -1,15 +1,27 @@
-using NAudio.CoreAudioApi;
-using System.Data;
-
-namespace AudioManager
+namespace AudioDeviceManager
 {
-    public partial class AudioOutputForm : System.Windows.Forms.Form
+    public partial class AudioOutputForm : Form
     {
         private ComboBox audioDeviceComboBox;
-        public AudioOutputForm()
+        private static AudioOutputForm instance;
+        private AudioDeviceManager audioManager;
+        private List<string> devices;
+        public AudioOutputForm(AudioDeviceManager audioManager)
         {
+            this.audioManager = audioManager;
+            this.devices = audioManager.ActiveDeviceNames;
+
             InitializeAudioOutputFormComponent();
             LoadAudioDevices();
+        }
+
+        public static AudioOutputForm GetInstance(AudioDeviceManager audioManager)
+        {
+            if (instance == null || instance.IsDisposed)
+            {
+                instance = new AudioOutputForm(audioManager);
+            }
+            return instance;
         }
 
         private void InitializeAudioOutputFormComponent()
@@ -39,15 +51,8 @@ namespace AudioManager
 
         private void LoadAudioDevices()
         {
-            var devices = GetAudioDevices();
-            audioDeviceComboBox.DataSource = devices;
-        }
-
-        public List<string> GetAudioDevices()
-        {
-            var enumerator = new MMDeviceEnumerator();
-            var devices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
-            return devices.Select(d => d.FriendlyName).ToList();
+            audioDeviceComboBox.DataSource = null;
+            audioDeviceComboBox.DataSource = this.devices;
         }
 
         private void audioDeviceComboBox_DropDown(object sender, EventArgs e)
@@ -57,12 +62,16 @@ namespace AudioManager
 
         private void audioDeviceComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-
+            string selectedDevice = audioDeviceComboBox.SelectedItem as string;
+            if (selectedDevice != null)
+            {
+                audioManager.setDefaultAudioDevice(selectedDevice);
+            }
         }
 
         private void AudioOutputForm_Load(object sender, EventArgs e)
         {
-            this.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.BackColor = Color.FromArgb(50, 50, 50);
         }
 
     }
