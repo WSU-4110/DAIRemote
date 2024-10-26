@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/design_default_color_primary</item>
-        <item name="colorPrimaryDark">@color/design_default_color_primary_dark</item>
-<!--        <item name="colorAccent">@color/color</item>-->
-
-        <item name="android:statusBarColor">#00000000</item>
+        <item name="colorPrimary">#077063</item>
+        <item name="colorPrimaryDark">#016B5F</item>
+        <item name="android:statusBarColor">#077063</item>
     </style>
 
     <style name="KeyboardExtrasStyle">
