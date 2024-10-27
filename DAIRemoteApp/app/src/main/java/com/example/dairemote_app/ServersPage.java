@@ -87,7 +87,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         hostListView = findViewById(R.id.hostList);
 
         // Adapter for the ListView to display the available hosts
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_single_choice, availableHosts);
+        adapter = new ArrayAdapter<>(this, R.layout.list_item, availableHosts);
         hostListView.setAdapter(adapter);
         hostListView.setOnItemClickListener((parent, view, position, id) -> {
             selectedHost = availableHosts.get(position);
