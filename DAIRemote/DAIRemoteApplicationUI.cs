@@ -21,6 +21,7 @@ namespace DAIRemote
             InitializeComponent();
             InitializeCustomComponents();
             InitializeDisplayLoadProfilesLayout();
+            InitializeDisplayDeleteProfilesLayout();
 
             this.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             this.Icon = new Icon("Resources/DAIRemoteLogo.ico");
@@ -43,27 +44,16 @@ namespace DAIRemote
 
             foreach (var profile in displayProfiles)
             {
-                // Create a button for each profile
                 Button profileButton = new Button
                 {
-                    Text = Path.GetFileNameWithoutExtension(profile), // Set profile name as button text
+                    Text = Path.GetFileNameWithoutExtension(profile),
                     Width = 150,
                     Height = 50,
                     Margin = new Padding(10),
-                    Tag = profile // Store profile name in the Tag for later use on click()
+                    Tag = profile
                 };
 
-                // Attach click event handler
                 profileButton.Click += ProfileButton_Click;
-
-                // I'm thinking of having different images depending on certain conditions, let these be for now
-                //profileButton.Image = Image.FromFile("path_to_image");
-                //profileButton.ImageAlign = ContentAlignment.MiddleLeft;
-
-                //Can make it scrollable
-                //flowPanel.AutoScroll = true;
-
-                // Add the button to the DisplayLoadProfilesLayout FlowLayoutPanel
                 DisplayLoadProfilesLayout.Controls.Add(profileButton);
             }
         }
@@ -71,7 +61,7 @@ namespace DAIRemote
         private void ProfileButton_Click(object sender, EventArgs e)
         {
             Button clickedButton = sender as Button;
-            string profileName = clickedButton.Tag.ToString(); // Retrieve profile name from Tag
+            string profileName = clickedButton.Tag.ToString();
             DisplayConfig.SetDisplaySettings(profileName);
         }
 
@@ -197,6 +187,33 @@ namespace DAIRemote
         private void LoadStartupSetting()
         {
             checkBoxStartup.Checked = IsAppInStartup();
+        }
+
+        private void InitializeDisplayDeleteProfilesLayout()
+        {
+            string[] displayProfiles = Directory.GetFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"), "*.json");
+
+            foreach (var profile in displayProfiles)
+            {
+                Button profileButton = new Button
+                {
+                    Text = Path.GetFileNameWithoutExtension(profile),
+                    Width = 150,
+                    Height = 50,
+                    Margin = new Padding(10),
+                    Tag = profile
+                };
+
+                profileButton.Click += ProfileButton_Click_2;
+                DisplayDeleteProfilesLayout.Controls.Add(profileButton);
+            }
+        }
+
+        private void ProfileButton_Click_2(object sender, EventArgs e)
+        {
+            Button clickedButton = sender as Button;
+            string profileName = clickedButton.Tag.ToString();
+            DisplayConfig.DeleteDisplaySettings(profileName);
         }
     }
 }
