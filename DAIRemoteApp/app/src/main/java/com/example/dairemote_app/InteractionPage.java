@@ -355,6 +355,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         interactionHelp = findViewById(R.id.interactionsHelp);
         interactionsHelpText = findViewById(R.id.interationsHelpTextView);
         startTutorial = findViewById(R.id.tutorialStartBtn);
+        startTutorial.setVisibility(View.GONE);
 
         interactionHelp.setOnClickListener(new View.OnClickListener() {
             @Override
