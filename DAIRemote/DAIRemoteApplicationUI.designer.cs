@@ -26,6 +26,7 @@
             button1 = new Button();
             profileNameTextBox = new TextBox();
             checkBoxStartup = new CheckBox();
+            BtnCycleAudioOutputs = new Button();
             SuspendLayout();
             // 
             // BtnSaveDisplayConfig
@@ -82,12 +83,25 @@
             checkBoxStartup.UseVisualStyleBackColor = true;
             checkBoxStartup.CheckedChanged += checkBoxStartup_CheckedChanged;
             // 
+            // BtnCycleAudioOutputs
+            // 
+            BtnCycleAudioOutputs.AccessibleName = "BtnCycleAudioOutputs";
+            BtnCycleAudioOutputs.BackColor = Color.LightSkyBlue;
+            BtnCycleAudioOutputs.Location = new Point(20, 272);
+            BtnCycleAudioOutputs.Name = "BtnCycleAudioOutputs";
+            BtnCycleAudioOutputs.Size = new Size(200, 40);
+            BtnCycleAudioOutputs.TabIndex = 5;
+            BtnCycleAudioOutputs.Text = "Cycle Audio Devices";
+            BtnCycleAudioOutputs.UseVisualStyleBackColor = false;
+            BtnCycleAudioOutputs.Click += BtnCycleAudioOutputs_Click;
+            // 
             // DAIRemoteApplicationUI
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(225, 246, 225);
             ClientSize = new Size(300, 450);
+            Controls.Add(BtnCycleAudioOutputs);
             Controls.Add(checkBoxStartup);
             Controls.Add(profileNameTextBox);
             Controls.Add(button1);
@@ -107,5 +121,6 @@
         private Button button1;
         private TextBox profileNameTextBox;
         private CheckBox checkBoxStartup;
+        private Button BtnCycleAudioOutputs;
     }
 }
