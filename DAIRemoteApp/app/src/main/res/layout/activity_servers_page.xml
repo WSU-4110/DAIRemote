@@ -65,9 +65,25 @@
             </ListView>
 
 
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/addServerBttn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="178dp"
+                android:contentDescription="Add server host"
+                android:src="@drawable/baseline_add_24"
+                app:layout_constraintBottom_toBottomOf="@+id/hostList"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:tint="@color/primary" />
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
     </ScrollView>
+
+
+
+
 
 </androidx.drawerlayout.widget.DrawerLayout>

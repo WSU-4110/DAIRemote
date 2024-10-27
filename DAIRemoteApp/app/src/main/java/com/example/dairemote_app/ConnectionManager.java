@@ -95,16 +95,21 @@ public class ConnectionManager {
     public boolean initializeConnection() {
         serverResponse = "";
         int broadcastCount = 0;
+        final int maxRetries = 5;
         while (serverResponse.isEmpty()) {
             connect("Connection requested by " + getDeviceName());
             broadcastCount += 1;
             if (broadcastCount == 1) {
                 waitForResponse(25);
-            } else if (broadcastCount > 5) {
-                Log.d("ConnectionManager", "Timed out waiting for connection response...");
             } else {
                 waitForResponse(2500);
             }
+
+            if (broadcastCount >= maxRetries && serverResponse.isEmpty()) {
+                Log.d("ConnectionManager", "Timed out waiting for connection response...");
+                return false;
+            }
+
         }
         return finishConnection();
     }
