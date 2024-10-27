@@ -222,7 +222,7 @@ public class ConnectionManager {
             socket.setBroadcast(true);
             String message = "Hello, I'm " + getDeviceName();
             byte[] sendData = message.getBytes();
-            InetAddress broadcastAddress = InetAddress.getByName("192.168.1.9"); // Broadcast address
+            InetAddress broadcastAddress = InetAddress.getByName("255.255.255.255"); // Broadcast address
             int port = 11000;
             DatagramPacket packet = new DatagramPacket(sendData, sendData.length, broadcastAddress, port);
             socket.send(packet);

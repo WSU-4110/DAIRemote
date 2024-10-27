@@ -143,6 +143,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         Log.e("MainActivity", "Error during host search: " + error);
                         notifyUser(MainActivity.this, "No hosts found");
                         Intent intent = new Intent(MainActivity.this, ServersPage.class);
+                        if (tut.getTutorialOn()) {
+                            tut.setCurrentStep(4);
+                        }
                         startActivity(intent);
                     }
                 });

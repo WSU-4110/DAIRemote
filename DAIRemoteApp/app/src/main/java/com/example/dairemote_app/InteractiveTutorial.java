@@ -152,13 +152,25 @@ public class InteractiveTutorial {
             case 5:
                 builderTitleMsg(builder, "Servers Page", "A list of all available nearby hosts. If not already connected, select a host from the list and you will be redirected to the Remote Page.");
                 builderNextBtn(builder);
-                builderFinishBtn(builder);
+                builderExitBtn(builder);
 
                 dialog = builder.create();
                 window = dialog.getWindow();
                 dialog.show();
 
                 windowPositioner(window, Gravity.BOTTOM | Gravity.RIGHT, xOffset, yOffset);
+
+                break;
+            case 6:
+                builderTitleMsg(builder, "+ Add Server Button", "Tap the + button to manually add a server host to connect to.");
+                builderNextBtn(builder);
+                builderFinishBtn(builder);
+
+                dialog = builder.create();
+                window = dialog.getWindow();
+                dialog.show();
+
+                windowPositioner(window, Gravity.TOP | Gravity.RIGHT, xOffset, yOffset);
 
                 break;
             default:
