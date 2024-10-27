@@ -174,7 +174,7 @@ namespace DAIRemote
             menu.Items.Add(exitMenuItem);
         }
 
-        private void SaveNewProfile(string profilesFolderPath)
+        public static void SaveNewProfile(string profilesFolderPath)
         {
             Form inputForm = new Form
             {

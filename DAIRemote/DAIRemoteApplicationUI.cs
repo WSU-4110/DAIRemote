@@ -22,6 +22,7 @@ namespace DAIRemote
             udpThread.Start();
 
             InitializeComponent();
+            InitializeDisplayProfilesLayouts();
 
             Task.Run(() =>
             {
@@ -46,6 +47,52 @@ namespace DAIRemote
         private void DAIRemoteApplicationUI_Load(object sender, EventArgs e)
         {
             this.Hide();
+        }
+
+        private void InitializeDisplayProfilesLayouts()
+        {
+            string[] displayProfiles = Directory.GetFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"), "*.json");
+
+            foreach (var profile in displayProfiles)
+            {
+                Button loadProfileButton = new Button
+                {
+                    Text = Path.GetFileNameWithoutExtension(profile),
+                    Width = 150,
+                    Height = 50,
+                    Margin = new Padding(10),
+                    Tag = profile
+                };
+
+                Button deleteProfileButton = new Button
+                {
+                    Text = Path.GetFileNameWithoutExtension(profile),
+                    Width = 150,
+                    Height = 50,
+                    Margin = new Padding(10),
+                    Tag = profile
+                };
+
+                loadProfileButton.Click += loadProfileButton_Click;
+                DisplayLoadProfilesLayout.Controls.Add(loadProfileButton);
+
+                deleteProfileButton.Click += deleteProfileButton_Click;
+                DisplayDeleteProfilesLayout.Controls.Add(deleteProfileButton);
+            }
+        }
+
+        private void deleteProfileButton_Click(object sender, EventArgs e)
+        {
+            Button clickedButton = sender as Button;
+            string profileName = clickedButton.Tag.ToString();
+            DisplayConfig.DeleteDisplaySettings(profileName);
+        }
+
+        private void loadProfileButton_Click(object sender, EventArgs e)
+        {
+            Button clickedButton = sender as Button;
+            string profileName = clickedButton.Tag.ToString();
+            DisplayConfig.SetDisplaySettings(profileName);
         }
 
         private void BtnShowAudioOutputs_Click(object sender, EventArgs e)
@@ -95,19 +142,9 @@ namespace DAIRemote
             this.Controls.Add(this.audioFormPanel);
         }
 
-        private void BtnSaveDisplayConfig_Click(object sender, EventArgs e)
+        private void BtnAddDisplayConfig_Click(object sender, EventArgs e)
         {
-            string fileName = profileNameTextBox.Text;
-            if (fileName != "")
-            {
-                DisplayConfig.SaveDisplaySettings(fileName + ".json");
-            }
-            else
-            {
-                MessageBox.Show("Invalid input, name cannot be empty");
-            }
-
-            profileNameTextBox.Clear();
+            TrayIconManager.SaveNewProfile(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"));
         }
 
         private void BtnLoadDisplayConfig_Click(object sender, EventArgs e)

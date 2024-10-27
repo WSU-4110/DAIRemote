@@ -1294,6 +1294,27 @@ namespace DisplayProfileManager
             return false;
         }
 
+        public static bool DeleteDisplaySettings(string fileName)
+        {
+            string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+            fileName = Path.Combine(folderPath, fileName);
+
+            DebugMsg("Deleting display profile: " + fileName);
+            if (!File.Exists(fileName))
+            {
+                Debug.WriteLine("ERROR: Display profile {" + fileName + "} does not exist: ");
+                return false;
+            }
+
+            File.Delete(fileName);
+            return true;
+        }
+
         [DllImport("user32.dll")]
         private static extern int PostMessage(int hWnd, int hMsg, int wParam, int lParam);
 
