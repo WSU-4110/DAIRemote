@@ -142,11 +142,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     public void onError(String error) {
                         Log.e("MainActivity", "Error during host search: " + error);
                         notifyUser(MainActivity.this, "No hosts found");
-                        Intent intent = new Intent(MainActivity.this, ServersPage.class);
-                        if (tut.getTutorialOn()) {
-                            tut.setCurrentStep(4);
-                        }
-                        startActivity(intent);
+                        runOnUiThread(() -> {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                            builder.setTitle("No Hosts Found")
+                                    .setMessage("No available hosts were found. Please add a server host manually.")
+                                    .setPositiveButton("Go to Servers Page", (dialog, which) -> {
+                                        Intent intent = new Intent(MainActivity.this, ServersPage.class);
+                                        if (tut.getTutorialOn()) {
+                                            tut.setCurrentStep(4);
+                                        }
+                                        startActivity(intent);
+                                    })
+                                    .setNegativeButton("Cancel", (dialog, which) -> {
+                                        dialog.dismiss();
+                                    })
+                                    .show();
+                        });
+
                     }
                 });
             } else {
