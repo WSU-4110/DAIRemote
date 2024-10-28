@@ -34,7 +34,7 @@ namespace DAIRemote
                 }));
             });
 
-            this.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
+            this.BackColor = Color.FromArgb(50, 50, 50);
             this.Icon = new Icon("Resources/DAIRemoteLogo.ico");
             trayIconManager = new TrayIconManager(this);
             this.Load += DAIRemoteApplicationUI_Load;
@@ -95,33 +95,6 @@ namespace DAIRemote
             DisplayConfig.SetDisplaySettings(profileName);
         }
 
-        private void BtnShowAudioOutputs_Click(object sender, EventArgs e)
-        {
-            if ((audioForm == null || audioForm.IsDisposed) && audioManager != null)
-            {
-                audioForm = new AudioOutputForm(audioManager)
-                {
-                    TopLevel = false,
-                    FormBorderStyle = FormBorderStyle.None,
-                    Dock = DockStyle.Fill
-                };
-
-                audioFormPanel.Controls.Add(audioForm);
-                audioForm.Show();
-            }
-            else if (audioForm != null)
-            {
-                if (audioForm.Visible)
-                {
-                    audioForm.Hide();
-                }
-                else
-                {
-                    audioForm.Show();
-                }
-            }
-        }
-
         private void DAIRemoteApplicationUI_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (e.CloseReason == CloseReason.UserClosing)
@@ -139,7 +112,16 @@ namespace DAIRemote
                 Size = new System.Drawing.Size(760, 370),
             };
 
+            audioForm = new AudioOutputForm(audioManager)
+            {
+                TopLevel = false,
+                FormBorderStyle = FormBorderStyle.None,
+                Dock = DockStyle.Fill
+            };
+
             this.Controls.Add(this.audioFormPanel);
+            audioFormPanel.Controls.Add(audioForm);
+            audioForm.Show();
         }
 
         private void BtnAddDisplayConfig_Click(object sender, EventArgs e)

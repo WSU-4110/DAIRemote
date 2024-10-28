@@ -48,14 +48,6 @@ namespace AudioDeviceManager
             get { return devices.Select(d => d.FullName).ToList(); }
         }
 
-        public void printAllAudioDevices()
-        {
-            foreach (CoreAudioDevice audioDevice in this.devices)
-            {
-                Debug.WriteLine(audioDevice.FullName);
-            }
-        }
-
         public void SetVolume(int volume)
         {
             this.defaultAudioDevice.Volume = volume;

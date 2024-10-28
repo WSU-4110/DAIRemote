@@ -2,7 +2,7 @@
 
 namespace UDPServerManager
 {
-    class MouseOperations
+    class MouseManager
     {
         [Flags]
         public enum MouseEventFlags

@@ -320,14 +320,14 @@ namespace UDPServerManagerForm
             {
                 case "MOUSE_MOVE":
                     string[] moveParts = parts[1].Split(' ');
-                    var currentPos = MouseOperations.GetCursorPosition();
+                    var currentPos = MouseManager.GetCursorPosition();
 
                     if (moveParts.Length >= 2)
                     {
                         float x = float.Parse(moveParts[0]);
                         float y = float.Parse(moveParts[1]);
 
-                        MouseOperations.SetCursorPosition((int)(x + currentPos.X), (int)(y + currentPos.Y));
+                        MouseManager.SetCursorPosition((int)(x + currentPos.X), (int)(y + currentPos.Y));
                     }
                     else
                     {
@@ -335,9 +335,9 @@ namespace UDPServerManagerForm
                     }
                     break;
                 case "MOUSE_LMB":
-                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
+                    MouseManager.MouseEvent(MouseManager.MouseEventFlags.LeftDown);
                     Thread.Sleep(25);
-                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);
+                    MouseManager.MouseEvent(MouseManager.MouseEventFlags.LeftUp);
                     break;
                 case "KEYBOARD_WRITE":
                     string key = parts[1];
@@ -353,17 +353,17 @@ namespace UDPServerManagerForm
                     }
                     break;
                 case "MOUSE_LMB_HOLD":
-                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
+                    MouseManager.MouseEvent(MouseManager.MouseEventFlags.LeftDown);
                     Thread.Sleep(25);
                     break;
                 case "MOUSE_RMB":
-                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.RightDown);
+                    MouseManager.MouseEvent(MouseManager.MouseEventFlags.RightDown);
                     Thread.Sleep(25);
-                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.RightUp);
+                    MouseManager.MouseEvent(MouseManager.MouseEventFlags.RightUp);
                     break;
                 case "MOUSE_SCROLL":
                     int scrollAmount = (int)float.Parse(parts[1]);
-                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.Wheel, scrollAmount);
+                    MouseManager.MouseEvent(MouseManager.MouseEventFlags.Wheel, scrollAmount);
                     break;
                 default:
                     Console.WriteLine("Unknown command: " + command);
