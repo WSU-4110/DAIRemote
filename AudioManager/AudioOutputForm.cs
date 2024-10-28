@@ -32,7 +32,12 @@ namespace AudioDeviceManager
         {
             if (instance == null || instance.IsDisposed)
             {
-                instance = new AudioOutputForm(audioManager);
+                instance = new AudioOutputForm(audioManager)
+                {
+                    TopLevel = false,
+                    FormBorderStyle = FormBorderStyle.None,
+                    Dock = DockStyle.Fill
+                };
             }
             return instance;
         }

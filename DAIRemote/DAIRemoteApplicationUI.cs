@@ -26,7 +26,7 @@ namespace DAIRemote
 
             Task.Run(() =>
             {
-                this.audioManager = new AudioDeviceManager.AudioDeviceManager();
+                this.audioManager = AudioDeviceManager.AudioDeviceManager.GetInstance();
 
                 this.Invoke((MethodInvoker)(() =>
                 {
@@ -112,12 +112,7 @@ namespace DAIRemote
                 Size = new System.Drawing.Size(760, 370),
             };
 
-            audioForm = new AudioOutputForm(audioManager)
-            {
-                TopLevel = false,
-                FormBorderStyle = FormBorderStyle.None,
-                Dock = DockStyle.Fill
-            };
+            audioForm = AudioOutputForm.GetInstance(audioManager);
 
             this.Controls.Add(this.audioFormPanel);
             audioFormPanel.Controls.Add(audioForm);

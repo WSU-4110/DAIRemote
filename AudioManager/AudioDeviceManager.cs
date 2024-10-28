@@ -5,23 +5,44 @@ namespace AudioDeviceManager
 {
     public class AudioDeviceManager
     {
+        private static AudioDeviceManager instance;
         private CoreAudioDevice defaultAudioDevice;
         private CoreAudioController controller;
         private List<CoreAudioDevice> devices;
+        private double defaultAudioDeviceVolume;
+        private bool defaultAudioMuteStatus;
 
         public AudioDeviceManager()
         {
+            // Initialize CoreAudioController, which combs through
+            // all the available audio sources, hence the slow
+            // initialization.
             controller = new CoreAudioController();
+
+            // Set the initial values for variables needed for functions
             defaultAudioDevice = controller.DefaultPlaybackDevice;
             devices = getAllActiveAudioDevices().ToList();
+            defaultAudioDeviceVolume = this.defaultAudioDevice.Volume;
+            defaultAudioMuteStatus = defaultAudioDevice.IsMuted;
+        }
+
+        public static AudioDeviceManager GetInstance()
+        {
+            if (instance == null)
+            {
+                instance = new AudioDeviceManager();
+            }
+            return instance;
         }
 
         public CoreAudioDevice getDefaultAudioDevice() { return this.defaultAudioDevice; }
+
         public void setDefaultAudioDevice(CoreAudioDevice audioDevice)
         {
             this.defaultAudioDevice = audioDevice;
             this.defaultAudioDevice.SetAsDefault();
         }
+
         public void setDefaultAudioDevice(string deviceFullName)
         {
             CoreAudioDevice matchedDevice = devices.FirstOrDefault(d => d.FullName == deviceFullName);
@@ -50,7 +71,52 @@ namespace AudioDeviceManager
 
         public void SetVolume(int volume)
         {
+            defaultAudioDeviceVolume = volume;
             this.defaultAudioDevice.Volume = volume;
+        }
+
+        public void IncVolume(int increment = 1)
+        {
+            double vol = GetVolume();
+            if (vol < 100 && increment > 0)
+            {
+                double setVolume = vol + increment;
+                if (setVolume <= 100)
+                {
+                    SetVolume((int)setVolume);
+                }
+                else
+                {
+                    SetVolume(100);
+                }
+            }
+        }
+
+        public void DecVolume(int decrement = 1)
+        {
+            double vol = GetVolume();
+            if (vol > 0 && decrement > 0)
+            {
+                double setVolume = vol - decrement;
+                if (setVolume >= 0)
+                {
+                    SetVolume((int)setVolume);
+                }
+                else
+                {
+                    SetVolume(0);
+                }
+            }
+        }
+
+        public double GetVolume()
+        {
+            return defaultAudioDeviceVolume;
+        }
+
+        public void ToggleAudioMute(bool mute = true)
+        {
+            this.defaultAudioDevice.Mute(mute);
         }
 
         public void CycleToNextAudioDevice()
