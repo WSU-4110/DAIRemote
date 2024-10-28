@@ -15,6 +15,7 @@ namespace UDPServerManagerForm
         private IPEndPoint remoteEP;
         private string clientAddress;
         private readonly int serverPort = 11000;
+        private AudioDeviceManager.AudioDeviceManager audioManager;
 
         public UDPServerHost()
         {
@@ -190,6 +191,10 @@ namespace UDPServerManagerForm
 
                     if (handshakeSuccessful)
                     {
+                        // Ensure we have an instance of audioManager in case of input
+                        // regarding volume
+                        await Task.Run(() => this.audioManager = AudioDeviceManager.AudioDeviceManager.GetInstance());
+
                         isClientConnected = true;
                         Debug.WriteLine("Handshake successful, starting message loop...");
                         MessageLoop();
@@ -344,7 +349,36 @@ namespace UDPServerManagerForm
                     if (key.Length > 1)
                     {
                         // Special keys such as {F1}, {ENTER}, etc.
-                        SendKeys.SendWait(key);
+                        if (key.StartsWith("WIN"))
+                        {
+                            if (key.Equals("WIN()"))
+                            {
+                                WindowsKey.PressWinKey();
+                            }
+                            else
+                            {
+                                int from = key.IndexOf("WIN(") + "WIN(".Length;
+                                int to = key.LastIndexOf(")");
+                                string winKeys = key.Substring(from, to - from);
+                                if (winKeys.Length > 1)
+                                {
+                                    WindowsKey.WinKeyDown();
+                                    SendKeys.SendWait(winKeys);
+                                    WindowsKey.WinKeyUp();
+                                }
+                                else
+                                {
+                                    winKeys = Regex.Replace(winKeys, "[+^%~(){}]", "{$0}");
+                                    WindowsKey.WinKeyDown();
+                                    SendKeys.SendWait(winKeys);
+                                    WindowsKey.WinKeyUp();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            SendKeys.SendWait(key);
+                        }
                     }
                     else
                     {
@@ -364,6 +398,21 @@ namespace UDPServerManagerForm
                 case "MOUSE_SCROLL":
                     int scrollAmount = (int)float.Parse(parts[1]);
                     MouseManager.MouseEvent(MouseManager.MouseEventFlags.Wheel, scrollAmount);
+                    break;
+                case "AUDIO":
+                    string audioAction = parts[1];
+                    if (audioAction == "UP")
+                    {
+                        audioManager.IncVolume(5);
+                    }
+                    else if (audioAction == "DOWN")
+                    {
+                        audioManager.DecVolume(5);
+                    }
+                    else if (audioAction == "MUTE")
+                    {
+                        audioManager.ToggleAudioMute();
+                    }
                     break;
                 default:
                     Console.WriteLine("Unknown command: " + command);

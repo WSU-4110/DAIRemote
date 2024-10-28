@@ -114,9 +114,15 @@ namespace AudioDeviceManager
             return defaultAudioDeviceVolume;
         }
 
-        public void ToggleAudioMute(bool mute = true)
+        public void SetAudioMute(bool mute = true)
         {
+            defaultAudioMuteStatus = mute;
             this.defaultAudioDevice.Mute(mute);
+        }
+
+        public void ToggleAudioMute()
+        {
+            SetAudioMute(!defaultAudioMuteStatus);
         }
 
         public void CycleToNextAudioDevice()

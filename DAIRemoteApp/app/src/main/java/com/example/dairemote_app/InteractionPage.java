@@ -79,6 +79,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     boolean modifierToggled = false;
     StringBuilder keyCombination = new StringBuilder();
     int parenthesesCount = 0;
+    TextView keyboardTextInputView;
 
     AlertDialog.Builder builder;
 
@@ -249,7 +250,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         editText = findViewById(R.id.editText);
         keyboardToolbar = findViewById(R.id.keyboardToolbar);
         keyboardExtraBtnsLayout = findViewById(R.id.keyboardExtraButtonsGrid);
-        TextView keyboardTextInputView = findViewById(R.id.keyboardInputView);
+        keyboardTextInputView = findViewById(R.id.keyboardInputView);
 
         // Initialize row 2 and 3 button arrays for keyboardToolbar
         initButtonRows();
@@ -328,7 +329,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         keyCombination.append(addedChar);
                         Log.d("KeyCombination", keyCombination.toString());
                     }
-                    keyboardTextInputView.setText(s.toString());
+                    keyboardTextInputView.append(String.valueOf(addedChar));
                 }
             }
 
@@ -414,6 +415,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     }
 
     private void resetKeyboardModifiers() {
+        winActive = false;
         ctrlActive = false;
         shiftActive = false;
         altActive = false;
@@ -430,6 +432,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     public void extraToolbarOnClick(View view) {
         String msg = "";
         int viewID = view.getId();
+        boolean audio = false;
 
         if (viewID == R.id.moreOpt) {
             // Place holder to do nothing,
@@ -438,7 +441,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             if (!winActive) {
                 winActive = true;
                 modifierToggled = true;
-                keyCombination.append("^{ESC}(");
+                keyCombination.append("WIN(");
+                keyboardTextInputView.append("Win(");
                 parenthesesCount += 1;
             } else {
                 modifierToggled = false;
@@ -457,6 +461,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                 altActive = true;
                 modifierToggled = true;
                 keyCombination.append("%(");
+                keyboardTextInputView.append("Alt(");
                 parenthesesCount += 1;
             } else {
                 modifierToggled = false;
@@ -466,6 +471,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                 ctrlActive = true;
                 modifierToggled = true;
                 keyCombination.append("^(");
+                keyboardTextInputView.append("Ctrl(");
                 parenthesesCount += 1;
             } else {
                 modifierToggled = false;
@@ -475,6 +481,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                 shiftActive = true;
                 modifierToggled = true;
                 keyCombination.append("+(");
+                keyboardTextInputView.append("Shift(");
                 parenthesesCount += 1;
             } else {
                 modifierToggled = false;
@@ -508,11 +515,14 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                 }
             } else if (currentPageIndex == 1) {
                 if (viewID == R.id.soundUpKey) {
-                    msg = "SOUND UP";
+                    audio = true;
+                    msg = "UP";
                 } else if (viewID == R.id.soundDownKey) {
-                    msg = "SOUND DOWN";
+                    audio = true;
+                    msg = "DOWN";
                 } else if (viewID == R.id.muteKey) {
-                    msg = "SOUND MUTE";
+                    audio = true;
+                    msg = "MUTE";
                 } else if (viewID == R.id.tabKey) {
                     msg = "{TAB}";
                 } else if (viewID == R.id.upKey) {
@@ -542,12 +552,13 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             }, 75); // Delay in milliseconds
         }
 
-        if (!modifierToggled && !keyCombination.toString().isEmpty()) {
-            Log.d("tryinggg", "tryinggg ");
-            if (keyCombination.toString().contains("(")) {
+        if (!modifierToggled && !audio && !keyCombination.toString().isEmpty()) {
+            if (parenthesesCount > 0) {
                 for (int i = 0; i < parenthesesCount; i++) {
                     keyCombination.append(")");
                 }
+
+                keyboardTextInputView.setText("");
             }
 
             MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE " + keyCombination);
@@ -563,8 +574,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     }
                 }
             }, 10);
-        } else if (modifierToggled && !msg.isEmpty()) {
+        } else if (modifierToggled && !msg.isEmpty() && !audio) {
             keyCombination.append(msg);
+            keyboardTextInputView.append(msg);
+        } else if (audio) {
+            MainActivity.connectionManager.sendHostMessage("AUDIO " + msg);
+            Log.d("KeyboardToolbar", "AUDIO " + msg);
         } else if (!msg.isEmpty()) {
             MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE " + msg);
             Log.d("KeyboardToolbar", "KEYBOARD_WRITE " + msg);

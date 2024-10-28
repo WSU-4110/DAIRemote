@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="InputSimulator" Version="1.0.4" />
+    <ProjectReference Include="..\AudioManager\AudioManager.csproj" />
   </ItemGroup>
 
 </Project>
