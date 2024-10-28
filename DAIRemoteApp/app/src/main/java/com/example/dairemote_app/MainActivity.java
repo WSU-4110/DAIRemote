@@ -5,10 +5,7 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MenuItem;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -145,6 +142,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     public void onError(String error) {
                         Log.e("MainActivity", "Error during host search: " + error);
                         notifyUser(MainActivity.this, "No hosts found");
+                        runOnUiThread(() -> {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                            builder.setTitle("No Hosts Found")
+                                    .setMessage("No available hosts were found. Please add a server host manually.")
+                                    .setPositiveButton("Go to Servers Page", (dialog, which) -> {
+                                        Intent intent = new Intent(MainActivity.this, ServersPage.class);
+                                        startActivity(intent);
+                                    })
+                                    .setNegativeButton("Cancel", (dialog, which) -> {
+                                        dialog.dismiss();
+                                    })
+                                    .show();
+                        });
+
                     }
                 });
             } else {

@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -21,6 +22,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
@@ -35,6 +37,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
     NavigationView navigationView;
     Toolbar toolbar;
 
+    ListView hostListView;
     private final List<String> availableHosts = new ArrayList<>();
     private ArrayAdapter<String> adapter;
     private String selectedHost = null;
@@ -81,14 +84,56 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
 
         drawerSetup(R.id.nav_server);
 
-        ListView hostListView = findViewById(R.id.hostList);
+        hostListView = findViewById(R.id.hostList);
 
         // Adapter for the ListView to display the available hosts
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_single_choice, availableHosts);
+        adapter = new ArrayAdapter<>(this, R.layout.list_item, availableHosts);
         hostListView.setAdapter(adapter);
         hostListView.setOnItemClickListener((parent, view, position, id) -> {
             selectedHost = availableHosts.get(position);
         });
+
+        // "add server" button logic handling user input of server host
+        FloatingActionButton addServer = findViewById(R.id.addServerBttn);
+
+        addServer.setOnClickListener(v -> {
+            final EditText inputField = new EditText(this);
+            inputField.setHint("Input here");
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Add your server host here:")
+                    .setView(inputField)
+                    .setPositiveButton("Submit", (dialog, which) -> {
+                        String serverInfo = inputField.getText().toString().trim();
+                        if (!serverInfo.isEmpty()) {
+
+                            MainActivity.connectionManager = new ConnectionManager(serverInfo);
+                            ExecutorService executor = Executors.newSingleThreadExecutor();
+                            executor.execute(() -> {
+                                boolean connectionInitialized = MainActivity.connectionManager.initializeConnection();
+                                if (connectionInitialized) {
+                                    // only add server host to the list if connection was successful
+                                    availableHosts.add(serverInfo);
+                                    runOnUiThread(() -> {
+                                        adapter.notifyDataSetChanged();
+                                        notifyUser(ServersPage.this, "Connected to: " + serverInfo);
+                                        Intent intent = new Intent(ServersPage.this, InteractionPage.class);
+                                        startActivity(intent);
+                                    });
+                                } else {
+                                    runOnUiThread(() -> {
+                                        notifyUser(ServersPage.this, "Connection failed for: " + serverInfo);
+                                    });
+                                }
+                            });
+                        } else {
+                            Toast.makeText(this, "Please enter a host.", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                    .show();
+        });
+
 
         // Perform host search in the background
         ConnectionManager.hostSearchInBackground(new HostSearchCallback() {

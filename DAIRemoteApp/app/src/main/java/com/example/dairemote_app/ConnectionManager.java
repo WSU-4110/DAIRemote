@@ -105,6 +105,7 @@ public class ConnectionManager {
             } else {
                 waitForResponse(2500);
             }
+
         }
         return finishConnection();
     }
