@@ -148,9 +148,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     .setMessage("No available hosts were found. Please add a server host manually.")
                                     .setPositiveButton("Go to Servers Page", (dialog, which) -> {
                                         Intent intent = new Intent(MainActivity.this, ServersPage.class);
-                                        if (tut.getTutorialOn()) {
-                                            tut.setCurrentStep(4);
-                                        }
                                         startActivity(intent);
                                     })
                                     .setNegativeButton("Cancel", (dialog, which) -> {
