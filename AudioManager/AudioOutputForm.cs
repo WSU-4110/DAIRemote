@@ -5,11 +5,9 @@ namespace AudioDeviceManager
         private ComboBox audioDeviceComboBox;
         private static AudioOutputForm instance;
         private AudioDeviceManager audioManager;
-        private List<string> devices;
         public AudioOutputForm(AudioDeviceManager audioManager)
         {
             this.audioManager = audioManager;
-            this.devices = audioManager.ActiveDeviceNames;
             audioDeviceComboBox = new ComboBox()
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
@@ -25,7 +23,10 @@ namespace AudioDeviceManager
             Name = "AudioOutputForm";
             Text = "Audio Output Switcher";
             BackColor = Color.FromArgb(50, 50, 50);
-            InitializeAudioOutputFormComponent();
+
+            // Listen to AudioDeviceManager's event handler for notifications
+            audioManager.audioDevicesUpdated += OnAudioDevicesUpdated;
+            InitializeAudioOutputFormComponent(audioManager.ActiveDeviceNames);
         }
 
         public static AudioOutputForm GetInstance(AudioDeviceManager audioManager)
@@ -42,7 +43,19 @@ namespace AudioDeviceManager
             return instance;
         }
 
-        private void InitializeAudioOutputFormComponent()
+        private void OnAudioDevicesUpdated(List<string> devices)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => InitializeAudioOutputFormComponent(audioManager.ActiveDeviceNames)));
+            }
+            else
+            {
+                InitializeAudioOutputFormComponent(audioManager.ActiveDeviceNames);
+            }
+        }
+
+        private void InitializeAudioOutputFormComponent(List<string> devices)
         {
             audioDeviceComboBox.Items.Clear();
             string defaultDevice = audioManager.getDefaultAudioDevice().FullName;
