@@ -34,7 +34,8 @@ namespace DAIRemote
                 }));
             });
 
-            this.BackColor = Color.FromArgb(50, 50, 50);
+            // Updated the property of the form itself to start with the color
+            //this.BackColor = Color.FromArgb(50, 50, 50);
             this.Icon = new Icon("Resources/DAIRemoteLogo.ico");
             trayIconManager = new TrayIconManager(this);
             this.Load += DAIRemoteApplicationUI_Load;
@@ -61,7 +62,8 @@ namespace DAIRemote
                     Width = 150,
                     Height = 50,
                     Margin = new Padding(10),
-                    Tag = profile
+                    Tag = profile,
+                    ForeColor = Color.White
                 };
 
                 Button deleteProfileButton = new Button
@@ -70,7 +72,8 @@ namespace DAIRemote
                     Width = 150,
                     Height = 50,
                     Margin = new Padding(10),
-                    Tag = profile
+                    Tag = profile,
+                    ForeColor = Color.White
                 };
 
                 loadProfileButton.Click += loadProfileButton_Click;

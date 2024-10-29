@@ -43,7 +43,8 @@
             // checkBoxStartup
             // 
             checkBoxStartup.AutoSize = true;
-            checkBoxStartup.Location = new Point(24, 366);
+            checkBoxStartup.ForeColor = SystemColors.Control;
+            checkBoxStartup.Location = new Point(20, 104);
             checkBoxStartup.Name = "checkBoxStartup";
             checkBoxStartup.Size = new Size(184, 19);
             checkBoxStartup.TabIndex = 4;
@@ -81,7 +82,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.FromArgb(225, 246, 225);
+            BackColor = Color.FromArgb(50, 50, 50);
             ClientSize = new Size(771, 395);
             Controls.Add(DisplayDeleteProfilesLayout);
             Controls.Add(DisplayLoadProfilesLayout);
