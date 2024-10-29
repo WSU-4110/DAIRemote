@@ -22,7 +22,6 @@
         private void InitializeComponent()
         {
             BtnSaveDisplayConfig = new Button();
-            BtnShowAudioOutputs = new Button();
             checkBoxStartup = new CheckBox();
             BtnCycleAudioOutputs = new Button();
             DisplayLoadProfilesLayout = new FlowLayoutPanel();
@@ -41,18 +40,6 @@
             BtnSaveDisplayConfig.UseVisualStyleBackColor = false;
             BtnSaveDisplayConfig.Click += BtnAddDisplayConfig_Click;
             // 
-            // BtnShowAudioOutputs
-            // 
-            BtnShowAudioOutputs.AccessibleName = "BtnShowAudioOutputs";
-            BtnShowAudioOutputs.BackColor = Color.LightSkyBlue;
-            BtnShowAudioOutputs.Location = new Point(20, 58);
-            BtnShowAudioOutputs.Name = "BtnShowAudioOutputs";
-            BtnShowAudioOutputs.Size = new Size(200, 40);
-            BtnShowAudioOutputs.TabIndex = 1;
-            BtnShowAudioOutputs.Text = "Show Audio Outputs";
-            BtnShowAudioOutputs.UseVisualStyleBackColor = false;
-            BtnShowAudioOutputs.Click += BtnShowAudioOutputs_Click;
-            // 
             // checkBoxStartup
             // 
             checkBoxStartup.AutoSize = true;
@@ -68,7 +55,7 @@
             // 
             BtnCycleAudioOutputs.AccessibleName = "BtnCycleAudioOutputs";
             BtnCycleAudioOutputs.BackColor = Color.LightSkyBlue;
-            BtnCycleAudioOutputs.Location = new Point(20, 104);
+            BtnCycleAudioOutputs.Location = new Point(20, 58);
             BtnCycleAudioOutputs.Name = "BtnCycleAudioOutputs";
             BtnCycleAudioOutputs.Size = new Size(200, 40);
             BtnCycleAudioOutputs.TabIndex = 5;
@@ -101,7 +88,6 @@
             Controls.Add(BtnCycleAudioOutputs);
             Controls.Add(checkBoxStartup);
             Controls.Add(BtnSaveDisplayConfig);
-            Controls.Add(BtnShowAudioOutputs);
             Name = "DAIRemoteApplicationUI";
             Text = "DAIRemote";
             Load += DAIRemoteApplicationUI_Load;
@@ -112,7 +98,6 @@
         #endregion
 
         private Button BtnSaveDisplayConfig;
-        private Button BtnShowAudioOutputs;
         private CheckBox checkBoxStartup;
         private Button BtnCycleAudioOutputs;
         private FlowLayoutPanel DisplayLoadProfilesLayout;

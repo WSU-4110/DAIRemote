@@ -2,7 +2,7 @@
 
 namespace UDPServerManager
 {
-    class MouseOperations
+    class MouseManager
     {
         [Flags]
         public enum MouseEventFlags
@@ -41,8 +41,8 @@ namespace UDPServerManager
 
         public static MousePoint GetCursorPosition()
         {
-            GetCursorPos(out MousePoint currentMousePoint);
-            return currentMousePoint;
+            GetCursorPos(out MousePoint cursorPos);
+            return cursorPos;
         }
 
         public static void MouseEvent(MouseEventFlags value, int data = 0)
