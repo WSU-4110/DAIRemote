@@ -332,7 +332,7 @@ namespace UDPServerManagerForm
                         float x = float.Parse(moveParts[0]);
                         float y = float.Parse(moveParts[1]);
 
-                        MouseManager.SetCursorPosition((int)(x + currentPos.X), (int)(y + currentPos.Y));
+                        MouseManager.SetCursorPosition((int)Math.Floor(x + currentPos.X), (int)Math.Floor(y + currentPos.Y));
                     }
                     else
                     {
@@ -398,6 +398,11 @@ namespace UDPServerManagerForm
                 case "MOUSE_SCROLL":
                     int scrollAmount = (int)float.Parse(parts[1]);
                     MouseManager.MouseEvent(MouseManager.MouseEventFlags.Wheel, scrollAmount);
+                    break;
+                case "MOUSE_MMB":
+                    MouseManager.MouseEvent(MouseManager.MouseEventFlags.MiddleDown);
+                    Thread.Sleep(25);
+                    MouseManager.MouseEvent(MouseManager.MouseEventFlags.MiddleUp);
                     break;
                 case "AUDIO":
                     string audioAction = parts[1];

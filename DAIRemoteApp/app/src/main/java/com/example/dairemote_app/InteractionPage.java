@@ -230,6 +230,11 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                                 startHome();
                             }
                             return true;
+                        } else if (event.getPointerCount() == 3 && (deltaT < CLICK_THRESHOLD && deltaT > 10)) {
+                            if (!MainActivity.connectionManager.sendHostMessage("MOUSE_MMB")) {
+                                startHome();
+                            }
+                            return true;
                         } else if (event.getPointerCount() <= 1) {
                             scrolling = false; // Reset when a finger is lifted
                             rmbDetected = false; // Reset RMB detection when a finger is lifted
