@@ -184,6 +184,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             boolean rmbDetected = false;    // Suppress movement during rmb
             boolean scrolling = false; // Suppress other inputs during scroll
             final float mouseSensitivity = 1;
+            int initialPointerCount = 0;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -214,6 +215,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         currentX = event.getX();
                         currentY = event.getY();
                         startTime = System.currentTimeMillis();
+                        initialPointerCount = event.getPointerCount();
 
                         scrolling = true;
                         rmbDetected = true;
@@ -225,15 +227,17 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         deltaX = currentX - x;
                         deltaY = currentY - y;
                         deltaT = System.currentTimeMillis() - startTime;
-                        if (event.getPointerCount() == 2 && (deltaT < CLICK_THRESHOLD && deltaT > 10)) {
+                        if (initialPointerCount == 2 && (deltaT < CLICK_THRESHOLD && deltaT > 10)) {
                             if (!MainActivity.connectionManager.sendHostMessage("MOUSE_RMB")) {
                                 startHome();
                             }
+                            initialPointerCount = 0;
                             return true;
-                        } else if (event.getPointerCount() == 3 && (deltaT < CLICK_THRESHOLD && deltaT > 10)) {
+                        } else if (initialPointerCount == 3 && (deltaT < CLICK_THRESHOLD && deltaT > 10)) {
                             if (!MainActivity.connectionManager.sendHostMessage("MOUSE_MMB")) {
                                 startHome();
                             }
+                            initialPointerCount = 0;
                             return true;
                         } else if (event.getPointerCount() <= 1) {
                             scrolling = false; // Reset when a finger is lifted
