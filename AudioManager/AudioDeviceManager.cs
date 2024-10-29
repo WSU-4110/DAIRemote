@@ -25,12 +25,7 @@ namespace AudioDeviceManager
             controller = new CoreAudioController();
 
             // Set the initial values for variables needed for functions
-            defaultAudioDevice = controller.DefaultPlaybackDevice;
-            defaultAudioDeviceVolume = this.defaultAudioDevice.Volume;
-            defaultAudioMuteStatus = defaultAudioDevice.IsMuted;
-
-            // Get list of active devices
-            setActiveDevices();
+            setAudioDefaults();
 
             // Subscribe all playback devices, even inactive ones
             foreach (CoreAudioDevice device in controller.GetPlaybackDevices())
