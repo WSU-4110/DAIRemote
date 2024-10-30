@@ -82,8 +82,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
     public void startHome() {
         notifyUser(InteractionPage.this, "Connection lost");
-        Intent intent = new Intent(InteractionPage.this, MainActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(InteractionPage.this, MainActivity.class));
         finish();
     }
 
@@ -674,8 +673,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else if (!(editText.getVisibility() == View.VISIBLE)) {
-            Intent intent = new Intent(InteractionPage.this, MainActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(InteractionPage.this, MainActivity.class));
         } else {
             super.onBackPressed();
         }
@@ -683,22 +681,17 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        Intent intent;
         int itemId = item.getItemId();
         Log.d("Navigation", "Item selected: " + itemId);
 
         if (itemId == R.id.nav_home) {
-            intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, MainActivity.class));
         } else if (itemId == R.id.nav_server) {
-            intent = new Intent(this, ServersPage.class);
-            startActivity(intent);
+            startActivity(new Intent(this, ServersPage.class));
         } else if (itemId == R.id.nav_help) {
-            intent = new Intent(this, InstructionsPage.class);
-            startActivity(intent);
+            startActivity(new Intent(this, InstructionsPage.class));
         } else if (itemId == R.id.nav_about) {
-            intent = new Intent(this, AboutPage.class);
-            startActivity(intent);
+            startActivity(new Intent(this, AboutPage.class));
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);

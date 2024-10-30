@@ -126,8 +126,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             notifyUser(MainActivity.this, "Denied connection");
                         } else {
                             notifyUser(MainActivity.this, "Connection approved");
-                            Intent intent = new Intent(MainActivity.this, InteractionPage.class);
-                            startActivity(intent);
+                            startActivity(new Intent(MainActivity.this, InteractionPage.class));
                         }
                     }
 
@@ -140,8 +139,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             builder.setTitle("No Hosts Found")
                                     .setMessage("No available hosts were found. Please add a server host manually.")
                                     .setPositiveButton("Go to Servers Page", (dialog, which) -> {
-                                        Intent intent = new Intent(MainActivity.this, ServersPage.class);
-                                        startActivity(intent);
+                                        startActivity(new Intent(MainActivity.this, ServersPage.class));
                                     })
                                     .setNegativeButton("Cancel", (dialog, which) -> {
                                         dialog.dismiss();
@@ -152,8 +150,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 });
             } else {
-                Intent intent = new Intent(MainActivity.this, InteractionPage.class);
-                startActivity(intent);
+                startActivity(new Intent(MainActivity.this, InteractionPage.class));
             }
         });
     }
@@ -178,17 +175,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.d("MainActivity", "Item selected: " + itemId);
 
         if (itemId == R.id.nav_remote) {
-            intent = new Intent(this, InteractionPage.class);
-            startActivity(intent);
+            startActivity(new Intent(this, InteractionPage.class));
         } else if (itemId == R.id.nav_help) {
-            intent = new Intent(this, InstructionsPage.class);
-            startActivity(intent);
+            startActivity(new Intent(this, InstructionsPage.class));
         } else if (itemId == R.id.nav_server) {
-            intent = new Intent(this, ServersPage.class);
-            startActivity(intent);
+            startActivity(new Intent(this, ServersPage.class));
         } else if (itemId == R.id.nav_about) {
-            intent = new Intent(this, AboutPage.class);
-            startActivity(intent);
+            startActivity(new Intent(this, AboutPage.class));
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);

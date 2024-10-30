@@ -113,8 +113,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
                                     availableHosts.add(serverIP);
                                     runOnUiThread(() -> adapter.notifyDataSetChanged());
                                     notifyUser(ServersPage.this, "Connection approved");
-                                    Intent intent = new Intent(ServersPage.this, InteractionPage.class);
-                                    startActivity(intent);
+                                    startActivity(new Intent(ServersPage.this, InteractionPage.class));
                                 }
                             });
                         } else {
@@ -168,16 +167,14 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
                     MainActivity.connectionManager = new ConnectionManager(selectedHost);
                     if (MainActivity.connectionManager.InitializeConnection()) {
                         notifyUser(ServersPage.this, "Connected to: " + selectedHost);
-                        Intent intent = new Intent(ServersPage.this, InteractionPage.class);
-                        startActivity(intent);
+                        startActivity(new Intent(ServersPage.this, InteractionPage.class));
                     } else {
                         notifyUser(ServersPage.this, "Connection failed");
                     }
                 });
             } else {
                 notifyUser(ServersPage.this, "Already connected");
-                Intent intent = new Intent(ServersPage.this, InteractionPage.class);
-                startActivity(intent);
+                startActivity(new Intent(ServersPage.this, InteractionPage.class));
             }
         });
     }
@@ -187,8 +184,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
-            Intent intent = new Intent(ServersPage.this, MainActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(ServersPage.this, MainActivity.class));
             super.onBackPressed();
         }
     }
@@ -200,17 +196,13 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         Log.d("Navigation", "Item selected: " + itemId);
 
         if (itemId == R.id.nav_home) {
-            intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, MainActivity.class));
         } else if (itemId == R.id.nav_help) {
-            intent = new Intent(this, InstructionsPage.class);
-            startActivity(intent);
+            startActivity(new Intent(this, InstructionsPage.class));
         } else if (itemId == R.id.nav_remote) {
-            intent = new Intent(this, InteractionPage.class);
-            startActivity(intent);
+            startActivity(new Intent(this, InteractionPage.class));
         } else if (itemId == R.id.nav_about) {
-            intent = new Intent(this, AboutPage.class);
-            startActivity(intent);
+            startActivity(new Intent(this, AboutPage.class));
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
