@@ -10,13 +10,10 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -119,7 +116,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (!ConnectionManager.connectionEstablished) {
+        if (!ConnectionManager.GetConnectionEstablished()) {
             startHome();
             return;
         }
@@ -140,7 +137,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             final GestureDetector gestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.SimpleOnGestureListener() {
                 @Override
                 public boolean onSingleTapUp(@NonNull MotionEvent e) {
-                    if (!MainActivity.connectionManager.sendHostMessage("MOUSE_LMB")) {
+                    if (!MainActivity.connectionManager.SendHostMessage("MOUSE_LMB")) {
                         startHome();
                     }
                     return super.onSingleTapUp(e);
@@ -148,7 +145,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
                 @Override
                 public boolean onDoubleTap(@NonNull MotionEvent e) {
-                    if (!MainActivity.connectionManager.sendHostMessage("MOUSE_LMB")) {
+                    if (!MainActivity.connectionManager.SendHostMessage("MOUSE_LMB")) {
                         startHome();
                     }
                     return super.onDoubleTap(e);
@@ -159,7 +156,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     if (vibrator != null && vibrator.hasVibrator()) {
                         vibrator.vibrate(10); // Vibrate for 50 milliseconds
                     }
-                    if (!MainActivity.connectionManager.sendHostMessage("MOUSE_LMB_HOLD")) {
+                    if (!MainActivity.connectionManager.SendHostMessage("MOUSE_LMB_HOLD")) {
                         startHome();
                     }
                     super.onLongPress(e);
@@ -170,7 +167,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     // Handle two-finger scroll here for vertical scrolling
                     if (e2.getPointerCount() == 2) {
                         scrolling = true; // Set scrolling flag
-                        if (!MainActivity.connectionManager.sendHostMessage("MOUSE_SCROLL " + distanceY)) {
+                        if (!MainActivity.connectionManager.SendHostMessage("MOUSE_SCROLL " + distanceY)) {
                             startHome();
                         }
                         return true;
@@ -204,7 +201,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         deltaX = (x - currentX)*mouseSensitivity;
                         deltaY = (y - currentY)*mouseSensitivity;
                         if (!rmbDetected && !scrolling) {
-                            if (!MainActivity.connectionManager.sendHostMessage("MOUSE_MOVE " + deltaX + " " + deltaY)) {
+                            if (!MainActivity.connectionManager.SendHostMessage("MOUSE_MOVE " + deltaX + " " + deltaY)) {
                                 startHome();
                             }
                             currentX = x;
@@ -228,13 +225,13 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         deltaY = currentY - y;
                         deltaT = System.currentTimeMillis() - startTime;
                         if (initialPointerCount == 2 && (deltaT < CLICK_THRESHOLD && deltaT > 10)) {
-                            if (!MainActivity.connectionManager.sendHostMessage("MOUSE_RMB")) {
+                            if (!MainActivity.connectionManager.SendHostMessage("MOUSE_RMB")) {
                                 startHome();
                             }
                             initialPointerCount = 0;
                             return true;
                         } else if (initialPointerCount == 3 && (deltaT < CLICK_THRESHOLD && deltaT > 10)) {
-                            if (!MainActivity.connectionManager.sendHostMessage("MOUSE_MMB")) {
+                            if (!MainActivity.connectionManager.SendHostMessage("MOUSE_MMB")) {
                                 startHome();
                             }
                             initialPointerCount = 0;
@@ -307,12 +304,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                             keyboardTextInputView.setText(textViewText.substring(0, textViewText.length() - 1));
                         }
                     }
-                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE {BS}")) {
+                    if (!MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE {BS}")) {
                         startHome();
                     }
                     return true;
                 } else if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    if (!MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE {ENTER}")) {
+                    if (!MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE {ENTER}")) {
                         startHome();
                     }
                     return true;
@@ -332,7 +329,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (count > before) {
                     char addedChar = s.charAt(start + count - 1);
-                    if (!modifierToggled && !MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE " + addedChar)) {
+                    if (!modifierToggled && !MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE " + addedChar)) {
                         startHome();
                     } else if (modifierToggled) {
                         keyCombination.append(addedChar);
@@ -356,8 +353,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (ConnectionManager.connectionEstablished) {
-                    MainActivity.connectionManager.shutdown();
+                if (ConnectionManager.GetConnectionEstablished()) {
+                    MainActivity.connectionManager.Shutdown();
                 }
             }
         });
@@ -570,7 +567,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                 keyboardTextInputView.setText("");
             }
 
-            MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE " + keyCombination);
+            MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE " + keyCombination);
             Log.d("KeyboardToolbar", "KEYBOARD_WRITE " + keyCombination);
 
             resetKeyboardModifiers();
@@ -587,10 +584,10 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             keyCombination.append(msg);
             keyboardTextInputView.append(msg);
         } else if (audio) {
-            MainActivity.connectionManager.sendHostMessage("AUDIO " + msg);
+            MainActivity.connectionManager.SendHostMessage("AUDIO " + msg);
             Log.d("KeyboardToolbar", "AUDIO " + msg);
         } else if (!msg.isEmpty()) {
-            MainActivity.connectionManager.sendHostMessage("KEYBOARD_WRITE " + msg);
+            MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE " + msg);
             Log.d("KeyboardToolbar", "KEYBOARD_WRITE " + msg);
         }
     }
