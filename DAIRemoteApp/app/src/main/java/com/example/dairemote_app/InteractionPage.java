@@ -41,6 +41,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     TextView interactionsHelpText;
     private ImageView interactionHelp;
     private TextView startTutorial;
+    private Handler handler = new Handler();
     // private TextView responseTextView;
     private ImageView sendButton;
 
@@ -52,21 +53,21 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     TextView moreOpts;
     private int currentPageIndex = 0;
 
-    private final String[][][] keyboardExtraRows = {
-            { // Page 1
-                    {"F1", "F2", "F3", "F4", "F5", "F6"}, // Row 1
-                    {"F7", "F8", "F9", "F10", "F11", "F12"} // Row 2
-            },
-            { // Page 2
-                    {"SUP", "SDOWN", "MUTE", "TAB", "UP", "ESC"},
-                    {"INSERT", "DELETE", "PRNTSCRN", "LEFT", "DOWN", "RIGHT"}
-            }
-    };
+    private final String[][][] keyboardExtraRows = {{ // Page 1
+            {"F1", "F2", "F3", "F4", "F5", "F6"}, // Row 1
+            {"F7", "F8", "F9", "F10", "F11", "F12"} // Row 2
+    }, { // Page 2
+            {"SUP", "SDOWN", "MUTE", "TAB", "UP", "ESC"}, {"INSERT", "DELETE", "PRNTSCRN", "LEFT", "DOWN", "RIGHT"}}};
 
     private final TextView[] p1r2Buttons = new TextView[6];
     private final TextView[] p1r3Buttons = new TextView[6];
+    private final String[] p1r2Keys = {"{F1}", "{F2}", "{F3}", "{F4}", "{F5}", "{F6}"};
+    private final String[] p1r3Keys = {"{F7}", "{F8}", "{F9}", "{F10}", "{F11}", "{F12}"};
+
     private final TextView[] p2r2Buttons = new TextView[6];
     private final TextView[] p2r3Buttons = new TextView[6];
+    private final String[] p2r2Keys = {"UP", "DOWN", "MUTE", "{TAB}", "{UP}", "{ESC}"};
+    private final String[] p2r3Keys = {"{INS}", "{DEL}", "{PRTSC}", "{LEFT}", "{DOWN}", "{RIGHT}"};
 
     boolean winActive = false;
     boolean ctrlActive = false;
@@ -78,8 +79,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     int parenthesesCount = 0;
     TextView keyboardTextInputView;
 
-    AlertDialog.Builder builder;
-
     public void startHome() {
         notifyUser(InteractionPage.this, "Connection lost");
         startActivity(new Intent(InteractionPage.this, MainActivity.class));
@@ -90,28 +89,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         runOnUiThread(() -> Toast.makeText(context, msg, Toast.LENGTH_SHORT).show());
     }
 
-    public void drawerSetup(int page) {
-        drawerLayout = findViewById(R.id.drawer_layout);
-        navigationView = findViewById(R.id.nav_view);
-        toolbar = findViewById(R.id.toolbar);
-
-        setSupportActionBar(toolbar);
-
-        // Remove the app name from tool bar
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("");
+    private Runnable hideRunnable = new Runnable() {
+        @Override
+        public void run() {
+            startTutorial.setVisibility(View.GONE);
         }
-
-        navigationView.bringToFront();
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-
-        navigationView.setNavigationItemSelectedListener(this);
-
-        // Select the home icon by default when opening navigation menu
-        navigationView.setCheckedItem(page);
-    }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,14 +106,29 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_interaction_page);
 
-        builder = new AlertDialog.Builder(InteractionPage.this);
-        if (MainActivity.tut.getTutorialOn()) {
-            MainActivity.tut.showNextStep(builder);
-        }
-
         FrameLayout touchpadFrame = findViewById(R.id.touchpadFrame);
-
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        drawerSetup(R.id.nav_remote);
+        keyboardImgBtn = findViewById(R.id.keyboardImgBtn);
+        editText = findViewById(R.id.editText);
+        keyboardToolbar = findViewById(R.id.keyboardToolbar);
+        keyboardExtraBtnsLayout = findViewById(R.id.keyboardExtraButtonsGrid);
+        keyboardTextInputView = findViewById(R.id.keyboardInputView);
+        // Initialize row 2 and 3 button arrays for keyboardToolbar
+        initButtonRows();
+        moreOpts = findViewById(R.id.moreOpt);
+        moreOpts.setOnClickListener(v -> keyboardExtraNextPage());
+        // Commented out the text view to display the system's response
+        // Maybe future feature
+        // responseTextView = findViewById(R.id.responseTextView);
+        sendButton = findViewById(R.id.udptest);
+        interactionHelp = findViewById(R.id.interactionsHelp);
+        interactionsHelpText = findViewById(R.id.interationsHelpTextView);
+        startTutorial = findViewById(R.id.tutorialStartBtn);
+
+        if (MainActivity.tut.getTutorialOn()) {
+            MainActivity.tut.showNextStep(new AlertDialog.Builder(InteractionPage.this));
+        }
 
         touchpadFrame.setOnTouchListener(new View.OnTouchListener() {
             final GestureDetector gestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.SimpleOnGestureListener() {
@@ -197,8 +195,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         x = event.getX();
                         y = event.getY();
 
-                        deltaX = (x - currentX)*mouseSensitivity;
-                        deltaY = (y - currentY)*mouseSensitivity;
+                        deltaX = (x - currentX) * mouseSensitivity;
+                        deltaY = (y - currentY) * mouseSensitivity;
                         if (!rmbDetected && !scrolling) {
                             if (!MainActivity.connectionManager.SendHostMessage("MOUSE_MOVE " + deltaX + " " + deltaY)) {
                                 startHome();
@@ -217,11 +215,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         rmbDetected = true;
                         break;
                     case MotionEvent.ACTION_POINTER_UP:
-                        x = event.getX();
-                        y = event.getY();
-
-                        deltaX = currentX - x;
-                        deltaY = currentY - y;
                         deltaT = System.currentTimeMillis() - startTime;
                         if (initialPointerCount == 2 && (deltaT < CLICK_THRESHOLD && deltaT > 10)) {
                             if (!MainActivity.connectionManager.SendHostMessage("MOUSE_RMB")) {
@@ -249,29 +242,22 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             }
         });
 
-        drawerSetup(R.id.nav_remote);
-
-        keyboardImgBtn = findViewById(R.id.keyboardImgBtn);
-        editText = findViewById(R.id.editText);
-        keyboardToolbar = findViewById(R.id.keyboardToolbar);
-        keyboardExtraBtnsLayout = findViewById(R.id.keyboardExtraButtonsGrid);
-        keyboardTextInputView = findViewById(R.id.keyboardInputView);
-
-        // Initialize row 2 and 3 button arrays for keyboardToolbar
-        initButtonRows();
-
-        moreOpts = findViewById(R.id.moreOpt);
-        moreOpts.setOnClickListener(v -> keyboardExtraNextPage());
-
         keyboardImgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                editText.setVisibility(View.VISIBLE);
-                editText.setCursorVisible(false);
-                editText.requestFocus();
+                if (ConnectionManager.GetConnectionEstablished()) {
+                    editText.setVisibility(View.VISIBLE);
+                    editText.setCursorVisible(false);
+                    editText.requestFocus();
 
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+                } else {
+                    MainActivity.connectionManager.Shutdown();
+                    notifyUser(InteractionPage.this, "Disconnected from host");
+                    startActivity(new Intent(InteractionPage.this, MainActivity.class));
+                    finish();
+                }
 
             }
         });
@@ -344,24 +330,17 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             }
         });
 
-        // Commented out the text view to display the system's response
-        // Maybe future feature
-        // responseTextView = findViewById(R.id.responseTextView);
-        sendButton = findViewById(R.id.udptest);
-
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (ConnectionManager.GetConnectionEstablished()) {
                     MainActivity.connectionManager.Shutdown();
+                    notifyUser(InteractionPage.this, "Disconnected from host");
+                    startActivity(new Intent(InteractionPage.this, MainActivity.class));
+                    finish();
                 }
             }
         });
-
-        interactionHelp = findViewById(R.id.interactionsHelp);
-        interactionsHelpText = findViewById(R.id.interationsHelpTextView);
-        startTutorial = findViewById(R.id.tutorialStartBtn);
-        startTutorial.setVisibility(View.GONE);
 
         interactionHelp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -371,27 +350,26 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                 } else {
                     interactionsHelpText.setVisibility(View.VISIBLE); // Show the TextView
 
-                    startTutorial.setVisibility(View.VISIBLE);  // Show clickable TextView for starting tutorial
+                    if(startTutorial.getVisibility() != View.VISIBLE) {
+                        startTutorial.setVisibility(View.VISIBLE);  // Show clickable TextView for starting tutorial
+                        startTutorial.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                // Hide after clicked
+                                startTutorial.setVisibility(View.GONE);
 
-                    startTutorial.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            MainActivity.tut.setTutorialOn(true);
-                            MainActivity.tut.setCurrentStep(1);
-                            MainActivity.tut.showNextStep(builder);
+                                // Initiate tutorial starting at remote page steps
+                                MainActivity.tut.setTutorialOn(true);
+                                MainActivity.tut.setCurrentStep(1);
+                                MainActivity.tut.showNextStep(new AlertDialog.Builder(InteractionPage.this));
+                            }
+                        });
+                    }
 
-                            // Hide after clicked
-                            startTutorial.setVisibility(View.GONE);
-                        }
-                    });
-
-                    // Hide the button automatically
-                    startTutorial.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            startTutorial.setVisibility(View.GONE);
-                        }
-                    }, 2500);
+                    // Cancel any existing hide callbacks
+                    handler.removeCallbacks(hideRunnable);
+                    // Hide the button automatically after a delay
+                    handler.postDelayed(hideRunnable, 2500);
                 }
             }
         });
@@ -493,59 +471,30 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             }
         } else {
             if (currentPageIndex == 0) {
-                if (viewID == R.id.f1Key) {
-                    msg = "{F1}";
-                } else if (viewID == R.id.f2Key) {
-                    msg = "{F2}";
-                } else if (viewID == R.id.f3Key) {
-                    msg = "{F3}";
-                } else if (viewID == R.id.f4Key) {
-                    msg = "{F4}";
-                } else if (viewID == R.id.f5Key) {
-                    msg = "{F5}";
-                } else if (viewID == R.id.f6Key) {
-                    msg = "{F6}";
-                } else if (viewID == R.id.f7Key) {
-                    msg = "{F7}";
-                } else if (viewID == R.id.f8Key) {
-                    msg = "{F8}";
-                } else if (viewID == R.id.f9Key) {
-                    msg = "{F9}";
-                } else if (viewID == R.id.f10Key) {
-                    msg = "{F10}";
-                } else if (viewID == R.id.f11Key) {
-                    msg = "{F11}";
-                } else if (viewID == R.id.f12Key) {
-                    msg = "{F12}";
+                for(int i = 0; i < 6; i++) {
+                    if(viewID == p1r2Buttons[i].getId()) {
+                        msg = p1r2Keys[i];
+                    }
                 }
+                for(int i = 0; i < 6; i++) {
+                    if(viewID == p1r3Buttons[i].getId()) {
+                        msg = p1r3Keys[i];
+                    }
+                }
+
             } else if (currentPageIndex == 1) {
-                if (viewID == R.id.soundUpKey) {
-                    audio = true;
-                    msg = "UP";
-                } else if (viewID == R.id.soundDownKey) {
-                    audio = true;
-                    msg = "DOWN";
-                } else if (viewID == R.id.muteKey) {
-                    audio = true;
-                    msg = "MUTE";
-                } else if (viewID == R.id.tabKey) {
-                    msg = "{TAB}";
-                } else if (viewID == R.id.upKey) {
-                    msg = "{UP}";
-                } else if (viewID == R.id.escKey) {
-                    msg = "{ESC}";
-                } else if (viewID == R.id.insertKey) {
-                    msg = "{INS}";
-                } else if (viewID == R.id.deleteKey) {
-                    msg = "{DEL}";
-                } else if (viewID == R.id.printScreenKey) {
-                    msg = "{PRTSC}";
-                } else if (viewID == R.id.leftKey) {
-                    msg = "{LEFT}";
-                } else if (viewID == R.id.downKey) {
-                    msg = "{DOWN}";
-                } else if (viewID == R.id.rightKey) {
-                    msg = "{RIGHT}";
+                for(int i = 0; i < 6; i++) {
+                    if(viewID == p2r2Buttons[i].getId()) {
+                        if(i == 0 || i == 1 || i == 2) {
+                            audio = true;
+                        }
+                        msg = p2r2Keys[i];
+                    }
+                }
+                for(int i = 0; i < 6; i++) {
+                    if(viewID == p2r3Buttons[i].getId()) {
+                        msg = p2r3Keys[i];
+                    }
                 }
             }
         }
@@ -686,15 +635,42 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
         if (itemId == R.id.nav_home) {
             startActivity(new Intent(this, MainActivity.class));
+            finish();
         } else if (itemId == R.id.nav_server) {
             startActivity(new Intent(this, ServersPage.class));
+            finish();
         } else if (itemId == R.id.nav_help) {
             startActivity(new Intent(this, InstructionsPage.class));
+            finish();
         } else if (itemId == R.id.nav_about) {
             startActivity(new Intent(this, AboutPage.class));
+            finish();
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void drawerSetup(int page) {
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
+        toolbar = findViewById(R.id.toolbar);
+
+        setSupportActionBar(toolbar);
+
+        // Remove the app name from tool bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("");
+        }
+
+        navigationView.bringToFront();
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // Select the home icon by default when opening navigation menu
+        navigationView.setCheckedItem(page);
     }
 }

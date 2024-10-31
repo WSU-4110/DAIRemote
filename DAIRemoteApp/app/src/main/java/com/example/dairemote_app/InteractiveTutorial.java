@@ -45,7 +45,7 @@ public class InteractiveTutorial {
 
     public void builderNextBtn(AlertDialog.Builder builder) {
         builder.setPositiveButton("Next", (dialog, which) -> {
-            if(checkIfStepCompleted()) {
+            if (checkIfStepCompleted()) {
                 Log.d("InteractiveTutorial", "Going next");
                 showNextStep(builder);
             }
@@ -76,7 +76,7 @@ public class InteractiveTutorial {
     }
 
     public void showNextStep(AlertDialog.Builder builder) {
-        setCurrentStep(getCurrentStep()+1);
+        setCurrentStep(getCurrentStep() + 1);
         Log.d("InteractiveTutorial", "Starting next step");
         showSteps(builder, getCurrentStep());
     }

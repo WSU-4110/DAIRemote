@@ -3,8 +3,10 @@ package com.example.dairemote_app;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -19,15 +21,13 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     DrawerLayout drawerLayout;
-    NavigationView navigationView;
-    Toolbar toolbar;
+    private static final AtomicBoolean handlerIsRunning = new AtomicBoolean(false);
     public static ConnectionManager connectionManager;
-
-    ImageButton remotePage;
 
     // vars for tutorial
     public static InteractiveTutorial tut;
@@ -35,29 +35,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void notifyUser(Context context, String msg) {
         runOnUiThread(() -> Toast.makeText(context, msg, Toast.LENGTH_SHORT).show());
-    }
-
-    public void drawerSetup(int page) {
-        drawerLayout = findViewById(R.id.drawer_layout);
-        navigationView = findViewById(R.id.nav_view);
-        toolbar = findViewById(R.id.toolbar);
-
-        setSupportActionBar(toolbar);
-
-        // Remove the app name from tool bar
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("");
-        }
-
-        navigationView.bringToFront();
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-
-        navigationView.setNavigationItemSelectedListener(this);
-
-        // Select the home icon by default when opening navigation menu
-        navigationView.setCheckedItem(page);
     }
 
     @Override
@@ -76,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        drawerSetup(R.id.nav_home);
 
         tut = new InteractiveTutorial();
 
@@ -89,24 +67,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Log.d("InteractiveTutorial", "Start tutorial");
         });
 
-        drawerSetup(R.id.nav_home);
-
-        remotePage = findViewById(R.id.DAIRemoteLogoBtn);
+        ImageButton remotePage = findViewById(R.id.DAIRemoteLogoBtn);
         remotePage.setOnClickListener(v -> {
             v.animate().scaleX(1.2f).scaleY(1.2f) // Scale the button up to 120% of its original size
                     .setDuration(150) // Duration of the scale up animation
                     .withEndAction(() -> {
                         // Scale back to normal size
-                        v.animate().scaleX(1f)
-                                .scaleY(1f)
-                                .setDuration(150) // Duration of the scale down animation
+                        v.animate().scaleX(1f).scaleY(1f).setDuration(150) // Duration of the scale down animation
                                 .start();
-                    })
-                    .start();
+                    }).start();
 
             // Initialize the connection manager
             // Establish connection to host if not already established and not declined prior
-            if (!ConnectionManager.GetConnectionEstablished()) {
+            if (!handlerIsRunning.get() && !ConnectionManager.GetConnectionEstablished()) {
+                handlerIsRunning.set(true);
                 ConnectionManager.HostSearchInBackground(new HostSearchCallback() {
                     @Override
                     public void onHostFound(List<String> serverIps) {
@@ -124,10 +98,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         if (!connectionManager.InitializeConnection()) {
                             // Ensure notifyUser runs on the main (UI) thread
                             notifyUser(MainActivity.this, "Denied connection");
+                            connectionManager.ResetConnectionManager();
                         } else {
                             notifyUser(MainActivity.this, "Connection approved");
                             startActivity(new Intent(MainActivity.this, InteractionPage.class));
                         }
+                        handlerIsRunning.set(false);
                     }
 
                     @Override
@@ -136,21 +112,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         notifyUser(MainActivity.this, "No hosts found");
                         runOnUiThread(() -> {
                             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                            builder.setTitle("No Hosts Found")
-                                    .setMessage("No available hosts were found. Please add a server host manually.")
-                                    .setPositiveButton("Go to Servers Page", (dialog, which) -> {
-                                        startActivity(new Intent(MainActivity.this, ServersPage.class));
-                                    })
-                                    .setNegativeButton("Cancel", (dialog, which) -> {
-                                        dialog.dismiss();
-                                    })
-                                    .show();
+                            builder.setTitle("No Hosts Found").setMessage("No available hosts were found. Please add a server host manually.").setPositiveButton("Go to Servers Page", (dialog, which) -> {
+                                startActivity(new Intent(MainActivity.this, ServersPage.class));
+                            }).setNegativeButton("Cancel", (dialog, which) -> {
+                                dialog.dismiss();
+                            }).show();
                         });
-
+                        handlerIsRunning.set(false);
                     }
                 });
-            } else {
+            } else if (ConnectionManager.GetConnectionEstablished()){
                 startActivity(new Intent(MainActivity.this, InteractionPage.class));
+                handlerIsRunning.set(false);
             }
         });
     }
@@ -162,8 +135,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         if (true) {
             this.moveTaskToBack(true);
-        }
-        else {
+        } else {
             super.onBackPressed();
         }
     }
@@ -176,15 +148,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (itemId == R.id.nav_remote) {
             startActivity(new Intent(this, InteractionPage.class));
+            finish();
         } else if (itemId == R.id.nav_help) {
             startActivity(new Intent(this, InstructionsPage.class));
+            finish();
         } else if (itemId == R.id.nav_server) {
             startActivity(new Intent(this, ServersPage.class));
+            finish();
         } else if (itemId == R.id.nav_about) {
             startActivity(new Intent(this, AboutPage.class));
+            finish();
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void drawerSetup(int page) {
+        drawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+
+        setSupportActionBar(toolbar);
+
+        // Remove the app name from tool bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("");
+        }
+
+        navigationView.bringToFront();
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // Select the home icon by default when opening navigation menu
+        navigationView.setCheckedItem(page);
     }
 }

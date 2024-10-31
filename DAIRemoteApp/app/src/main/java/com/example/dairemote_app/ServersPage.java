@@ -39,29 +39,6 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
     private EditText inputField;
     private FloatingActionButton addServer;
 
-    public void drawerSetup(int page) {
-        drawerLayout = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-
-        setSupportActionBar(toolbar);
-
-        // Remove the app name from tool bar
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("");
-        }
-
-        navigationView.bringToFront();
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-
-        navigationView.setNavigationItemSelectedListener(this);
-
-        // Select the home icon by default when opening navigation menu
-        navigationView.setCheckedItem(page);
-    }
-
     public void notifyUser(Context context, String msg) {
         runOnUiThread(() -> Toast.makeText(context, msg, Toast.LENGTH_SHORT).show());
     }
@@ -82,45 +59,41 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         inputField = new EditText(this);
         hostListView = findViewById(R.id.hostList);
         addServer = findViewById(R.id.addServerBtn);
-
+        // "add server" button logic handling user input of server host
+        FloatingActionButton addServer = findViewById(R.id.addServerBtn);
         // Adapter for the ListView to display the available hosts
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_expandable_list_item_1, availableHosts);
         hostListView.setAdapter(adapter);
+
         hostListView.setOnItemClickListener((parent, view, position, id) -> {
             selectedHost = availableHosts.get(position);
         });
 
-        // "add server" button logic handling user input of server host
-        FloatingActionButton addServer = findViewById(R.id.addServerBtn);
-
         addServer.setOnClickListener(v -> {
             inputField.setHint("Enter IP Address here");
 
-            builder.setTitle("Add your server host here:")
-                    .setView(inputField)
-                    .setPositiveButton("Connect", (dialog, which) -> {
-                        String serverIP = inputField.getText().toString().trim();
-                        if (!serverIP.isEmpty()) {
-                            // Initialize ConnectionManager with the found server IP
-                            MainActivity.connectionManager = new ConnectionManager(serverIP);
-                            ExecutorService executor = Executors.newSingleThreadExecutor();
-                            executor.execute(() -> {
-                                boolean connected = MainActivity.connectionManager.InitializeConnection();
-                                if (!connected) {
-                                    notifyUser(ServersPage.this, "Connection failed");
-                                } else {
-                                    // only add server host to the list if connection was successful
-                                    availableHosts.add(serverIP);
-                                    runOnUiThread(() -> adapter.notifyDataSetChanged());
-                                    notifyUser(ServersPage.this, "Connection approved");
-                                    startActivity(new Intent(ServersPage.this, InteractionPage.class));
-                                }
-                            });
+            builder.setTitle("Add your server host here:").setView(inputField).setPositiveButton("Connect", (dialog, which) -> {
+                String serverIP = inputField.getText().toString().trim();
+                if (!serverIP.isEmpty()) {
+                    // Initialize ConnectionManager with the found server IP
+                    MainActivity.connectionManager = new ConnectionManager(serverIP);
+                    ExecutorService executor = Executors.newSingleThreadExecutor();
+                    executor.execute(() -> {
+                        boolean connected = MainActivity.connectionManager.InitializeConnection();
+                        if (!connected) {
+                            notifyUser(ServersPage.this, "Connection failed");
                         } else {
-                            notifyUser(ServersPage.this, "Server IP cannot be empty");
+                            // only add server host to the list if connection was successful
+                            availableHosts.add(serverIP);
+                            runOnUiThread(() -> adapter.notifyDataSetChanged());
+                            notifyUser(ServersPage.this, "Connection approved");
+                            startActivity(new Intent(ServersPage.this, InteractionPage.class));
                         }
-                    })
-                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).show();
+                    });
+                } else {
+                    notifyUser(ServersPage.this, "Server IP cannot be empty");
+                }
+            }).setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).show();
         });
 
 
@@ -197,15 +170,42 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
 
         if (itemId == R.id.nav_home) {
             startActivity(new Intent(this, MainActivity.class));
+            finish();
         } else if (itemId == R.id.nav_help) {
             startActivity(new Intent(this, InstructionsPage.class));
+            finish();
         } else if (itemId == R.id.nav_remote) {
             startActivity(new Intent(this, InteractionPage.class));
+            finish();
         } else if (itemId == R.id.nav_about) {
             startActivity(new Intent(this, AboutPage.class));
+            finish();
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void drawerSetup(int page) {
+        drawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+
+        setSupportActionBar(toolbar);
+
+        // Remove the app name from tool bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("");
+        }
+
+        navigationView.bringToFront();
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // Select the home icon by default when opening navigation menu
+        navigationView.setCheckedItem(page);
     }
 }

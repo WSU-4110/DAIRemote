@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ConnectionManager {
     private static ScheduledExecutorService heartbeatScheduler;
     private final ExecutorService executorService;
+    private static ExecutorService hostSearchExecService;
     private static String serverAddress;
     private static InetAddress inetAddr;
     private static final int serverPort = 11000;
@@ -35,6 +36,7 @@ public class ConnectionManager {
     private static DatagramPacket sendPacket;
     private static DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
     private static DatagramSocket udpSocket;
+
     static {
         try {
             udpSocket = new DatagramSocket();
@@ -44,6 +46,7 @@ public class ConnectionManager {
     }
 
     private static final InetAddress broadcastAddress;
+
     static {
         try {
             broadcastAddress = InetAddress.getByName("255.255.255.255");
@@ -126,9 +129,13 @@ public class ConnectionManager {
     // Broadcast to search for hosts in the background
     public static void HostSearchInBackground(HostSearchCallback hostSearchCallback) {
         callback = hostSearchCallback;
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        hostSearchExecService = Executors.newSingleThreadExecutor();
         // Perform the host search
-        executor.execute(ConnectionManager::HostSearch);
+        hostSearchExecService.execute(ConnectionManager::HostSearch);
+    }
+
+    public static void ShutdownHostSearchInBackground() {
+        hostSearchExecService.shutdownNow();
     }
 
     // Broadcast to search for hosts
@@ -191,14 +198,12 @@ public class ConnectionManager {
             udpSocket.setSoTimeout(75);
 
             SetServerResponse(new String(receivePacket.getData(), 0, receivePacket.getLength()));
-            Log.d("ConnectionManager", "Server response: " + GetServerResponse());
-
         } catch (SocketTimeoutException e) {
             Log.e("ConnectionManager", "No response received within the timeout: " + e.getMessage());
-            SetServerResponse(null);
+            SetServerResponse("");
         } catch (Exception e) {
             Log.e("ConnectionManager", "Error waiting for response: " + e.getMessage());
-            SetServerResponse(null);
+            SetServerResponse("");
         }
     }
 
@@ -227,12 +232,19 @@ public class ConnectionManager {
     }
 
     public boolean FinishConnection() {
+        int approvalTimeout = 0;
         if (GetServerResponse().equalsIgnoreCase("Wait")) {
-            while (!Objects.equals(GetServerResponse(), "Approved")) {
+            SetServerResponse("");
+            while (GetServerResponse().isEmpty()) {
                 Log.d("ConnectionManager", "Waiting for approval...");
                 WaitForResponse(10000);
+                approvalTimeout += 1;
+                if(approvalTimeout > 5) {
+                    break;
+                }
             }
             if (GetServerResponse().equalsIgnoreCase("Approved")) {
+                ShutdownHostSearchInBackground();
                 StartHeartbeat();
                 SetConnectionEstablished(true);
                 return true;
@@ -240,7 +252,9 @@ public class ConnectionManager {
                 ResetConnectionManager();
                 Log.d("ConnectionManager", "Denied connection");
             }
+            SetServerResponse("");
         } else if (GetServerResponse().equalsIgnoreCase("Approved")) {
+            ShutdownHostSearchInBackground();
             StartHeartbeat();
             SetConnectionEstablished(true);
             return true;
@@ -262,24 +276,28 @@ public class ConnectionManager {
     }
 
     public void SendHeartbeat() {
-        if (!connectionEstablished.get() || !SendHostMessage("DroidHeartBeat")) {
+        if (!SendHostMessage("DroidHeartBeat")) {
             return;
         }
+        Log.d("ConnectionManager", "Sending heartbeat");
 
         WaitForResponse(3000);
         if (!GetServerResponse().equalsIgnoreCase("HeartBeat Ack")) {
+            Log.e("ConnectionManager", "heartbeat was not acknowledged");
             ResetConnectionManager();
             InitializeConnection();
+        } else {
+            Log.d("ConnectionManager", "Received heartbeat response: " + GetServerResponse());
         }
     }
 
-    public static void StopExecServices(ScheduledExecutorService service) {
+    public void StopExecServices(ScheduledExecutorService service) {
         if (service != null && !service.isShutdown()) {
             service.shutdownNow();
         }
     }
 
-    public static void StopExecServices(ExecutorService service) {
+    public void StopExecServices(ExecutorService service) {
         if (service != null && !service.isShutdown()) {
             service.shutdownNow();
         }
