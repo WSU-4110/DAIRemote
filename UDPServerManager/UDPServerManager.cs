@@ -2,7 +2,6 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using UDPServerManager;
 
@@ -30,54 +29,6 @@ namespace UDPServerManagerForm
             public DateTime Timestamp { get; set; }
         }
 
-        public void SaveDeviceHistory(string ipAddress, string deviceName = "")
-        {
-            // Ensure the directory exists
-            string filePath = GetFilePath("deviceHistory.json");
-
-            DeviceHistoryEntry ipData = new()
-            {
-                DeviceName = deviceName,
-                IpAddress = ipAddress,
-                Timestamp = DateTime.Now
-            };
-
-            // Read the existing JSON file if it exists
-            List<DeviceHistoryEntry> ipList = [];
-            if (File.Exists(filePath))
-            {
-                string existingData = File.ReadAllText(filePath);
-                ipList = JsonSerializer.Deserialize<List<DeviceHistoryEntry>>(existingData);
-            }
-
-            // Add the new IP to the list
-            ipList.Add(ipData);
-
-            // Write the updated list to the JSON file
-            string jsonData = JsonSerializer.Serialize(ipList, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(filePath, jsonData);
-
-        }
-
-        public bool SearchDeviceHistory(string ipAddress)
-        {
-            string historyFilePath = GetFilePath("deviceHistory.json");
-
-            string existingData = File.ReadAllText(historyFilePath);
-            List<DeviceHistoryEntry> ipList = JsonSerializer.Deserialize<List<DeviceHistoryEntry>>(existingData);
-
-            // Check if any entry in the list has the same IP address
-            foreach (DeviceHistoryEntry entry in ipList)
-            {
-                if (entry.IpAddress == ipAddress)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private string ExtractDeviceName(string handshakeMessage)
         {
             int byIndex = handshakeMessage.IndexOf("by ");
@@ -87,26 +38,6 @@ namespace UDPServerManagerForm
                 return handshakeMessage[(byIndex + 3)..].Trim();
             }
             return null;
-        }
-
-        private string GetFilePath(string fileName)
-        {
-            string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote");
-
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-
-            string filePath = Path.Combine(folderPath, fileName);
-
-            if (!File.Exists(filePath))
-            {
-                // Create an empty JSON file with an empty array
-                File.WriteAllText(filePath, "[]");
-            }
-
-            return filePath;
         }
 
         // Method to handle the initial handshake
@@ -149,10 +80,11 @@ namespace UDPServerManagerForm
 
         public bool AwaitApproval(string deviceName)
         {
+            DeviceHistoryManager deviceHistoryManager = new DeviceHistoryManager();
             Debug.WriteLine("Checking for approval...");
             SendUdpMessage("Wait");
             string ip = remoteEP.Address.ToString();
-            if (SearchDeviceHistory(ip))
+            if (deviceHistoryManager.SearchDeviceHistory(ip))
             {
                 string approvalMessage = "Approved";
                 byte[] approvalBytes = Encoding.ASCII.GetBytes(approvalMessage);
@@ -171,7 +103,7 @@ namespace UDPServerManagerForm
 
                 if (form.HandleConnectionResult(connect, udpServer, remoteEP))
                 {
-                    SaveDeviceHistory(ip, deviceName);
+                    deviceHistoryManager.SaveDeviceHistory(ip, deviceName);
                     clientAddress = ip;
                     Debug.WriteLine("Approval granted by user");
                     return true;
