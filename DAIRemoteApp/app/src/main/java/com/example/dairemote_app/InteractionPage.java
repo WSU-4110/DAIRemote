@@ -104,7 +104,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         }
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_interaction_page);
+        setContentView(R.layout.activity_interaction);
 
         FrameLayout touchpadFrame = findViewById(R.id.touchpadFrame);
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);

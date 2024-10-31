@@ -21,7 +21,7 @@ public class AboutPage extends AppCompatActivity implements NavigationView.OnNav
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_about_page);
+        setContentView(R.layout.activity_about);
 
         drawerSetup(R.id.nav_about);
     }

@@ -50,7 +50,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         finish();
     }
 
-    public void PriorConnectionEstablishedCheck(String host) {
+    public boolean PriorConnectionEstablishedCheck(String host) {
         if(ConnectionManager.GetConnectionEstablished()) {
             if (!Objects.equals(host, ConnectionManager.GetServerAddress())) {
                 // Stop the current connection before attempting a new one
@@ -58,7 +58,9 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
             } else {
                 InitiateInteractionPage("Already connected");
             }
+            return true;
         }
+        return false;
     }
 
     @Override
@@ -102,20 +104,21 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         hostListView.setOnItemClickListener((parent, view, position, id) -> {
             selectedHost = availableHosts.get(position);
 
-            PriorConnectionEstablishedCheck(selectedHost);
-            MainActivity.connectionManager = new ConnectionManager(selectedHost);
+            if(!PriorConnectionEstablishedCheck(selectedHost)) {
+                MainActivity.connectionManager = new ConnectionManager(selectedHost);
 
-            // Start the new connection process in the background
-            if(!executor.isShutdown()) {
-                executor.execute(() -> {
-                    if (MainActivity.connectionManager.InitializeConnection()) {
-                        InitiateInteractionPage("Connected to: " + selectedHost);
-                    } else {
-                        notifyUser(ServersPage.this, "Connection failed");
-                        MainActivity.connectionManager.ResetConnectionManager();
-                    }
-                    executor.shutdownNow();
-                });
+                // Start the new connection process in the background
+                if(!executor.isShutdown()) {
+                    executor.execute(() -> {
+                        if (MainActivity.connectionManager.InitializeConnection()) {
+                            InitiateInteractionPage("Connected to: " + selectedHost);
+                        } else {
+                            notifyUser(ServersPage.this, "Connection failed");
+                            MainActivity.connectionManager.ResetConnectionManager();
+                        }
+                        executor.shutdownNow();
+                    });
+                }
             }
         });
 
@@ -125,23 +128,24 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
             builder.setTitle("Add your server host here:").setView(inputField).setPositiveButton("Connect", (dialog, which) -> {
                 selectedHost = inputField.getText().toString().trim();
                 if (!selectedHost.isEmpty()) {
-                    PriorConnectionEstablishedCheck(selectedHost);
-                    MainActivity.connectionManager = new ConnectionManager(selectedHost);
-                    // Initialize ConnectionManager with the found server IP
-                    if(!executor.isShutdown()) {
-                        executor.execute(() -> {
-                            if (MainActivity.connectionManager.InitializeConnection()) {
-                                // only add server host to the list if connection was successful
-                                availableHosts.add(selectedHost);
-                                runOnUiThread(() -> adapter.notifyDataSetChanged());
+                    if(!PriorConnectionEstablishedCheck(selectedHost)) {
+                        MainActivity.connectionManager = new ConnectionManager(selectedHost);
+                        // Initialize ConnectionManager with the found server IP
+                        if(!executor.isShutdown()) {
+                            executor.execute(() -> {
+                                if (MainActivity.connectionManager.InitializeConnection()) {
+                                    // only add server host to the list if connection was successful
+                                    availableHosts.add(selectedHost);
+                                    runOnUiThread(() -> adapter.notifyDataSetChanged());
 
-                                InitiateInteractionPage("Connection approved");
-                            } else {
-                                notifyUser(ServersPage.this, "Connection failed");
-                                MainActivity.connectionManager.ResetConnectionManager();
-                            }
-                            executor.shutdownNow();
-                        });
+                                    InitiateInteractionPage("Connection approved");
+                                } else {
+                                    notifyUser(ServersPage.this, "Connection failed");
+                                    MainActivity.connectionManager.ResetConnectionManager();
+                                }
+                                executor.shutdownNow();
+                            });
+                        }
                     }
                 } else {
                     notifyUser(ServersPage.this, "Server IP cannot be empty");

@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -53,8 +54,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         drawerSetup(R.id.nav_home);
+        ProgressBar connectionProgress = findViewById(R.id.connectionLoading);
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-
         tut = new InteractiveTutorial();
 
         // find the help button by its ID
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         ImageButton remotePage = findViewById(R.id.DAIRemoteLogoBtn);
         remotePage.setOnClickListener(v -> {
+            connectionProgress.setVisibility(View.VISIBLE);
             v.animate().scaleX(1.2f).scaleY(1.2f) // Scale the button up to 120% of its original size
                     .setDuration(150) // Duration of the scale up animation
                     .withEndAction(() -> {
@@ -95,10 +97,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         // Initialize ConnectionManager with the found server IP
                         connectionManager = new ConnectionManager(selectedHost);
                         if (!connectionManager.InitializeConnection()) {
+                            runOnUiThread(() -> connectionProgress.setVisibility(View.GONE));
                             // Ensure notifyUser runs on the main (UI) thread
                             notifyUser(MainActivity.this, "Denied connection");
                             connectionManager.ResetConnectionManager();
                         } else {
+                            runOnUiThread(() -> connectionProgress.setVisibility(View.GONE));
                             notifyUser(MainActivity.this, "Connection approved");
                             startActivity(new Intent(MainActivity.this, InteractionPage.class));
                         }
@@ -107,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     @Override
                     public void onError(String error) {
+                        runOnUiThread(() -> connectionProgress.setVisibility(View.GONE));
                         Log.e("MainActivity", "Error during host search: " + error);
                         notifyUser(MainActivity.this, "No hosts found");
                         runOnUiThread(() -> {
@@ -121,6 +126,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 });
             } else if (ConnectionManager.GetConnectionEstablished()){
+                connectionProgress.setVisibility(View.GONE);
                 startActivity(new Intent(MainActivity.this, InteractionPage.class));
                 handlerIsRunning.set(false);
             }

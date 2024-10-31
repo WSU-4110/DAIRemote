@@ -23,7 +23,7 @@ public class InstructionsPage extends AppCompatActivity implements NavigationVie
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_instructions_page);
+        setContentView(R.layout.activity_instructions);
 
         drawerSetup(R.id.nav_help);
     }

@@ -151,7 +151,7 @@ public class ConnectionManager {
         try {
             udpSocket.setBroadcast(true);
             SendData("Hello, I'm " + GetDeviceName(), broadcastAddress);
-            udpSocket.setSoTimeout(10000); // Millisecond timeout for responses and to break out of loop
+            udpSocket.setSoTimeout(3000); // Millisecond timeout for responses and to break out of loop
             while (true) {
                 try {
 
@@ -228,7 +228,11 @@ public class ConnectionManager {
                 return false;
             } else {
                 // Updates serverResponse else times out and throws socket exception
-                WaitForResponse(5000);
+                try {
+                    WaitForResponse(5000);
+                } catch (Exception e) {
+                    Log.e("ConnectionManager", "Connection initialization timeout: " + broadcastCount);
+                }
             }
 
         }
@@ -276,7 +280,7 @@ public class ConnectionManager {
             public void run() {
                 SendHeartbeat();
             }
-        }, 250, 2000, TimeUnit.MILLISECONDS); // Initial delay 250 ms, and 2s delay after first execution
+        }, 2, 2, TimeUnit.SECONDS); // Initial delay 5 seconds, and 2-second delay after first execution
     }
 
     public void SendHeartbeat() {
