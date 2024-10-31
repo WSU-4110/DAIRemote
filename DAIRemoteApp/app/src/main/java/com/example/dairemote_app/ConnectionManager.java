@@ -104,6 +104,9 @@ public class ConnectionManager {
     }
 
     public static void SendData(String message, InetAddress address) throws IOException {
+        if (udpSocket == null || udpSocket.isClosed()) {
+            udpSocket = new DatagramSocket();
+        }
         sendData = message.getBytes();
         sendPacket = new DatagramPacket(sendData, sendData.length, address, GetPort());
         udpSocket.send(sendPacket);
@@ -222,6 +225,7 @@ public class ConnectionManager {
             broadcastCount += 1;
             if (broadcastCount > 5) {
                 Log.d("ConnectionManager", "Timed out waiting for connection response...");
+                return false;
             } else {
                 // Updates serverResponse else times out and throws socket exception
                 WaitForResponse(5000);
@@ -272,7 +276,7 @@ public class ConnectionManager {
             public void run() {
                 SendHeartbeat();
             }
-        }, 2, 2, TimeUnit.SECONDS); // Initial delay 5 seconds, and 2-second delay after first execution
+        }, 250, 2000, TimeUnit.MILLISECONDS); // Initial delay 250 ms, and 2s delay after first execution
     }
 
     public void SendHeartbeat() {

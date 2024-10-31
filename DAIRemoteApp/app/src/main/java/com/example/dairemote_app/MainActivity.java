@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // vars for tutorial
     public static InteractiveTutorial tut;
-    AlertDialog.Builder builder;
 
     public void notifyUser(Context context, String msg) {
         runOnUiThread(() -> Toast.makeText(context, msg, Toast.LENGTH_SHORT).show());
@@ -54,13 +53,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         drawerSetup(R.id.nav_home);
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
         tut = new InteractiveTutorial();
 
         // find the help button by its ID
         ImageButton helpButton = findViewById(R.id.helpButton);
         helpButton.setOnClickListener(v -> {
-            builder = new AlertDialog.Builder(MainActivity.this);
             Log.d("InteractiveTutorial", "Popup start tutorial");
             tut.setCurrentStep(0);
             tut.showSteps(builder, tut.getCurrentStep());
@@ -142,7 +141,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        Intent intent;
         int itemId = item.getItemId();
         Log.d("MainActivity", "Item selected: " + itemId);
 

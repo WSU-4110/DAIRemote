@@ -38,23 +38,40 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
 
     private EditText inputField;
     private FloatingActionButton addServer;
+    private ExecutorService executor;
 
     public void notifyUser(Context context, String msg) {
         runOnUiThread(() -> Toast.makeText(context, msg, Toast.LENGTH_SHORT).show());
+    }
+
+    public void InitiateInteractionPage(String message) {
+        notifyUser(ServersPage.this, message);
+        startActivity(new Intent(ServersPage.this, InteractionPage.class));
+        finish();
+    }
+
+    public void PriorConnectionEstablishedCheck(String host) {
+        if(ConnectionManager.GetConnectionEstablished()) {
+            if (!Objects.equals(host, ConnectionManager.GetServerAddress())) {
+                // Stop the current connection before attempting a new one
+                MainActivity.connectionManager.Shutdown();
+            } else {
+                InitiateInteractionPage("Already connected");
+            }
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_servers_page);
+        drawerSetup(R.id.nav_server);
 
         //  if tutorial is still active on navigation button clicked
         AlertDialog.Builder builder = new AlertDialog.Builder(ServersPage.this);
         if (MainActivity.tut.getTutorialOn()) {
-            MainActivity.tut.showNextStep(new AlertDialog.Builder(ServersPage.this));
+            MainActivity.tut.showNextStep(builder);
         }
-
-        drawerSetup(R.id.nav_server);
 
         inputField = new EditText(this);
         hostListView = findViewById(R.id.hostList);
@@ -65,90 +82,71 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_expandable_list_item_1, availableHosts);
         hostListView.setAdapter(adapter);
 
+        executor = Executors.newSingleThreadExecutor();
+
+        // Perform host search in the background
+        ConnectionManager.HostSearchInBackground(new HostSearchCallback() {
+            @Override
+            public void onHostFound(List<String> hosts) {
+                availableHosts.clear();
+                availableHosts.addAll(hosts);
+                runOnUiThread(() -> adapter.notifyDataSetChanged());
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e("ServersPage", "No hosts available: " + error);
+            }
+        });
+
         hostListView.setOnItemClickListener((parent, view, position, id) -> {
             selectedHost = availableHosts.get(position);
+
+            PriorConnectionEstablishedCheck(selectedHost);
+            MainActivity.connectionManager = new ConnectionManager(selectedHost);
+
+            // Start the new connection process in the background
+            if(!executor.isShutdown()) {
+                executor.execute(() -> {
+                    if (MainActivity.connectionManager.InitializeConnection()) {
+                        InitiateInteractionPage("Connected to: " + selectedHost);
+                    } else {
+                        notifyUser(ServersPage.this, "Connection failed");
+                        MainActivity.connectionManager.ResetConnectionManager();
+                    }
+                    executor.shutdownNow();
+                });
+            }
         });
 
         addServer.setOnClickListener(v -> {
             inputField.setHint("Enter IP Address here");
 
             builder.setTitle("Add your server host here:").setView(inputField).setPositiveButton("Connect", (dialog, which) -> {
-                String serverIP = inputField.getText().toString().trim();
-                if (!serverIP.isEmpty()) {
+                selectedHost = inputField.getText().toString().trim();
+                if (!selectedHost.isEmpty()) {
+                    PriorConnectionEstablishedCheck(selectedHost);
+                    MainActivity.connectionManager = new ConnectionManager(selectedHost);
                     // Initialize ConnectionManager with the found server IP
-                    MainActivity.connectionManager = new ConnectionManager(serverIP);
-                    ExecutorService executor = Executors.newSingleThreadExecutor();
-                    executor.execute(() -> {
-                        boolean connected = MainActivity.connectionManager.InitializeConnection();
-                        if (!connected) {
-                            notifyUser(ServersPage.this, "Connection failed");
-                        } else {
-                            // only add server host to the list if connection was successful
-                            availableHosts.add(serverIP);
-                            runOnUiThread(() -> adapter.notifyDataSetChanged());
-                            notifyUser(ServersPage.this, "Connection approved");
-                            startActivity(new Intent(ServersPage.this, InteractionPage.class));
-                        }
-                    });
+                    if(!executor.isShutdown()) {
+                        executor.execute(() -> {
+                            if (MainActivity.connectionManager.InitializeConnection()) {
+                                // only add server host to the list if connection was successful
+                                availableHosts.add(selectedHost);
+                                runOnUiThread(() -> adapter.notifyDataSetChanged());
+
+                                InitiateInteractionPage("Connection approved");
+                            } else {
+                                notifyUser(ServersPage.this, "Connection failed");
+                                MainActivity.connectionManager.ResetConnectionManager();
+                            }
+                            executor.shutdownNow();
+                        });
+                    }
                 } else {
                     notifyUser(ServersPage.this, "Server IP cannot be empty");
                 }
             }).setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).show();
-        });
-
-
-        // Perform host search in the background
-        ConnectionManager.HostSearchInBackground(new HostSearchCallback() {
-            @Override
-            public void onHostFound(List<String> hosts) {
-                runOnUiThread(() -> {
-                    availableHosts.clear();
-                    availableHosts.addAll(hosts);
-                    adapter.notifyDataSetChanged();
-
-                    // Check if any host matches current connection and select it
-                    if (ConnectionManager.GetServerAddress() != null && !ConnectionManager.GetServerAddress().isEmpty()) {
-                        for (int i = 0; i < availableHosts.size(); i++) {
-                            if (Objects.equals(availableHosts.get(i), ConnectionManager.GetServerAddress())) {
-                                hostListView.setItemChecked(i, true);  // Select the matching host
-                                break;
-                            }
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void onError(String error) {
-                Log.e("HostListActivity", "Error: " + error);
-            }
-        });
-
-        hostListView.setOnItemClickListener((parent, view, position, id) -> {
-            selectedHost = availableHosts.get(position);
-            if (!Objects.equals(selectedHost, ConnectionManager.GetServerAddress())) {
-                // Check if a connection is already established
-                if (ConnectionManager.GetConnectionEstablished()) {
-                    // Stop the current connection before attempting a new one
-                    MainActivity.connectionManager.Shutdown();
-                    notifyUser(ServersPage.this, "Disconnected from: " + ConnectionManager.GetServerAddress());
-                }
-
-                // Start the new connection process in the background
-                ExecutorService executor = Executors.newSingleThreadExecutor();
-                executor.execute(() -> {
-                    MainActivity.connectionManager = new ConnectionManager(selectedHost);
-                    if (MainActivity.connectionManager.InitializeConnection()) {
-                        notifyUser(ServersPage.this, "Connected to: " + selectedHost);
-                        startActivity(new Intent(ServersPage.this, InteractionPage.class));
-                    } else {
-                        notifyUser(ServersPage.this, "Connection failed");
-                    }
-                });
-            } else {
-                notifyUser(ServersPage.this, "Already connected");
-                startActivity(new Intent(ServersPage.this, InteractionPage.class));
-            }
         });
     }
 
@@ -164,7 +162,6 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        Intent intent;
         int itemId = item.getItemId();
         Log.d("Navigation", "Item selected: " + itemId);
 
