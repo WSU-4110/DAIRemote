@@ -89,7 +89,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         runOnUiThread(() -> Toast.makeText(context, msg, Toast.LENGTH_SHORT).show());
     }
 
-    private Runnable hideRunnable = new Runnable() {
+    private final Runnable HideStartTutorial = new Runnable() {
         @Override
         public void run() {
             startTutorial.setVisibility(View.GONE);
@@ -126,8 +126,9 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         interactionsHelpText = findViewById(R.id.interationsHelpTextView);
         startTutorial = findViewById(R.id.tutorialStartBtn);
 
-        if (MainActivity.tut.getTutorialOn()) {
-            MainActivity.tut.showNextStep(new AlertDialog.Builder(InteractionPage.this));
+        TutorialMediator tutorial = TutorialMediator.GetInstance(new AlertDialog.Builder(InteractionPage.this));
+        if (tutorial.getTutorialOn()) {
+            tutorial.showNextStep();
         }
 
         touchpadFrame.setOnTouchListener(new View.OnTouchListener() {
@@ -359,17 +360,17 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                                 startTutorial.setVisibility(View.GONE);
 
                                 // Initiate tutorial starting at remote page steps
-                                MainActivity.tut.setTutorialOn(true);
-                                MainActivity.tut.setCurrentStep(1);
-                                MainActivity.tut.showNextStep(new AlertDialog.Builder(InteractionPage.this));
+                                tutorial.setTutorialOn(true);
+                                tutorial.setCurrentStep(1);
+                                tutorial.showNextStep();
                             }
                         });
                     }
 
                     // Cancel any existing hide callbacks
-                    handler.removeCallbacks(hideRunnable);
+                    handler.removeCallbacks(HideStartTutorial);
                     // Hide the button automatically after a delay
-                    handler.postDelayed(hideRunnable, 2500);
+                    handler.postDelayed(HideStartTutorial, 2500);
                 }
             }
         });

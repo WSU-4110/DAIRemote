@@ -3,10 +3,11 @@ package com.example.dairemote_app;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -24,14 +25,11 @@ import com.google.android.material.navigation.NavigationView;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, IBuilderTemplate {
 
     DrawerLayout drawerLayout;
     private static final AtomicBoolean handlerIsRunning = new AtomicBoolean(false);
     public static ConnectionManager connectionManager;
-
-    // vars for tutorial
-    public static InteractiveTutorial tut;
 
     public void notifyUser(Context context, String msg) {
         runOnUiThread(() -> Toast.makeText(context, msg, Toast.LENGTH_SHORT).show());
@@ -49,6 +47,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onDestroy();
     }
 
+    public void builderTitleMsg(AlertDialog.Builder builder, String title, String message) {
+        builder.setTitle(title);
+        builder.setMessage(message);
+    }
+
+    public void builderPositiveBtn(AlertDialog.Builder builder, String text) {
+        builder.setPositiveButton(text, (dialog, which) -> {
+            startActivity(new Intent(MainActivity.this, ServersPage.class));
+        });
+    }
+
+    public void builderNegativeBtn(AlertDialog.Builder builder, String text) {
+        builder.setNegativeButton(text, (dialog, which) -> {
+            dialog.dismiss();
+        });
+    }
+
+    public void builderShow(AlertDialog.Builder builder) {
+        builder.create().show();
+    }
+
+    public void BuilderWindowPosition(Window window, int gravity, int xOffset, int yOffset) {
+        // sets custom position
+        if (window != null) {
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.gravity = gravity;
+            params.x = xOffset;
+            params.y = yOffset;
+            window.setAttributes(params);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,15 +86,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerSetup(R.id.nav_home);
         ProgressBar connectionProgress = findViewById(R.id.connectionLoading);
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        tut = new InteractiveTutorial();
+        TutorialMediator tutorial = TutorialMediator.GetInstance(builder);
 
         // find the help button by its ID
         ImageButton helpButton = findViewById(R.id.helpButton);
         helpButton.setOnClickListener(v -> {
-            Log.d("InteractiveTutorial", "Popup start tutorial");
-            tut.setCurrentStep(0);
-            tut.showSteps(builder, tut.getCurrentStep());
-            Log.d("InteractiveTutorial", "Start tutorial");
+            tutorial.setCurrentStep(0);
+            tutorial.showSteps(tutorial.getCurrentStep());
         });
 
         ImageButton remotePage = findViewById(R.id.DAIRemoteLogoBtn);
@@ -115,12 +143,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         Log.e("MainActivity", "Error during host search: " + error);
                         notifyUser(MainActivity.this, "No hosts found");
                         runOnUiThread(() -> {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                            builder.setTitle("No Hosts Found").setMessage("No available hosts were found. Please add a server host manually.").setPositiveButton("Go to Servers Page", (dialog, which) -> {
-                                startActivity(new Intent(MainActivity.this, ServersPage.class));
-                            }).setNegativeButton("Cancel", (dialog, which) -> {
-                                dialog.dismiss();
-                            }).show();
+                            builderTitleMsg(builder, "No Hosts Found", "No available hosts were found. Please add a server host manually.");
+                            builderPositiveBtn(builder, "Go to Servers Page");
+                            builderNegativeBtn(builder, "Cancel");
+                            builderShow(builder);
                         });
                         handlerIsRunning.set(false);
                     }

@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -44,6 +46,61 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         runOnUiThread(() -> Toast.makeText(context, msg, Toast.LENGTH_SHORT).show());
     }
 
+    public void builderTitleMsg(AlertDialog.Builder builder, String title, String message) {
+        builder.setTitle(title);
+    }
+
+    public void builderPositiveBtn(AlertDialog.Builder builder, String text) {
+        builder.setPositiveButton(text, (dialog, which) -> {
+            selectedHost = inputField.getText().toString().trim();
+            if (!selectedHost.isEmpty()) {
+                if(!PriorConnectionEstablishedCheck(selectedHost)) {
+                    MainActivity.connectionManager = new ConnectionManager(selectedHost);
+                    // Initialize ConnectionManager with the found server IP
+                    if(!executor.isShutdown()) {
+                        executor.execute(() -> {
+                            if (MainActivity.connectionManager.InitializeConnection()) {
+                                // only add server host to the list if connection was successful
+                                availableHosts.add(selectedHost);
+                                runOnUiThread(() -> adapter.notifyDataSetChanged());
+
+                                InitiateInteractionPage("Connection approved");
+                            } else {
+                                notifyUser(ServersPage.this, "Connection failed");
+                                MainActivity.connectionManager.ResetConnectionManager();
+                            }
+                            executor.shutdownNow();
+                        });
+                    }
+                }
+            } else {
+                notifyUser(ServersPage.this, "Server IP cannot be empty");
+            }
+        });
+    }
+
+    public void builderNegativeBtn(AlertDialog.Builder builder, String text) {
+        builder.setNegativeButton(text, (dialog, which) -> {
+            dialog.dismiss();
+        });
+    }
+
+    public void builderShow(AlertDialog.Builder builder) {
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    public void BuilderWindowPosition(Window window, int gravity, int xOffset, int yOffset) {
+        // sets custom position
+        if (window != null) {
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.gravity = gravity;
+            params.x = xOffset;
+            params.y = yOffset;
+            window.setAttributes(params);
+        }
+    }
+
     public void InitiateInteractionPage(String message) {
         notifyUser(ServersPage.this, message);
         startActivity(new Intent(ServersPage.this, InteractionPage.class));
@@ -71,11 +128,11 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
 
         //  if tutorial is still active on navigation button clicked
         AlertDialog.Builder builder = new AlertDialog.Builder(ServersPage.this);
-        if (MainActivity.tut.getTutorialOn()) {
-            MainActivity.tut.showNextStep(builder);
+        TutorialMediator tutorial = TutorialMediator.GetInstance(builder);
+        if (tutorial.getTutorialOn()) {
+            tutorial.showNextStep();
         }
 
-        inputField = new EditText(this);
         hostListView = findViewById(R.id.hostList);
         addServer = findViewById(R.id.addServerBtn);
         // "add server" button logic handling user input of server host
@@ -123,34 +180,13 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         });
 
         addServer.setOnClickListener(v -> {
+            inputField = new EditText(ServersPage.this);
             inputField.setHint("Enter IP Address here");
-
-            builder.setTitle("Add your server host here:").setView(inputField).setPositiveButton("Connect", (dialog, which) -> {
-                selectedHost = inputField.getText().toString().trim();
-                if (!selectedHost.isEmpty()) {
-                    if(!PriorConnectionEstablishedCheck(selectedHost)) {
-                        MainActivity.connectionManager = new ConnectionManager(selectedHost);
-                        // Initialize ConnectionManager with the found server IP
-                        if(!executor.isShutdown()) {
-                            executor.execute(() -> {
-                                if (MainActivity.connectionManager.InitializeConnection()) {
-                                    // only add server host to the list if connection was successful
-                                    availableHosts.add(selectedHost);
-                                    runOnUiThread(() -> adapter.notifyDataSetChanged());
-
-                                    InitiateInteractionPage("Connection approved");
-                                } else {
-                                    notifyUser(ServersPage.this, "Connection failed");
-                                    MainActivity.connectionManager.ResetConnectionManager();
-                                }
-                                executor.shutdownNow();
-                            });
-                        }
-                    }
-                } else {
-                    notifyUser(ServersPage.this, "Server IP cannot be empty");
-                }
-            }).setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).show();
+            builderTitleMsg(builder, "Add your server host here:", "");
+            builder.setView(inputField);
+            builderPositiveBtn(builder, "Connect");
+            builderNegativeBtn(builder, "Cancel");
+            builderShow(builder);
         });
     }
 
