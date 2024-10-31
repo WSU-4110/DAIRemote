@@ -44,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/audiowide"
-            android:text="To simulate input:\nTap with 1 finger to left-click\nTap with 2 fingers to right-click\nDrag with 2 fingers to scroll\nLong-press and move to drag\nTap once to release drag"
+            android:text="@string/interaction_instructions"
             android:textAlignment="center"
             android:textColor="@color/white"
             android:textSize="20sp"
