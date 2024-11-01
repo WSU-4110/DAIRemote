@@ -42,7 +42,17 @@ namespace UDPServerManager
             if (File.Exists(filePath))
             {
                 string existingData = File.ReadAllText(filePath);
-                ipList = JsonSerializer.Deserialize<List<DeviceHistoryEntry>>(existingData);
+
+                // Check if the file is empty
+                if (string.IsNullOrWhiteSpace(existingData))
+                {
+                    // Write an empty list to the file if it's empty
+                    File.WriteAllText(filePath, "[]");
+                }
+                else
+                {
+                    ipList = JsonSerializer.Deserialize<List<DeviceHistoryEntry>>(existingData);
+                }
             }
 
             // Add the new IP to the list
@@ -59,17 +69,19 @@ namespace UDPServerManager
             string historyFilePath = GetFilePath("deviceHistory.json");
 
             string existingData = File.ReadAllText(historyFilePath);
-            List<DeviceHistoryEntry> ipList = JsonSerializer.Deserialize<List<DeviceHistoryEntry>>(existingData);
-
-            // Check if any entry in the list has the same IP address
-            foreach (DeviceHistoryEntry entry in ipList)
+            if (!string.IsNullOrWhiteSpace(existingData))
             {
-                if (entry.IpAddress == ipAddress)
+                List<DeviceHistoryEntry> ipList = JsonSerializer.Deserialize<List<DeviceHistoryEntry>>(existingData);
+
+                // Check if any entry in the list has the same IP address
+                foreach (DeviceHistoryEntry entry in ipList)
                 {
-                    return true;
+                    if (entry.IpAddress == ipAddress)
+                    {
+                        return true;
+                    }
                 }
             }
-
             return false;
         }
     }

@@ -14,7 +14,7 @@ public class ConnectionMonitor {
     private static ExecutorService executorService;
     private Handler handler;
     private Runnable heartbeatService;
-    private boolean serviceRunning = false;
+    private boolean serviceRunning = true;
 
     public ConnectionMonitor(ConnectionManager manager) {
         SetConnectionManager(manager);
@@ -25,6 +25,9 @@ public class ConnectionMonitor {
                 // Send heartbeat
                 if (SendHeartbeat()) {
                     handler.postDelayed(this, 2000); // Repeat every 2 seconds
+                } else {
+                    serviceRunning = false;
+                    connectionManager.SetConnectionEstablished(false);
                 }
             }
         };
@@ -74,8 +77,7 @@ public class ConnectionMonitor {
 
                 if (!ConnectionManager.GetServerResponse().equalsIgnoreCase("HeartBeat Ack")) {
                     Log.e("ConnectionManager", "heartbeat was not acknowledged");
-                    manager.ResetConnectionManager();
-                    return manager.InitializeConnection();
+                    return false;
                 } else {
                     Log.d("ConnectionManager", "Received heartbeat response: " + ConnectionManager.GetServerResponse());
                     return true;
