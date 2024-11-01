@@ -78,6 +78,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     StringBuilder keyCombination = new StringBuilder();
     int parenthesesCount = 0;
     TextView keyboardTextInputView;
+    ConnectionMonitor connectionMonitor;
 
     public void startHome() {
         notifyUser(InteractionPage.this, "Connection lost");
@@ -105,6 +106,18 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_interaction);
+
+        Log.d("TEST", "BOUTA INITIATE");
+        Log.d("TEST", ConnectionManager.GetServerAddress());
+        connectionMonitor = ConnectionMonitor.GetInstance(MainActivity.connectionManager);
+        if (!connectionMonitor.IsHeartbeatRunning()) {
+            if(ConnectionManager.GetConnectionEstablished()) {
+                connectionMonitor.StartHeartbeat(5000);
+            } else {
+                Log.d("TEST", "CONNECTION IS NOT ESTABLISHED IN HEARTBEAT");
+            }
+        }
+        Log.d("TEST", "INITIATED");
 
         FrameLayout touchpadFrame = findViewById(R.id.touchpadFrame);
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -630,23 +643,37 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     }
 
     @Override
+    protected void onPause() {
+        if (connectionMonitor.IsHeartbeatRunning()) {
+            connectionMonitor.StopHeartbeat();
+        }
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!connectionMonitor.IsHeartbeatRunning()) {
+            Log.d("TEST", "HEARTBEAT ON RESUME");
+            connectionMonitor.StartHeartbeat();
+        }
+    }
+
+    @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
         Log.d("Navigation", "Item selected: " + itemId);
 
         if (itemId == R.id.nav_home) {
             startActivity(new Intent(this, MainActivity.class));
-            finish();
         } else if (itemId == R.id.nav_server) {
             startActivity(new Intent(this, ServersPage.class));
-            finish();
         } else if (itemId == R.id.nav_help) {
             startActivity(new Intent(this, InstructionsPage.class));
-            finish();
         } else if (itemId == R.id.nav_about) {
             startActivity(new Intent(this, AboutPage.class));
-            finish();
         }
+        finish();
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;

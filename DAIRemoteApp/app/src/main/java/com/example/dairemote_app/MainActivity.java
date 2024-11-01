@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         });
                         handlerIsRunning.set(false);
                     }
-                });
+                }, "Hello, I'm");
             } else if (ConnectionManager.GetConnectionEstablished()){
                 connectionProgress.setVisibility(View.GONE);
                 startActivity(new Intent(MainActivity.this, InteractionPage.class));
@@ -178,17 +178,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (itemId == R.id.nav_remote) {
             startActivity(new Intent(this, InteractionPage.class));
-            finish();
         } else if (itemId == R.id.nav_help) {
             startActivity(new Intent(this, InstructionsPage.class));
-            finish();
         } else if (itemId == R.id.nav_server) {
             startActivity(new Intent(this, ServersPage.class));
-            finish();
         } else if (itemId == R.id.nav_about) {
             startActivity(new Intent(this, AboutPage.class));
-            finish();
         }
+        finish();
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;

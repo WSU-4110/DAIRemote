@@ -45,17 +45,14 @@ public class InstructionsPage extends AppCompatActivity implements NavigationVie
 
         if (itemId == R.id.nav_home) {
             startActivity(new Intent(this, MainActivity.class));
-            finish();
         } else if (itemId == R.id.nav_remote) {
             startActivity(new Intent(this, InteractionPage.class));
-            finish();
         } else if (itemId == R.id.nav_server) {
             startActivity(new Intent(this, ServersPage.class));
-            finish();
         } else if (itemId == R.id.nav_about) {
             startActivity(new Intent(this, AboutPage.class));
-            finish();
         }
+        finish();
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;

@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ConnectionManager {
-    private static ScheduledExecutorService heartbeatScheduler;
     private final ExecutorService executorService;
     private static ExecutorService hostSearchExecService;
     private static String serverAddress;
@@ -99,7 +98,7 @@ public class ConnectionManager {
         serverResponse = response;
     }
 
-    private static String GetServerResponse() {
+    public static String GetServerResponse() {
         return serverResponse;
     }
 
@@ -130,11 +129,11 @@ public class ConnectionManager {
     }
 
     // Broadcast to search for hosts in the background
-    public static void HostSearchInBackground(HostSearchCallback hostSearchCallback) {
+    public static void HostSearchInBackground(HostSearchCallback hostSearchCallback, String message) {
         callback = hostSearchCallback;
         hostSearchExecService = Executors.newSingleThreadExecutor();
         // Perform the host search
-        hostSearchExecService.execute(ConnectionManager::HostSearch);
+        hostSearchExecService.execute(() -> HostSearch(message));
     }
 
     public static void ShutdownHostSearchInBackground() {
@@ -142,7 +141,7 @@ public class ConnectionManager {
     }
 
     // Broadcast to search for hosts
-    public static void HostSearch() {
+    public static void HostSearch(String message) {
         if (callback == null) {
             Log.e("ConnectionManager", "Callback is null!");
             return;
@@ -150,7 +149,7 @@ public class ConnectionManager {
         List<String> hosts = new ArrayList<>();
         try {
             udpSocket.setBroadcast(true);
-            SendData("Hello, I'm " + GetDeviceName(), broadcastAddress);
+            SendData(message + " " + GetDeviceName(), broadcastAddress);
             udpSocket.setSoTimeout(3000); // Millisecond timeout for responses and to break out of loop
             while (true) {
                 try {
@@ -253,7 +252,7 @@ public class ConnectionManager {
             }
             if (GetServerResponse().equalsIgnoreCase("Approved")) {
                 ShutdownHostSearchInBackground();
-                StartHeartbeat();
+                ConnectionMonitor.GetInstance(MainActivity.connectionManager);
                 SetConnectionEstablished(true);
                 return true;
             } else if (GetServerResponse().equalsIgnoreCase("Connection attempt declined.")) {
@@ -263,46 +262,13 @@ public class ConnectionManager {
             SetServerResponse("");
         } else if (GetServerResponse().equalsIgnoreCase("Approved")) {
             ShutdownHostSearchInBackground();
-            StartHeartbeat();
+            ConnectionMonitor.GetInstance(MainActivity.connectionManager);
             SetConnectionEstablished(true);
             return true;
         } else {
             Log.d("ConnectionManager", "No response to broadcast.");
         }
         return false;
-    }
-
-    public void StartHeartbeat() {
-        // Create a ScheduledExecutorService to run heartbeat with a delay after each execution
-        heartbeatScheduler = Executors.newScheduledThreadPool(1);
-        heartbeatScheduler.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                SendHeartbeat();
-            }
-        }, 2, 2, TimeUnit.SECONDS); // Initial delay 5 seconds, and 2-second delay after first execution
-    }
-
-    public void SendHeartbeat() {
-        if (!SendHostMessage("DroidHeartBeat")) {
-            return;
-        }
-        Log.d("ConnectionManager", "Sending heartbeat");
-
-        WaitForResponse(3000);
-        if (!GetServerResponse().equalsIgnoreCase("HeartBeat Ack")) {
-            Log.e("ConnectionManager", "heartbeat was not acknowledged");
-            ResetConnectionManager();
-            InitializeConnection();
-        } else {
-            Log.d("ConnectionManager", "Received heartbeat response: " + GetServerResponse());
-        }
-    }
-
-    public void StopExecServices(ScheduledExecutorService service) {
-        if (service != null && !service.isShutdown()) {
-            service.shutdownNow();
-        }
     }
 
     public void StopExecServices(ExecutorService service) {
@@ -331,7 +297,6 @@ public class ConnectionManager {
 
     public void ResetConnectionManager() {
         Log.e("ConnectionManager", "Resetting ConnectionManager");
-        StopExecServices(heartbeatScheduler);
         StopExecServices(executorService);
         SetConnectionEstablished(false);
         SetServerResponse(null);
@@ -341,6 +306,7 @@ public class ConnectionManager {
 
     // Shutdown the connection
     public void Shutdown() {
+        ConnectionMonitor.GetInstance(this).StopHeartbeat();
         SendHostMessage("Shutdown requested");
         ResetConnectionManager();
     }

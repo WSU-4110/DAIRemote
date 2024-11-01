@@ -174,9 +174,6 @@ namespace UDPServerManagerForm
                         if (IsClient(remoteEP.Address.ToString()))
                         {
                             string receivedData = Encoding.ASCII.GetString(data);
-                            Debug.WriteLine($"Received: {receivedData}");
-
-                            // Handle received data
                             HandleReceivedData(receivedData, ref lastHeartbeatTime);
                         }
 
@@ -230,6 +227,11 @@ namespace UDPServerManagerForm
                 SendUdpMessage("Hello, I'm " + Environment.MachineName);
                 Debug.WriteLine("Sent response to broadcast");
                 InitiateHandshake();
+            }
+            else if (receivedData.StartsWith("Hello, DAI"))
+            {
+                SendUdpMessage("Hello, I'm " + Environment.MachineName);
+                Debug.WriteLine("Sent response to broadcast search");
             }
             else if (receivedData.StartsWith("Connection requested"))
             {

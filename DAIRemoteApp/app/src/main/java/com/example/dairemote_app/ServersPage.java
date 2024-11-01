@@ -113,6 +113,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
                 // Stop the current connection before attempting a new one
                 MainActivity.connectionManager.Shutdown();
             } else {
+                Log.d("TEST", "Already connected");
                 InitiateInteractionPage("Already connected");
             }
             return true;
@@ -156,7 +157,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
             public void onError(String error) {
                 Log.e("ServersPage", "No hosts available: " + error);
             }
-        });
+        }, "Hello, DAIRemote");
 
         hostListView.setOnItemClickListener((parent, view, position, id) -> {
             selectedHost = availableHosts.get(position);
@@ -207,17 +208,14 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
 
         if (itemId == R.id.nav_home) {
             startActivity(new Intent(this, MainActivity.class));
-            finish();
         } else if (itemId == R.id.nav_help) {
             startActivity(new Intent(this, InstructionsPage.class));
-            finish();
         } else if (itemId == R.id.nav_remote) {
             startActivity(new Intent(this, InteractionPage.class));
-            finish();
         } else if (itemId == R.id.nav_about) {
             startActivity(new Intent(this, AboutPage.class));
-            finish();
         }
+        finish();
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;

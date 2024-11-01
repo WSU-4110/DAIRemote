@@ -43,17 +43,14 @@ public class AboutPage extends AppCompatActivity implements NavigationView.OnNav
 
         if (itemId == R.id.nav_home) {
             startActivity(new Intent(this, MainActivity.class));
-            finish();
         } else if (itemId == R.id.nav_remote) {
             startActivity(new Intent(this, InteractionPage.class));
-            finish();
         } else if (itemId == R.id.nav_server) {
             startActivity(new Intent(this, ServersPage.class));
-            finish();
         } else if (itemId == R.id.nav_help) {
             startActivity(new Intent(this, InstructionsPage.class));
-            finish();
         }
+        finish();
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
