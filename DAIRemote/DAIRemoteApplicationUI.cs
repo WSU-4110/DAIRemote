@@ -52,7 +52,12 @@ namespace DAIRemote
 
         private void InitializeDisplayProfilesLayouts()
         {
-            string[] displayProfiles = Directory.GetFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"), "*.json");
+            string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+            string[] displayProfiles = Directory.GetFiles(folderPath, "*.json");
 
             foreach (var profile in displayProfiles)
             {

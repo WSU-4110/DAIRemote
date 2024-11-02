@@ -9,81 +9,70 @@
     android:fitsSystemWindows="true"
     tools:context=".ServersPage">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar" />
+
+        <TextView
+            android:id="@+id/availableHostsTxtV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="64dp"
+            android:fontFamily="@font/audiowide"
+            android:text="Available Hosts"
+            android:textColor="#206B23"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addServerBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintVertical_bias="0.95"
+            android:contentDescription="Add server host"
+            android:src="@drawable/baseline_add_24"
+            app:tint="@color/black"
+            android:backgroundTint="@color/green"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ListView
+            android:id="@+id/hostList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#000000"
+            android:clickable="true"
+            android:focusable="true"
+            android:fontFamily="@font/audiowide"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.9"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/availableHostsTxtV">
+
+        </ListView>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="225dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/main_menu_header"
-        app:menu="@menu/main_menu" />
+        app:menu="@menu/main_menu" >
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/availableHostsTxtV"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:fontFamily="@font/audiowide"
-                android:layout_marginTop="64dp"
-                android:text="Available Hosts"
-                android:textSize="16sp"
-                android:textColor="#206B23"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <include
-                android:id="@+id/toolbar"
-                layout="@layout/toolbar" />
-
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline_top"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                app:layout_constraintGuide_percent="0.04" />
-
-
-            <ListView
-                android:id="@+id/hostList"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:background="#000000"
-                android:clickable="true"
-                android:fontFamily="@font/audiowide"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHeight_percent="0.9"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/availableHostsTxtV">
-
-            </ListView>
-
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/addServerBttn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="178dp"
-                android:contentDescription="Add server host"
-                android:src="@drawable/baseline_add_24"
-                app:layout_constraintBottom_toBottomOf="@+id/hostList"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:tint="@color/primary" />
-
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-    </ScrollView>
-
-
-
+    </com.google.android.material.navigation.NavigationView>
 
 
 </androidx.drawerlayout.widget.DrawerLayout>
