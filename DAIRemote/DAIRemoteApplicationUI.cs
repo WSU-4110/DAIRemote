@@ -30,7 +30,7 @@ namespace DAIRemote
 
                 this.Invoke((MethodInvoker)(() =>
                 {
-                    InitializeAudioComponents();
+                    InitializeAudioDropDown();
                 }));
             });
 
@@ -42,7 +42,7 @@ namespace DAIRemote
             this.FormClosing += DAIRemoteApplicationUI_FormClosing;
             this.StartPosition = FormStartPosition.CenterScreen;
 
-            LoadStartupSetting();   // Checks onStartup default value to set
+            SetStartupStatus();   // Checks onStartup default value to set
         }
 
         private void DAIRemoteApplicationUI_Load(object sender, EventArgs e)
@@ -57,9 +57,9 @@ namespace DAIRemote
             {
                 Directory.CreateDirectory(folderPath);
             }
-            string[] displayProfiles = Directory.GetFiles(folderPath, "*.json");
+            string[] displayProfilesDirectory = Directory.GetFiles(folderPath, "*.json");
 
-            foreach (var profile in displayProfiles)
+            foreach (var profile in displayProfilesDirectory)
             {
                 Button loadProfileButton = new Button
                 {
@@ -81,22 +81,22 @@ namespace DAIRemote
                     ForeColor = Color.White
                 };
 
-                loadProfileButton.Click += loadProfileButton_Click;
+                loadProfileButton.Click += LoadProfileButton_Click;
                 DisplayLoadProfilesLayout.Controls.Add(loadProfileButton);
 
-                deleteProfileButton.Click += deleteProfileButton_Click;
+                deleteProfileButton.Click += DeleteProfileButton_Click;
                 DisplayDeleteProfilesLayout.Controls.Add(deleteProfileButton);
             }
         }
 
-        private void deleteProfileButton_Click(object sender, EventArgs e)
+        private void DeleteProfileButton_Click(object sender, EventArgs e)
         {
             Button clickedButton = sender as Button;
             string profileName = clickedButton.Tag.ToString();
             DisplayConfig.DeleteDisplaySettings(profileName);
         }
 
-        private void loadProfileButton_Click(object sender, EventArgs e)
+        private void LoadProfileButton_Click(object sender, EventArgs e)
         {
             Button clickedButton = sender as Button;
             string profileName = clickedButton.Tag.ToString();
@@ -112,7 +112,7 @@ namespace DAIRemote
             }
         }
 
-        private void InitializeAudioComponents()
+        private void InitializeAudioDropDown()
         {
             this.audioFormPanel = new Panel
             {
@@ -137,7 +137,7 @@ namespace DAIRemote
             DisplayConfig.SetDisplaySettings("displayConfig" + ".json");
         }
 
-        private void checkBoxStartup_CheckedChanged(object sender, EventArgs e)
+        private void CheckBoxStartup_CheckedChanged(object sender, EventArgs e)
         {
             string startupKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
             string appName = "DAIRemote";
@@ -194,14 +194,14 @@ namespace DAIRemote
             }
         }
 
-        private void LoadStartupSetting()
+        private void SetStartupStatus()
         {
             checkBoxStartup.Checked = IsAppInStartup();
         }
 
         private void BtnCycleAudioOutputs_Click(object sender, EventArgs e)
         {
-            audioManager.CycleToNextAudioDevice();
+            audioManager.CycleAudioDevice();
         }
     }
 }

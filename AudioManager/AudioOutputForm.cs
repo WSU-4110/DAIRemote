@@ -2,13 +2,13 @@ namespace AudioDeviceManager
 {
     public partial class AudioOutputForm : Form
     {
-        private ComboBox audioDeviceComboBox;
-        private static AudioOutputForm instance;
+        private ComboBox audioDevicesDropDown;
+        private static AudioOutputForm audioFormInstance;
         private AudioDeviceManager audioManager;
         public AudioOutputForm(AudioDeviceManager audioManager)
         {
             this.audioManager = audioManager;
-            audioDeviceComboBox = new ComboBox()
+            audioDevicesDropDown = new ComboBox()
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 FormattingEnabled = true,
@@ -18,53 +18,53 @@ namespace AudioDeviceManager
                 TabIndex = 0
             };
 
-            audioDeviceComboBox.SelectedIndexChanged += audioDeviceComboBox_SelectedIndexChanged;
-            Controls.Add(audioDeviceComboBox);
+            audioDevicesDropDown.SelectedIndexChanged += DropDownOnSelectedChange;
+            Controls.Add(audioDevicesDropDown);
             Name = "AudioOutputForm";
             Text = "Audio Output Switcher";
             BackColor = Color.FromArgb(50, 50, 50);
 
             // Listen to AudioDeviceManager's event handler for notifications
             audioManager.audioDevicesUpdated += OnAudioDevicesUpdated;
-            InitializeAudioOutputFormComponent(audioManager.ActiveDeviceNames);
+            PopulateDropDown(audioManager.ActiveDeviceNames);
         }
 
         public static AudioOutputForm GetInstance(AudioDeviceManager audioManager)
         {
-            if (instance == null || instance.IsDisposed)
+            if (audioFormInstance == null || audioFormInstance.IsDisposed)
             {
-                instance = new AudioOutputForm(audioManager)
+                audioFormInstance = new AudioOutputForm(audioManager)
                 {
                     TopLevel = false,
                     FormBorderStyle = FormBorderStyle.None,
                     Dock = DockStyle.Fill
                 };
             }
-            return instance;
+            return audioFormInstance;
         }
 
         private void OnAudioDevicesUpdated(List<string> devices)
         {
             if (InvokeRequired)
             {
-                Invoke(new Action(() => InitializeAudioOutputFormComponent(audioManager.ActiveDeviceNames)));
+                Invoke(new Action(() => PopulateDropDown(audioManager.ActiveDeviceNames)));
             }
             else
             {
-                InitializeAudioOutputFormComponent(audioManager.ActiveDeviceNames);
+                PopulateDropDown(audioManager.ActiveDeviceNames);
             }
         }
 
-        private void InitializeAudioOutputFormComponent(List<string> devices)
+        private void PopulateDropDown(List<string> audioDevices)
         {
-            audioDeviceComboBox.Items.Clear();
-            string defaultDevice = audioManager.getDefaultAudioDevice().FullName;
+            audioDevicesDropDown.Items.Clear();
+            string defaultAudioDevice = audioManager.GetDefaultAudioDevice().FullName;
             int defaultIndex = -1;
 
-            for (int i = 0; i < devices.Count; i++)
+            for (int i = 0; i < audioDevices.Count; i++)
             {
-                audioDeviceComboBox.Items.Add(devices[i]);
-                if (devices[i] == defaultDevice)
+                audioDevicesDropDown.Items.Add(audioDevices[i]);
+                if (audioDevices[i] == defaultAudioDevice)
                 {
                     defaultIndex = i;
                 }
@@ -72,16 +72,16 @@ namespace AudioDeviceManager
 
             if (defaultIndex != -1)
             {
-                audioDeviceComboBox.SelectedIndex = defaultIndex;
+                audioDevicesDropDown.SelectedIndex = defaultIndex;
             }
         }
 
-        private void audioDeviceComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void DropDownOnSelectedChange(object sender, EventArgs e)
         {
-            string selectedDevice = audioDeviceComboBox.SelectedItem as string;
-            if (selectedDevice != null && selectedDevice != audioManager.getDefaultAudioDevice().FullName)
+            string selectedDevice = audioDevicesDropDown.SelectedItem as string;
+            if (selectedDevice != null && selectedDevice != audioManager.GetDefaultAudioDevice().FullName)
             {
-                audioManager.setDefaultAudioDevice(selectedDevice);
+                audioManager.SetDefaultAudioDevice(selectedDevice);
             }
         }
     }

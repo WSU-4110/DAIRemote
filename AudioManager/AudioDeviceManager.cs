@@ -7,10 +7,10 @@ namespace AudioDeviceManager
 {
     public class AudioDeviceManager
     {
-        private static AudioDeviceManager instance;
+        private static AudioDeviceManager aduioDeviceManagerInstance;
         private CoreAudioDevice defaultAudioDevice;
-        private CoreAudioController controller;
-        private List<CoreAudioDevice> devices;
+        private CoreAudioController audioController;
+        private List<CoreAudioDevice> audioDevices;
         private double defaultAudioDeviceVolume;
         private bool defaultAudioMuteStatus;
 
@@ -22,60 +22,60 @@ namespace AudioDeviceManager
             // Initialize CoreAudioController, which combs through
             // all the available audio sources, hence the slow
             // initialization.
-            controller = new CoreAudioController();
+            audioController = new CoreAudioController();
 
             // Set the initial values for variables needed for functions
-            setAudioDefaults();
+            SetAudioDefaults();
 
             // Subscribe all playback devices, even inactive ones
-            foreach (CoreAudioDevice device in controller.GetPlaybackDevices())
+            foreach (CoreAudioDevice device in audioController.GetPlaybackDevices())
             {
                 device.StateChanged.Subscribe(OnAudioDeviceChanged);
             }
         }
 
-        private void setAudioDefaults()
+        private void SetAudioDefaults()
         {
             // Set the initial values for variables needed for functions
-            defaultAudioDevice = controller.DefaultPlaybackDevice;
+            defaultAudioDevice = audioController.DefaultPlaybackDevice;
             defaultAudioDeviceVolume = this.defaultAudioDevice.Volume;
             defaultAudioMuteStatus = defaultAudioDevice.IsMuted;
 
             // Get list of active devices
-            setActiveDevices();
+            SetActiveDevices();
         }
 
         private void OnAudioDeviceChanged(DeviceChangedArgs args)
         {
             Debug.WriteLine($"Audio device state changed for: {args.Device.FullName}");
-            setAudioDefaults();
+            SetAudioDefaults();
             audioDevicesUpdated?.Invoke(ActiveDeviceNames);
         }
 
         public static AudioDeviceManager GetInstance()
         {
-            if (instance == null)
+            if (aduioDeviceManagerInstance == null)
             {
-                instance = new AudioDeviceManager();
+                aduioDeviceManagerInstance = new AudioDeviceManager();
             }
-            return instance;
+            return aduioDeviceManagerInstance;
         }
 
-        public CoreAudioDevice getDefaultAudioDevice() { return this.defaultAudioDevice; }
+        public CoreAudioDevice GetDefaultAudioDevice() { return this.defaultAudioDevice; }
 
-        public void setDefaultAudioDevice(CoreAudioDevice audioDevice)
+        public void SetDefaultAudioDevice(CoreAudioDevice audioDevice)
         {
             this.defaultAudioDevice = audioDevice;
             this.defaultAudioDevice.SetAsDefault();
         }
 
-        public void setDefaultAudioDevice(string deviceFullName)
+        public void SetDefaultAudioDevice(string deviceFullName)
         {
-            CoreAudioDevice matchedDevice = devices.FirstOrDefault(d => d.FullName == deviceFullName);
+            CoreAudioDevice matchedDevice = audioDevices.FirstOrDefault(d => d.FullName == deviceFullName);
 
             if (matchedDevice != null)
             {
-                setDefaultAudioDevice(matchedDevice);
+                SetDefaultAudioDevice(matchedDevice);
             }
             else
             {
@@ -83,21 +83,21 @@ namespace AudioDeviceManager
             }
         }
 
-        public List<CoreAudioDevice> getActiveDevices() { return this.devices; }
+        public List<CoreAudioDevice> GetActiveDevices() { return this.audioDevices; }
 
-        public void setActiveDevices()
+        public void SetActiveDevices()
         {
-            devices = getAllActiveAudioDevices().ToList();
+            audioDevices = GetAllActiveAudioDevices().ToList();
         }
 
-        public IEnumerable<CoreAudioDevice> getAllActiveAudioDevices()
+        public IEnumerable<CoreAudioDevice> GetAllActiveAudioDevices()
         {
-            return controller.GetPlaybackDevices().Where(device => device.State == AudioSwitcher.AudioApi.DeviceState.Active);
+            return audioController.GetPlaybackDevices().Where(device => device.State == AudioSwitcher.AudioApi.DeviceState.Active);
         }
 
         public List<string> ActiveDeviceNames
         {
-            get { return devices.Select(d => d.FullName).ToList(); }
+            get { return audioDevices.Select(d => d.FullName).ToList(); }
         }
 
         public void SetVolume(int volume)
@@ -106,12 +106,12 @@ namespace AudioDeviceManager
             this.defaultAudioDevice.Volume = volume;
         }
 
-        public void IncVolume(int increment = 1)
+        public void IncreaseVolume(int increment = 1)
         {
-            double vol = GetVolume();
-            if (vol < 100 && increment > 0)
+            double volume = GetVolume();
+            if (volume < 100 && increment > 0)
             {
-                double setVolume = vol + increment;
+                double setVolume = volume + increment;
                 if (setVolume <= 100)
                 {
                     SetVolume((int)setVolume);
@@ -123,12 +123,12 @@ namespace AudioDeviceManager
             }
         }
 
-        public void DecVolume(int decrement = 1)
+        public void DecreaseVolume(int decrement = 1)
         {
-            double vol = GetVolume();
-            if (vol > 0 && decrement > 0)
+            double volume = GetVolume();
+            if (volume > 0 && decrement > 0)
             {
-                double setVolume = vol - decrement;
+                double setVolume = volume - decrement;
                 if (setVolume >= 0)
                 {
                     SetVolume((int)setVolume);
@@ -156,14 +156,14 @@ namespace AudioDeviceManager
             SetAudioMute(!defaultAudioMuteStatus);
         }
 
-        public void CycleToNextAudioDevice()
+        public void CycleAudioDevice()
         {
             // Get the index of the current default device
-            int currentIndex = devices.FindIndex(device => device.Id == defaultAudioDevice.Id);
+            int currentIndex = audioDevices.FindIndex(device => device.Id == defaultAudioDevice.Id);
             // Calculate the next index in a circular manner
-            int nextIndex = (currentIndex + 1) % devices.Count;
+            int nextIndex = (currentIndex + 1) % audioDevices.Count;
             // Set the next device as the default audio device
-            setDefaultAudioDevice(devices[nextIndex]);
+            SetDefaultAudioDevice(audioDevices[nextIndex]);
             Debug.WriteLine($"Switched to {defaultAudioDevice.FullName}");
             audioDevicesUpdated?.Invoke(ActiveDeviceNames);
         }

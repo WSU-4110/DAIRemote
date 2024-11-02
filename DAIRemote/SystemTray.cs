@@ -7,34 +7,34 @@ namespace DAIRemote
         private NotifyIcon trayIcon;
         private ContextMenuStrip trayMenu;
         private Form form;
-        private FileSystemWatcher profileDirWatcher;
-        private string profilesFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
+        private FileSystemWatcher displayProfileDirWatcher;
+        private string displayProfilesFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
 
         private Image aboutIcon;
-        private Image DAIRemoteLogo;
+        private Image DAIRemoteLogoIcon;
         private Image deleteProfileIcon;
         private Image exitIcon;
         private Image monitorIcon;
         private Image saveProfileIcon;
         private Image turnOffAllMonitorsIcon;
-        private Image plusIcon;
+        private Image addProfileIcon;
 
         public TrayIconManager(Form form)
         {
             this.form = form;
 
             aboutIcon = Image.FromFile("Resources/About.ico");
-            DAIRemoteLogo = Image.FromFile("Resources/DAIRemoteLogo.ico");
+            DAIRemoteLogoIcon = Image.FromFile("Resources/DAIRemoteLogo.ico");
             deleteProfileIcon = Image.FromFile("Resources/DeleteProfile.ico");
             exitIcon = Image.FromFile("Resources/Exit.ico");
             monitorIcon = Image.FromFile("Resources/Monitor.ico");
             saveProfileIcon = Image.FromFile("Resources/SaveProfile.ico");
             turnOffAllMonitorsIcon = Image.FromFile("Resources/TurnOffAllMonitors.ico");
-            plusIcon = Image.FromFile("Resources/AddProfile.ico");
+            addProfileIcon = Image.FromFile("Resources/AddProfile.ico");
 
-            if (!Directory.Exists(profilesFolderPath))
+            if (!Directory.Exists(displayProfilesFolderPath))
             {
-                Directory.CreateDirectory(profilesFolderPath);
+                Directory.CreateDirectory(displayProfilesFolderPath);
             }
 
             InitializeTrayIcon();
@@ -51,12 +51,12 @@ namespace DAIRemote
                 Visible = true
             };
 
-            profileDirWatcher = new FileSystemWatcher(@profilesFolderPath);
-            profileDirWatcher.NotifyFilter = NotifyFilters.FileName;
-            profileDirWatcher.Created += OnProfilesChanged;
-            profileDirWatcher.Deleted += OnProfilesChanged;
-            profileDirWatcher.Renamed += OnProfilesChanged;
-            profileDirWatcher.EnableRaisingEvents = true;
+            displayProfileDirWatcher = new FileSystemWatcher(displayProfilesFolderPath);
+            displayProfileDirWatcher.NotifyFilter = NotifyFilters.FileName;
+            displayProfileDirWatcher.Created += OnProfilesChanged;
+            displayProfileDirWatcher.Deleted += OnProfilesChanged;
+            displayProfileDirWatcher.Renamed += OnProfilesChanged;
+            displayProfileDirWatcher.EnableRaisingEvents = true;
 
             trayIcon.DoubleClick += (s, e) => ShowForm();
         }
@@ -116,9 +116,9 @@ namespace DAIRemote
                 Enabled = false,
             };
 
-            ToolStripMenuItem addNewProfile = new ToolStripMenuItem("Add New Profile", plusIcon, (sender, e) =>
+            ToolStripMenuItem addNewProfile = new ToolStripMenuItem("Add New Profile", addProfileIcon, (sender, e) =>
             {
-                SaveNewProfile(profilesFolderPath);
+                SaveNewProfile(displayProfilesFolderPath);
             });
 
             ToolStripMenuItem saveProfileMenuItem = new ToolStripMenuItem("Save Profile", saveProfileIcon);
@@ -127,26 +127,26 @@ namespace DAIRemote
             menu.Items.Add(loadProfilesLabel);
             menu.Items.Add(new ToolStripSeparator());
 
-            string[] jsonProfiles = Directory.GetFiles(profilesFolderPath, "*.json");
+            string[] displayProfiles = Directory.GetFiles(displayProfilesFolderPath, "*.json");
 
-            foreach (string jsonProfile in jsonProfiles)
+            foreach (string profile in displayProfiles)
             {
-                string fileName = Path.GetFileNameWithoutExtension(jsonProfile);
-                var jsonMenuItem = new ToolStripMenuItem(fileName, monitorIcon, (sender, e) =>
+                string fileName = Path.GetFileNameWithoutExtension(profile);
+                var profileLoadItem = new ToolStripMenuItem(fileName, monitorIcon, (sender, e) =>
                 {
-                    DisplayConfig.SetDisplaySettings(jsonProfile);
+                    DisplayConfig.SetDisplaySettings(profile);
                 });
 
-                menu.Items.Insert(2, jsonMenuItem);
+                menu.Items.Insert(2, profileLoadItem);
 
                 ToolStripMenuItem profileDeleteItem = new ToolStripMenuItem(fileName, monitorIcon, (sender, e) =>
                 {
-                    DeleteProfile(jsonProfile);
+                    DeleteProfile(profile);
                 });
 
                 ToolStripMenuItem profileSaveItem = new ToolStripMenuItem(fileName, monitorIcon, (sender, e) =>
                 {
-                    SaveProfile(jsonProfile);
+                    SaveProfile(profile);
                 });
 
                 deleteProfileMenuItem.DropDownItems.Add(profileDeleteItem);

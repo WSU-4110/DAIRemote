@@ -342,11 +342,11 @@ namespace UDPServerManagerForm
                     string audioAction = parts[1];
                     if (audioAction == "UP")
                     {
-                        audioManager.IncVolume(5);
+                        audioManager.IncreaseVolume(5);
                     }
                     else if (audioAction == "DOWN")
                     {
-                        audioManager.DecVolume(5);
+                        audioManager.DecreaseVolume(5);
                     }
                     else if (audioAction == "MUTE")
                     {
