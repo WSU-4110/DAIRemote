@@ -181,7 +181,7 @@ public class DisplayConfig
     https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-displayconfiggetdeviceinfo
     */
     [DllImport("User32.dll")]
-    public static extern int DisplayConfigGetDeviceInfo(ref DISPLAYCONFIG_TARGET_DEVICE_NAME deviceName);
+    private static extern int DisplayConfigGetDeviceInfo(ref DISPLAYCONFIG_TARGET_DEVICE_NAME deviceName);
 
     /*
     The DISPLAYCONFIG_DEVICE_INFO_HEADER structure contains display information about the device.
@@ -201,7 +201,7 @@ public class DisplayConfig
     https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-displayconfig_source_device_name
     */
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    public struct DISPLAYCONFIG_SOURCE_DEVICE_NAME : DISPLAYCONFIG_INFO_CONTRACT
+    public struct DISPLAYCONFIG_SOURCE_DEVICE_NAME : IDISPLAYCONFIG_INFO_CONTRACT
     {
         private const int cchDeviceName = 32;
 
@@ -264,9 +264,9 @@ public class DisplayConfig
     https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-displayconfig_target_device_name_flags
     */
     [StructLayout(LayoutKind.Sequential)]
-    public struct DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS
+    public readonly struct DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS
     {
-        private uint value;
+        private readonly uint value;
     }
 
     /*
@@ -292,7 +292,7 @@ public class DisplayConfig
         public DISPLAYCONFIG_VIDEO_OUTPUT_TECHNOLOGY baseOutputTechnology;
     }
 
-    //POINTL used in DISPLAYCONFIG_DESKTOP_IMAGE_INFO
+    // POINTL used in DISPLAYCONFIG_DESKTOP_IMAGE_INFO
     [StructLayout(LayoutKind.Sequential)]
     public struct POINTL
     {
@@ -344,7 +344,7 @@ public class DisplayConfig
     https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setdisplayconfig
     */
     [DllImport("User32.dll")]
-    public static extern int SetDisplayConfig(
+    private static extern int SetDisplayConfig(
         uint numPathArrayElements,
         [In] DISPLAYCONFIG_PATH_INFO[] pathArray,
         uint numModeInfoArrayElements,
@@ -478,7 +478,7 @@ public class DisplayConfig
     https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-querydisplayconfig
     */
     [DllImport("User32.dll")]
-    public static extern int QueryDisplayConfig(
+    private static extern int QueryDisplayConfig(
         QueryDisplayConfigFlags flags,
         ref uint numPathArrayElements,
         [Out] DISPLAYCONFIG_PATH_INFO[] pathInfoArray,
@@ -488,7 +488,7 @@ public class DisplayConfig
     );
 
     [DllImport("User32.dll")]
-    public static extern int GetDisplayConfigBufferSizes(QueryDisplayConfigFlags flags, out uint numPathArrayElements, out uint numModeInfoArrayElements);
+    private static extern int GetDisplayConfigBufferSizes(QueryDisplayConfigFlags flags, out uint numPathArrayElements, out uint numModeInfoArrayElements);
 
     /*
     The DISPLAYCONFIG_TOPOLOGY_ID enumeration specifies the type of display topology.
@@ -516,7 +516,7 @@ public class DisplayConfig
         StatusCode_INSUFFICIENTBUFFER = 122
     }
 
-    public interface DISPLAYCONFIG_INFO_CONTRACT
+    public interface IDISPLAYCONFIG_INFO_CONTRACT
     {
     }
 
@@ -532,13 +532,8 @@ public class DisplayConfig
                 type = DISPLAYCONFIG_DEVICE_INFO_TYPE.DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME
             }
         };
-        var error = DisplayConfigGetDeviceInfo(ref displayName);
-        if (error != ERROR_CONST)
-        {
-            throw new Win32Exception(error);
-        }
-
-        return displayName.monitorFriendlyDeviceName;
+        int error = DisplayConfigGetDeviceInfo(ref displayName);
+        return error != ERROR_CONST ? throw new Win32Exception(error) : displayName.monitorFriendlyDeviceName;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -552,7 +547,7 @@ public class DisplayConfig
         [JsonPropertyName("monitorDevicePath")]
         public string monitorDevicePath64
         {
-            get
+            readonly get
             {
                 string outValue = monitorDevicePath ?? "";
                 return Convert.ToBase64String(Encoding.UTF32.GetBytes(outValue));
@@ -575,7 +570,7 @@ public class DisplayConfig
         [JsonPropertyName("monitorFriendlyDevice")]
         public string monitorFriendlyDevice64
         {
-            get
+            readonly get
             {
                 string outValue = monitorFriendlyDevice ?? "";
                 return Convert.ToBase64String(Encoding.UTF32.GetBytes(outValue));
@@ -609,7 +604,7 @@ public class DisplayConfig
                 type = DISPLAYCONFIG_DEVICE_INFO_TYPE.DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME
             }
         };
-        var error = DisplayConfigGetDeviceInfo(ref monitorName);
+        int error = DisplayConfigGetDeviceInfo(ref monitorName);
         if (error != ERROR_CONST)
         {
             throw new Win32Exception(error);
@@ -630,12 +625,12 @@ public class DisplayConfig
     /// <param name="func"></param>
     /// <returns></returns>
     private static StatusCode MarshalStructureAndCall<T>(ref T displayConfig,
-        Func<IntPtr, StatusCode> func) where T : DISPLAYCONFIG_INFO_CONTRACT
+        Func<IntPtr, StatusCode> func) where T : IDISPLAYCONFIG_INFO_CONTRACT
     {
-        var ptr = Marshal.AllocHGlobal(Marshal.SizeOf(displayConfig));
+        nint ptr = Marshal.AllocHGlobal(Marshal.SizeOf(displayConfig));
         Marshal.StructureToPtr(displayConfig, ptr, false);
 
-        var returnValue = func(ptr);
+        StatusCode returnValue = func(ptr);
 
         displayConfig = (T)Marshal.PtrToStructure(ptr, displayConfig.GetType());
 
@@ -656,7 +651,6 @@ public class DisplayConfig
 
     public static bool GetDisplaySettings(ref DISPLAYCONFIG_PATH_INFO[] pathInfoArray, ref DISPLAYCONFIG_MODE_INFO[] modeInfoArray, ref MonitorAdditionalInfo[] additionalInfo, bool ActiveOnly)
     {
-        // active paths from the computer.
         DebugMsg("Getting display settings");
         QueryDisplayConfigFlags queryFlags = QueryDisplayConfigFlags.QueryDisplayConfigFlags_ALLPATHS;
         if (ActiveOnly)
@@ -665,7 +659,7 @@ public class DisplayConfig
         }
 
         DebugMsg("Getting buffer size");
-        var status = GetDisplayConfigBufferSizes(queryFlags, out uint numPathArrayElements, out uint numModeInfoArrayElements);
+        int status = GetDisplayConfigBufferSizes(queryFlags, out uint numPathArrayElements, out uint numModeInfoArrayElements);
         if (status == 0)
         {
             pathInfoArray = new DISPLAYCONFIG_PATH_INFO[numPathArrayElements];
@@ -679,17 +673,17 @@ public class DisplayConfig
 
             if (status == 0)
             {
-                // cleanup of modeInfo bad elements 
+                // Removal bad elements in modeInfo 
                 int validCount = 0;
                 foreach (DISPLAYCONFIG_MODE_INFO modeInfo in modeInfoArray)
                 {
                     if (modeInfo.infoType != DISPLAYCONFIG_MODE_INFO_TYPE.DISPLAYCONFIG_MODE_INFO_TYPE_ZERO)
-                    {   // count number of valid mode Infos
+                    {
                         validCount++;
                     }
                 }
                 if (validCount > 0)
-                {   // only cleanup if there is at least one valid element found
+                {
                     DISPLAYCONFIG_MODE_INFO[] tempInfoArray = new DISPLAYCONFIG_MODE_INFO[modeInfoArray.Length];
                     modeInfoArray.CopyTo(tempInfoArray, 0);
                     modeInfoArray = new DISPLAYCONFIG_MODE_INFO[validCount];
@@ -704,7 +698,7 @@ public class DisplayConfig
                     }
                 }
 
-                // cleanup of currently not available pathInfo elements
+                // Removal of unavailable pathInfo elements
                 validCount = 0;
                 foreach (DISPLAYCONFIG_PATH_INFO pathInfo in pathInfoArray)
                 {
@@ -714,7 +708,7 @@ public class DisplayConfig
                     }
                 }
                 if (validCount > 0)
-                {   // only cleanup if there is at least one valid element found
+                {
                     DISPLAYCONFIG_PATH_INFO[] tempInfoArray = new DISPLAYCONFIG_PATH_INFO[pathInfoArray.Length];
                     pathInfoArray.CopyTo(tempInfoArray, 0);
                     pathInfoArray = new DISPLAYCONFIG_PATH_INFO[validCount];
@@ -729,7 +723,7 @@ public class DisplayConfig
                     }
                 }
 
-                // get the display names for all modes
+                // Get display names
                 for (int iMode = 0; iMode < modeInfoArray.Length; iMode++)
                 {
                     if (modeInfoArray[iMode].infoType == DISPLAYCONFIG_MODE_INFO_TYPE.DISPLAYCONFIG_MODE_INFO_TYPE_TARGET)
@@ -761,10 +755,9 @@ public class DisplayConfig
 
     public static string PrintDisplaySettings(DISPLAYCONFIG_PATH_INFO[] pathInfoArray, DISPLAYCONFIG_MODE_INFO[] modeInfoArray)
     {
-        // Initialize result
         string output = "";
 
-        // Create an object to hold the data for serialization
+        // Create an object to hold the display information for serialization
         var displaySettings = new
         {
             pathInfoArray = pathInfoArray.Select(pathInfo => new
@@ -859,7 +852,6 @@ public class DisplayConfig
             }).ToList()
         };
 
-        // Serialize to JSON using MemoryStream and Utf8JsonWriter
         using (MemoryStream memoryStream = new())
         {
             using (Utf8JsonWriter jsonWriter = new(memoryStream, new JsonWriterOptions { Indented = true }))
@@ -883,11 +875,11 @@ public class DisplayConfig
         {
             string json = System.IO.File.ReadAllText(fileName);
             var displaySettings = JsonConvert.DeserializeObject<dynamic>(json);
-            var pathInfoList = new List<DISPLAYCONFIG_PATH_INFO>();
+            List<DISPLAYCONFIG_PATH_INFO> pathInfoList = [];
 
             foreach (var pathInfo in displaySettings.pathInfoArray)
             {
-                var sourceInfo = new DISPLAYCONFIG_PATH_SOURCE_INFO
+                DISPLAYCONFIG_PATH_SOURCE_INFO sourceInfo = new()
                 {
                     adapterId = new LUID
                     {
@@ -899,7 +891,7 @@ public class DisplayConfig
                     statusFlags = pathInfo.sourceInfo.statusFlags
                 };
 
-                var targetInfo = new DISPLAYCONFIG_PATH_TARGET_INFO
+                DISPLAYCONFIG_PATH_TARGET_INFO targetInfo = new()
                 {
                     adapterId = new LUID
                     {
@@ -928,18 +920,18 @@ public class DisplayConfig
                     flags = (uint)pathInfo.flags
                 });
             }
-            pathInfoArray = pathInfoList.ToArray();
+            pathInfoArray = [.. pathInfoList];
 
-            var modeInfoList = new List<DISPLAYCONFIG_MODE_INFO>();
+            List<DISPLAYCONFIG_MODE_INFO> modeInfoList = [];
             foreach (var modeInfo in displaySettings.modeInfoArray)
             {
-                var adapterId = new LUID
+                LUID adapterId = new()
                 {
                     LowPart = (uint)modeInfo.adapterId.LowPart,
                     HighPart = (int)modeInfo.adapterId.HighPart
                 };
 
-                var mode = new DISPLAYCONFIG_MODE_INFO
+                DISPLAYCONFIG_MODE_INFO mode = new()
                 {
                     id = (uint)modeInfo.id,
                     adapterId = adapterId,
@@ -995,9 +987,9 @@ public class DisplayConfig
 
                 modeInfoList.Add(mode);
             }
-            modeInfoArray = modeInfoList.ToArray();
+            modeInfoArray = [.. modeInfoList];
 
-            var additionalInfoList = new List<MonitorAdditionalInfo>();
+            List<MonitorAdditionalInfo> additionalInfoList = [];
             foreach (var info in displaySettings.additionalInfo)
             {
                 additionalInfoList.Add(new MonitorAdditionalInfo
@@ -1009,7 +1001,7 @@ public class DisplayConfig
                     monitorFriendlyDevice = (string)info.monitorFriendlyDevice
                 });
             }
-            additionalInfo = additionalInfoList.ToArray();
+            additionalInfo = [.. additionalInfoList];
 
             return true;
         }
@@ -1280,7 +1272,7 @@ public class DisplayConfig
             }
             fileName = Path.Combine(folderPath, fileName);
 
-            var options = new JsonSerializerOptions { WriteIndented = true };
+            JsonSerializerOptions options = new() { WriteIndented = true };
             string jsonString = System.Text.Json.JsonSerializer.Serialize(displaySettings, options);
             File.WriteAllText(fileName, jsonString);
 
