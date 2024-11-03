@@ -3,6 +3,7 @@ using DisplayProfileManager;
 using Microsoft.Win32;
 using UDPServerManagerForm;
 
+
 namespace DAIRemote
 {
     public partial class DAIRemoteApplicationUI : Form
@@ -11,6 +12,8 @@ namespace DAIRemote
         private AudioOutputForm audioForm;
         private Panel audioFormPanel;
         private AudioDeviceManager.AudioDeviceManager audioManager;
+        private Label lblCurrentHotkey;
+        private Keys selectedHotkey;
 
         public DAIRemoteApplicationUI()
         {
@@ -20,6 +23,8 @@ namespace DAIRemote
                 IsBackground = true
             };
             udpThread.Start();
+            selectedHotkey = Keys.None;
+            InitializeHotkeySelection();
 
             InitializeComponent();
             InitializeDisplayProfilesLayouts();
@@ -44,7 +49,43 @@ namespace DAIRemote
 
             LoadStartupSetting();   // Checks onStartup default value to set
         }
+        private void InitializeHotkeySelection()
+        {
+            ComboBox hotkeyComboBox = new ComboBox();
+            hotkeyComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            hotkeyComboBox.Items.AddRange(Enum.GetNames(typeof(Keys))); // Add all keys
+            hotkeyComboBox.SelectedIndexChanged += (s, e) =>
+            {
+                selectedHotkey = (Keys)Enum.Parse(typeof(Keys), hotkeyComboBox.SelectedItem.ToString());
+                lblCurrentHotkey.Text = $"Current Hotkey: {selectedHotkey}";
+            };
 
+            this.Controls.Add(hotkeyComboBox); // Add it to the form
+            hotkeyComboBox.Location = new Point(20, 150); // Position it on the form
+            hotkeyComboBox.Width = 200;
+
+            // Initialize the label to display the current hotkey
+            lblCurrentHotkey = new Label();
+            lblCurrentHotkey.Location = new Point(20, 180); // Position it on the form
+            lblCurrentHotkey.AutoSize = true; // Adjust size based on content
+            lblCurrentHotkey.ForeColor = Color.White; // Set text color
+            lblCurrentHotkey.Text = "Current Hotkey: None"; // Default text
+
+            this.Controls.Add(lblCurrentHotkey);
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            // Check if the pressed key matches the selected hotkey
+            if (keyData == selectedHotkey)
+            {
+                // Logic to cycle through audio devices
+                audioManager.CycleToNextAudioDevice();
+                return true; // Indicate the key was processed
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+        
         private void DAIRemoteApplicationUI_Load(object sender, EventArgs e)
         {
             this.Hide();
@@ -122,7 +163,7 @@ namespace DAIRemote
             audioForm.Show();
         }
 
-        private void BtnAddDisplayConfig_Click(object sender, EventArgs e)
+        public static void BtnAddDisplayConfig_Click(object sender, EventArgs e)
         {
             TrayIconManager.SaveNewProfile(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"));
         }
@@ -191,7 +232,7 @@ namespace DAIRemote
 
         private void LoadStartupSetting()
         {
-            checkBoxStartup.Checked = IsAppInStartup();
+            checkBoxStartup.Checked = IsAppInStartup(); 
         }
 
         private void BtnCycleAudioOutputs_Click(object sender, EventArgs e)

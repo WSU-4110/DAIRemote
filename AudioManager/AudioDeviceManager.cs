@@ -19,9 +19,7 @@ namespace AudioDeviceManager
 
         public AudioDeviceManager()
         {
-            // Initialize CoreAudioController, which combs through
-            // all the available audio sources, hence the slow
-            // initialization.
+            
             controller = new CoreAudioController();
 
             // Set the initial values for variables needed for functions
@@ -167,5 +165,13 @@ namespace AudioDeviceManager
             Debug.WriteLine($"Switched to {defaultAudioDevice.FullName}");
             audioDevicesUpdated?.Invoke(ActiveDeviceNames);
         }
+        public void RefreshDeviceList()
+        {
+            setActiveDevices();
+            defaultAudioDevice = controller.DefaultPlaybackDevice;
+            audioDevicesUpdated?.Invoke(ActiveDeviceNames);
+        }
+
+
     }
 }
