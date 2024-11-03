@@ -12,8 +12,7 @@ namespace DAIRemote
         private AudioOutputForm audioForm;
         private Panel audioFormPanel;
         private AudioDeviceManager.AudioDeviceManager audioManager;
-        private Label lblCurrentHotkey;
-        private Keys selectedHotkey;
+        private HotkeyManager hotkeyManager;
 
         public DAIRemoteApplicationUI()
         {
@@ -23,8 +22,6 @@ namespace DAIRemote
                 IsBackground = true
             };
             udpThread.Start();
-            selectedHotkey = Keys.None;
-            InitializeHotkeySelection();
 
             InitializeComponent();
             InitializeDisplayProfilesLayouts();
@@ -36,6 +33,7 @@ namespace DAIRemote
                 this.Invoke((MethodInvoker)(() =>
                 {
                     InitializeAudioComponents();
+                    InitializeHotkeySelection();
                 }));
             });
 
@@ -47,45 +45,36 @@ namespace DAIRemote
             this.FormClosing += DAIRemoteApplicationUI_FormClosing;
             this.StartPosition = FormStartPosition.CenterScreen;
 
-            LoadStartupSetting();   // Checks onStartup default value to set
+            LoadStartupSetting();   
         }
         private void InitializeHotkeySelection()
         {
-            ComboBox hotkeyComboBox = new ComboBox();
-            hotkeyComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            hotkeyComboBox.Items.AddRange(Enum.GetNames(typeof(Keys))); // Add all keys
+            if (hotkeyComboBox.Items.Count == 0)
+            {
+                hotkeyComboBox.Items.AddRange(Enum.GetNames(typeof(Keys))); 
+            }
+
+            hotkeyManager = new HotkeyManager(lblCurrentHotkey, audioManager);
+
+            if (hotkeyComboBox.Items.Count > 0)
+            {
+                hotkeyComboBox.SelectedIndex = 0; 
+            }
+
             hotkeyComboBox.SelectedIndexChanged += (s, e) =>
             {
-                selectedHotkey = (Keys)Enum.Parse(typeof(Keys), hotkeyComboBox.SelectedItem.ToString());
-                lblCurrentHotkey.Text = $"Current Hotkey: {selectedHotkey}";
+                var selectedHotkey = (Keys)Enum.Parse(typeof(Keys), hotkeyComboBox.SelectedItem.ToString());
+                hotkeyManager.SetHotkey(selectedHotkey); 
             };
-
-            this.Controls.Add(hotkeyComboBox); // Add it to the form
-            hotkeyComboBox.Location = new Point(20, 150); // Position it on the form
-            hotkeyComboBox.Width = 200;
-
-            // Initialize the label to display the current hotkey
-            lblCurrentHotkey = new Label();
-            lblCurrentHotkey.Location = new Point(20, 180); // Position it on the form
-            lblCurrentHotkey.AutoSize = true; // Adjust size based on content
-            lblCurrentHotkey.ForeColor = Color.White; // Set text color
-            lblCurrentHotkey.Text = "Current Hotkey: None"; // Default text
-
-            this.Controls.Add(lblCurrentHotkey);
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            // Check if the pressed key matches the selected hotkey
-            if (keyData == selectedHotkey)
-            {
-                // Logic to cycle through audio devices
-                audioManager.CycleToNextAudioDevice();
-                return true; // Indicate the key was processed
-            }
+            hotkeyManager.HandleKeyPress(keyData); // Delegate to HotkeyManager
             return base.ProcessCmdKey(ref msg, keyData);
         }
-        
+
+
         private void DAIRemoteApplicationUI_Load(object sender, EventArgs e)
         {
             this.Hide();

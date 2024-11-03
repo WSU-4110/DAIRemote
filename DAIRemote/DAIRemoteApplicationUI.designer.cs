@@ -26,6 +26,8 @@
             BtnCycleAudioOutputs = new Button();
             DisplayLoadProfilesLayout = new FlowLayoutPanel();
             DisplayDeleteProfilesLayout = new FlowLayoutPanel();
+            lblCurrentHotkey = new Label();
+            hotkeyComboBox = new ComboBox();
             SuspendLayout();
             // 
             // BtnSaveDisplayConfig
@@ -78,6 +80,29 @@
             DisplayDeleteProfilesLayout.Size = new Size(476, 189);
             DisplayDeleteProfilesLayout.TabIndex = 7;
             // 
+            // hotkeyComboBox
+            // 
+            hotkeyComboBox.Location = new Point(20, 150); 
+            hotkeyComboBox.Width = 200; 
+            hotkeyComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+
+            hotkeyComboBox.Items.AddRange(Enum.GetNames(typeof(Keys)));
+            hotkeyComboBox.SelectedIndexChanged += (s, e) =>
+            {
+                var selectedHotkey = (Keys)Enum.Parse(typeof(Keys), hotkeyComboBox.SelectedItem.ToString());
+            };
+            //
+            //lblCurrentHotkey
+            //
+            lblCurrentHotkey = new Label();
+            lblCurrentHotkey.Location = new Point(20, 300); 
+            lblCurrentHotkey.AutoSize = true; 
+            lblCurrentHotkey.ForeColor = Color.White; 
+            lblCurrentHotkey.Text = "Current Hotkey: None"; 
+
+            this.Controls.Add(lblCurrentHotkey);
+            this.Controls.Add(hotkeyComboBox); 
+            // 
             // DAIRemoteApplicationUI
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -94,6 +119,10 @@
             Load += DAIRemoteApplicationUI_Load;
             ResumeLayout(false);
             PerformLayout();
+
+
+
+
         }
 
         #endregion
@@ -103,5 +132,8 @@
         private Button BtnCycleAudioOutputs;
         private FlowLayoutPanel DisplayLoadProfilesLayout;
         private FlowLayoutPanel DisplayDeleteProfilesLayout;
+        private Label lblCurrentHotkey;
+        private ComboBox hotkeyComboBox;
+
     }
 }
