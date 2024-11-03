@@ -9,7 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DisplayProfileManager", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioManager", "..\AudioManager\AudioManager.csproj", "{B1064153-2065-4F28-BD20-409DAF3FEB21}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UDPServerManager", "..\UDPServerManager\UDPServerManager.csproj", "{AC67661C-671A-44FD-AD35-8309399DAA00}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UDPServerManager", "..\UDPServerManager\UDPServerManager.csproj", "{AC67661C-671A-44FD-AD35-8309399DAA00}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B7A054D4-A4A2-47F7-9DCC-ED47BF2EACEA}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
