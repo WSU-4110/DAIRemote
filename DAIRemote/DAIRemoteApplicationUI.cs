@@ -49,24 +49,29 @@ namespace DAIRemote
         }
         private void InitializeHotkeySelection()
         {
+            // Ensure the ComboBox is populated
             if (hotkeyComboBox.Items.Count == 0)
             {
-                hotkeyComboBox.Items.AddRange(Enum.GetNames(typeof(Keys))); 
+                hotkeyComboBox.Items.AddRange(Enum.GetNames(typeof(Keys)));
             }
 
+            // Initialize HotkeyManager with the label and audioManager
             hotkeyManager = new HotkeyManager(lblCurrentHotkey, audioManager);
 
+            // Select the first hotkey as default if available
             if (hotkeyComboBox.Items.Count > 0)
             {
-                hotkeyComboBox.SelectedIndex = 0; 
+                hotkeyComboBox.SelectedIndex = 0;
             }
 
+            // Handle selection change event to set the hotkey
             hotkeyComboBox.SelectedIndexChanged += (s, e) =>
             {
                 var selectedHotkey = (Keys)Enum.Parse(typeof(Keys), hotkeyComboBox.SelectedItem.ToString());
-                hotkeyManager.SetHotkey(selectedHotkey); 
+                hotkeyManager.SetHotkey(selectedHotkey);
             };
         }
+
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
