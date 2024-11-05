@@ -22,7 +22,6 @@ public class AboutPage extends AppCompatActivity implements NavigationView.OnNav
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
-
         drawerSetup(R.id.nav_about);
     }
 
@@ -41,16 +40,25 @@ public class AboutPage extends AppCompatActivity implements NavigationView.OnNav
         int itemId = item.getItemId();
         Log.d("Navigation", "Item selected: " + itemId);
 
-        if (itemId == R.id.nav_home) {
+        if (itemId == R.id.nav_remote) {
+            if (ConnectionManager.GetConnectionEstablished()) {
+                startActivity(new Intent(this, InteractionPage.class));
+            } else {
+                startActivity(new Intent(this, MainActivity.class));
+            }
+            finish();
+        } else if (itemId == R.id.nav_home) {
             startActivity(new Intent(this, MainActivity.class));
-        } else if (itemId == R.id.nav_remote) {
-            startActivity(new Intent(this, InteractionPage.class));
+            finish();
         } else if (itemId == R.id.nav_server) {
             startActivity(new Intent(this, ServersPage.class));
+            finish();
         } else if (itemId == R.id.nav_help) {
             startActivity(new Intent(this, InstructionsPage.class));
+            finish();
+        } else if (itemId == R.id.nav_about) {
+            // Current page, do nothing
         }
-        finish();
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;

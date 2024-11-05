@@ -17,14 +17,11 @@ import com.google.android.material.navigation.NavigationView;
 public class InstructionsPage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     DrawerLayout drawerLayout;
-    NavigationView navigationView;
-    Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_instructions);
-
         drawerSetup(R.id.nav_help);
     }
 
@@ -43,16 +40,25 @@ public class InstructionsPage extends AppCompatActivity implements NavigationVie
         int itemId = item.getItemId();
         Log.d("Navigation", "Item selected: " + itemId);
 
-        if (itemId == R.id.nav_home) {
+        if (itemId == R.id.nav_remote) {
+            if (ConnectionManager.GetConnectionEstablished()) {
+                startActivity(new Intent(this, InteractionPage.class));
+            } else {
+                startActivity(new Intent(this, MainActivity.class));
+            }
+            finish();
+        } else if (itemId == R.id.nav_home) {
             startActivity(new Intent(this, MainActivity.class));
-        } else if (itemId == R.id.nav_remote) {
-            startActivity(new Intent(this, InteractionPage.class));
+            finish();
         } else if (itemId == R.id.nav_server) {
             startActivity(new Intent(this, ServersPage.class));
+            finish();
+        } else if (itemId == R.id.nav_help) {
+            // Current page, do nothing
         } else if (itemId == R.id.nav_about) {
             startActivity(new Intent(this, AboutPage.class));
+            finish();
         }
-        finish();
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;

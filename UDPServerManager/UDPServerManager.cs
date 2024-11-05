@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using DisplayProfileManager;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -14,6 +15,8 @@ public class UDPServerHost
     private IPEndPoint remoteEP;
     private string clientAddress;
     private readonly int serverPort = 11000;
+    private DateTime lastHeartbeatTime;
+    private TimeSpan heartbeatTimeout;
     private AudioManager.AudioDeviceManager audioManager;
 
     public UDPServerHost()
@@ -22,12 +25,19 @@ public class UDPServerHost
         remoteEP = new IPEndPoint(IPAddress.Any, serverPort);
     }
 
-    public class DeviceHistoryEntry
+    private void SetLastHeartbeat(DateTime time)
     {
-        public string DeviceName { get; set; }
-        public string IpAddress { get; set; }
-        public DateTime Timestamp { get; set; }
+        this.lastHeartbeatTime = time;
     }
+
+    private DateTime GetLastHeartbeat() { return lastHeartbeatTime; }
+
+    private void SetHeartbeatTimeout(TimeSpan time)
+    {
+        this.heartbeatTimeout = time;
+    }
+
+    private TimeSpan GetHeartbeatTimeout() { return heartbeatTimeout; }
 
     private string ExtractDeviceName(string handshakeMessage)
     {
@@ -50,32 +60,17 @@ public class UDPServerHost
 
             Debug.WriteLine($"Received handshake from {remoteEP.Address}:{remoteEP.Port}: {handshakeMessage}");
 
-            // Check if the received message is the handshake request
-            if (handshakeMessage.StartsWith("Connection requested"))
-            {
-                return AwaitApproval(ExtractDeviceName(handshakeMessage));
-            }
-            else if (handshakeMessage.StartsWith("Hello, I'm"))
-            {
-                Debug.WriteLine($"Received client broadcast from {remoteEP.Address}:{remoteEP.Port}: {handshakeMessage}");
-                // Send an approval message back to the client
-                SendUdpMessage("Hello, I'm " + Environment.MachineName);
-
-                Debug.WriteLine($"Sent reply to client's broadcast at {remoteEP.Address}:{remoteEP.Port}\nAwaiting handshake...");
-                return false;
-            }
-            return false;
+            return HandleReceivedData(handshakeMessage);
         }
         catch (SocketException e)
         {
             Debug.WriteLine("Error during handshake: " + e.Message);
-            return false;
         }
         catch (ObjectDisposedException e)
         {
             Debug.WriteLine("Error: UdpClient has been disposed: " + e.Message);
-            return false;
         }
+        return false;
     }
 
     public bool AwaitApproval(string deviceName)
@@ -129,7 +124,6 @@ public class UDPServerHost
 
                     isClientConnected = true;
                     Debug.WriteLine("Handshake successful, starting message loop...");
-                    MessageLoop();
                     break;
                 }
             }
@@ -151,31 +145,17 @@ public class UDPServerHost
         try
         {
             udpServer.Client.ReceiveTimeout = 20000; // 20-second timeout for receive
-
-            DateTime lastHeartbeatTime = DateTime.Now;
-            TimeSpan heartbeatTimeout = TimeSpan.FromSeconds(2700);
+            SetLastHeartbeat(DateTime.Now);
+            SetHeartbeatTimeout(TimeSpan.FromSeconds(2700));
 
             while (isClientConnected)
             {
                 try
                 {
-                    // Check if the heartbeat timeout has been exceeded
-                    if (DateTime.Now - lastHeartbeatTime > heartbeatTimeout)
-                    {
-                        Debug.WriteLine("No heartbeat received in 60 seconds. Disconnecting...");
-                        isClientConnected = false; // Exit the loop
-                        break;
-                    }
-
-                    // Blocking call: wait for a message from the client
+                    // Blocking, wait for a message from the client
                     byte[] data = udpServer.Receive(ref remoteEP);
-
-                    // Check if input is by client
-                    if (IsClient(remoteEP.Address.ToString()))
-                    {
-                        string receivedData = Encoding.ASCII.GetString(data);
-                        HandleReceivedData(receivedData, ref lastHeartbeatTime);
-                    }
+                    string receivedData = Encoding.ASCII.GetString(data);
+                    HandleReceivedData(receivedData);
 
                 }
                 catch (SocketException e)
@@ -208,25 +188,12 @@ public class UDPServerHost
         }
     }
 
-    private void HandleReceivedData(string receivedData, ref DateTime lastHeartbeatTime)
+    private bool HandleReceivedData(string receivedData)
     {
-        if (receivedData.Equals("Shutdown requested", StringComparison.OrdinalIgnoreCase))
-        {
-            Debug.WriteLine("Shutdown message received. Exiting message loop...");
-            isClientConnected = false;
-        }
-        else if (receivedData.Equals("DroidHeartBeat", StringComparison.OrdinalIgnoreCase))
-        {
-            lastHeartbeatTime = DateTime.Now;
-            Debug.WriteLine("Acknowledged heartbeat");
-
-            SendUdpMessage("HeartBeat Ack");
-        }
-        else if (receivedData.StartsWith("Hello, I'm"))
+        if (receivedData.StartsWith("Hello, I'm"))
         {
             SendUdpMessage("Hello, I'm " + Environment.MachineName);
-            Debug.WriteLine("Sent response to broadcast");
-            InitiateHandshake();
+            Debug.WriteLine($"Sent reply to client's broadcast at {remoteEP.Address}:{remoteEP.Port}\nAwaiting handshake...");
         }
         else if (receivedData.StartsWith("Hello, DAI"))
         {
@@ -235,12 +202,37 @@ public class UDPServerHost
         }
         else if (receivedData.StartsWith("Connection requested"))
         {
-            AwaitApproval(ExtractDeviceName(receivedData));
+            return AwaitApproval(ExtractDeviceName(receivedData));
         }
-        else
+
+        if (isClientConnected)
         {
-            RetrieveCommand(receivedData);
+            // Check if the heartbeat timeout has been exceeded
+            if (DateTime.Now - GetLastHeartbeat() > GetHeartbeatTimeout())
+            {
+                Debug.WriteLine("No heartbeat received in 45 minutes. Disconnecting...");
+                isClientConnected = false;
+            }
+            if (IsClient(remoteEP.Address.ToString()))
+            {
+                if (receivedData.Equals("Shutdown requested", StringComparison.OrdinalIgnoreCase))
+                {
+                    Debug.WriteLine("Shutdown message received. Exiting message loop...");
+                    isClientConnected = false;
+                }
+                else if (receivedData.Equals("DroidHeartBeat", StringComparison.OrdinalIgnoreCase))
+                {
+                    SetLastHeartbeat(DateTime.Now);
+                    SendUdpMessage("HeartBeat Ack");
+                    Debug.WriteLine("Acknowledged heartbeat");
+                }
+                else
+                {
+                    RetrieveCommand(receivedData);
+                }
+            }
         }
+        return false;
     }
 
     private void SendUdpMessage(string message)
@@ -287,25 +279,25 @@ public class UDPServerHost
                     {
                         if (key.Equals("WIN()"))
                         {
-                            WindowsKey.PressWinKey();
+                            SpecialKeys.PressKey(SpecialKeys.LWin);
                         }
                         else
                         {
                             int from = key.IndexOf("WIN(") + "WIN(".Length;
-                            int to = key.LastIndexOf(")".ToCharArray()[0]);
-                            string winKeys = key[from..(to - from)];
+                            int to = key.LastIndexOf(")");
+                            string winKeys = key.Substring(from, to - from);
                             if (winKeys.Length > 1)
                             {
-                                WindowsKey.WinKeyDown();
+                                SpecialKeys.KeyDown(SpecialKeys.LWin);
                                 SendKeys.SendWait(winKeys);
-                                WindowsKey.WinKeyUp();
+                                SpecialKeys.KeyUp(SpecialKeys.LWin);
                             }
                             else
                             {
                                 winKeys = Regex.Replace(winKeys, "[+^%~(){}]", "{$0}");
-                                WindowsKey.WinKeyDown();
+                                SpecialKeys.KeyDown(SpecialKeys.LWin);
                                 SendKeys.SendWait(winKeys);
-                                WindowsKey.WinKeyUp();
+                                SpecialKeys.KeyUp(SpecialKeys.LWin);
                             }
                         }
                     }
@@ -356,27 +348,47 @@ public class UDPServerHost
                     List<string> devices = audioManager.ActiveDeviceNames;
                     string list = string.Join(",", devices);
 
-                    Debug.WriteLine("AudioDevices: " + list);
-                    SendUdpMessage("AudioDevices: " + list);
+                    SendUdpMessage("AudioDevices: " + list + "|Volume: " + audioManager.GetVolume() + "|DefaultAudioDevice: " + audioManager.GetDefaultAudioDevice().FullName);
                 }
                 else if (parts[1] == "TogglePlay")
                 {
-                    // !! Implement toggling
+                    SpecialKeys.PressKey(SpecialKeys.playPauseTrack);
                 }
                 else if (parts[1] == "PreviousTrack")
                 {
-                    // !! Implement previous
+                    SpecialKeys.PressKey(SpecialKeys.previousTrack);
                 }
                 else if (parts[1] == "NextTrack")
                 {
-                    // !! Implement previous
+                    SpecialKeys.PressKey(SpecialKeys.nextTrack);
                 }
                 break;
             case "AudioVolume":
-                audioManager.SetVolume(Convert.ToInt32(parts[1]));
+                audioManager.SetVolume(Convert.ToDouble(parts[1]));
                 break;
             case "AudioConnect":
                 audioManager.SetDefaultAudioDevice(parts[1]);
+                break;
+            case "DISPLAY":
+                try
+                {
+                    // Get all .json files from the directory (display profiles)
+                    string[] displayProfiles = Directory.GetFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"), "*.json");
+                    string displayProfileName = string.Join(",", Array.ConvertAll(displayProfiles, Path.GetFileNameWithoutExtension));
+
+                    Debug.WriteLine(displayProfileName);
+                    SendUdpMessage("DisplayProfiles: " + displayProfileName);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error returning display profiles to client: " + ex.Message);
+                }
+                break;
+            case "DisplayConnect":
+                DisplayConfig.SetDisplaySettings(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles/" + parts[1] + ".json"));
+                break;
+            case "HOST":
+                SendUdpMessage("HostName: " + Environment.MachineName);
                 break;
             default:
                 Console.WriteLine("Unknown command: " + command);

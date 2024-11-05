@@ -3,6 +3,7 @@ package com.example.dairemote_app;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -15,10 +16,13 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,58 +31,78 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
+
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class InteractionPage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    ImageView keyboardImgBtn;
-    EditText editText;
-    TextView interactionsHelpText;
-    private ImageView interactionHelp;
+    private DrawerLayout drawerLayout;
+
+    private EditText editText;
+    private TextView interactionsHelpText;
     private TextView startTutorial;
-    private Handler handler = new Handler();
-    // private TextView responseTextView;
-    private ImageView sendButton;
+    private ConnectionMonitor connectionMonitor;
+    private final Handler handler = new Handler();
 
-    DrawerLayout drawerLayout;
-    NavigationView navigationView;
-    Toolbar toolbar;
-    Toolbar keyboardToolbar;
-    GridLayout keyboardExtraBtnsLayout;
-    TextView moreOpts;
+    // Keyboard & Keyboard Toolbar variables
+    private Toolbar keyboardToolbar;
+    private GridLayout keyboardExtraBtnsLayout;
+    private int parenthesesCount = 0;
     private int currentPageIndex = 0;
-
-    private final String[][][] keyboardExtraRows = {{ // Page 1
-            {"F1", "F2", "F3", "F4", "F5", "F6"}, // Row 1
-            {"F7", "F8", "F9", "F10", "F11", "F12"} // Row 2
-    }, { // Page 2
-            {"SUP", "SDOWN", "MUTE", "TAB", "UP", "ESC"}, {"INSERT", "DELETE", "PRNTSCRN", "LEFT", "DOWN", "RIGHT"}}};
-
+    private TextView keyboardTextInputView;
+    private final StringBuilder keyCombination = new StringBuilder();
+    private boolean winActive = false;
+    private boolean ctrlActive = false;
+    private boolean shiftActive = false;
+    private boolean altActive = false;
+    private boolean fnActive = false;
+    private boolean modifierToggled = false;
     private final TextView[] p1r2Buttons = new TextView[6];
     private final TextView[] p1r3Buttons = new TextView[6];
-    private final String[] p1r2Keys = {"{F1}", "{F2}", "{F3}", "{F4}", "{F5}", "{F6}"};
-    private final String[] p1r3Keys = {"{F7}", "{F8}", "{F9}", "{F10}", "{F11}", "{F12}"};
-
     private final TextView[] p2r2Buttons = new TextView[6];
     private final TextView[] p2r3Buttons = new TextView[6];
+    private final String[] p1r2Keys = {"{F1}", "{F2}", "{F3}", "{F4}", "{F5}", "{F6}"};
+    private final String[] p1r3Keys = {"{F7}", "{F8}", "{F9}", "{F10}", "{F11}", "{F12}"};
     private final String[] p2r2Keys = {"UP", "DOWN", "MUTE", "{TAB}", "{UP}", "{ESC}"};
     private final String[] p2r3Keys = {"{INS}", "{DEL}", "{PRTSC}", "{LEFT}", "{DOWN}", "{RIGHT}"};
 
-    boolean winActive = false;
-    boolean ctrlActive = false;
-    boolean shiftActive = false;
-    boolean altActive = false;
-    boolean fnActive = false;
-    boolean modifierToggled = false;
-    StringBuilder keyCombination = new StringBuilder();
-    int parenthesesCount = 0;
-    TextView keyboardTextInputView;
-    ConnectionMonitor connectionMonitor;
+    // Audio Control Panel and Host Audio Devices variables
+    private ConstraintLayout audioControlPanel;
+    private SeekBar volumeSlider;
+    private TextView currentVolume;
+    private Button expandButton;
+    private boolean isRequestAudioDevicesTaskRunning = false;
+    private RecyclerView audioRecyclerViewOptions;
+    private AudioRecyclerAdapter audioRecyclerAdapter;
+    private boolean audioListVisible = false;
+
+    // Host Display Profiles variables
+    private boolean isRequestDisplayProfilesTaskRunning = false;
+    private RecyclerView displayRecyclerViewOptions;
+    private DisplayProfilesRecyclerAdapter displayProfilesRecyclerAdapter;
+    private boolean displayListVisible = false;
+
+    // Touch interactions variables
+    private float startX, startY, x, y, deltaX, deltaY, currentX, currentY, deltaT;
+    private long startTime;
+    private final int CLICK_THRESHOLD = 125; // Maximum time to register
+    private boolean rmbDetected = false;    // Suppress movement during rmb
+    private boolean scrolling = false; // Suppress other inputs during scroll
+    private final float mouseSensitivity = 1;
+    private int initialPointerCount = 0;
 
     public void startHome() {
         notifyUser(InteractionPage.this, "Connection lost");
@@ -107,37 +131,57 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_interaction);
 
-        Log.d("TEST", "BOUTA INITIATE");
-        Log.d("TEST", ConnectionManager.GetServerAddress());
         connectionMonitor = ConnectionMonitor.GetInstance(MainActivity.connectionManager);
         if (!connectionMonitor.IsHeartbeatRunning()) {
             if(ConnectionManager.GetConnectionEstablished()) {
                 connectionMonitor.StartHeartbeat(5000);
-            } else {
-                Log.d("TEST", "CONNECTION IS NOT ESTABLISHED IN HEARTBEAT");
             }
         }
-        Log.d("TEST", "INITIATED");
 
         FrameLayout touchpadFrame = findViewById(R.id.touchpadFrame);
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         drawerSetup(R.id.nav_remote);
-        keyboardImgBtn = findViewById(R.id.keyboardImgBtn);
+        ImageView keyboardImgBtn = findViewById(R.id.keyboardImgBtn);
         editText = findViewById(R.id.editText);
         keyboardToolbar = findViewById(R.id.keyboardToolbar);
         keyboardExtraBtnsLayout = findViewById(R.id.keyboardExtraButtonsGrid);
         keyboardTextInputView = findViewById(R.id.keyboardInputView);
         // Initialize row 2 and 3 button arrays for keyboardToolbar
         initButtonRows();
-        moreOpts = findViewById(R.id.moreOpt);
+        TextView moreOpts = findViewById(R.id.moreOpt);
         moreOpts.setOnClickListener(v -> keyboardExtraNextPage());
         // Commented out the text view to display the system's response
         // Maybe future feature
         // responseTextView = findViewById(R.id.responseTextView);
-        sendButton = findViewById(R.id.udptest);
-        interactionHelp = findViewById(R.id.interactionsHelp);
+        ImageView sendButton = findViewById(R.id.udptest);
+        ImageView displayButton = findViewById(R.id.displays);
+        ImageView interactionHelp = findViewById(R.id.interactionsHelp);
         interactionsHelpText = findViewById(R.id.interationsHelpTextView);
         startTutorial = findViewById(R.id.tutorialStartBtn);
+
+        // Audio Control Panel
+        volumeSlider = findViewById(R.id.volume_slider);
+        expandButton = findViewById(R.id.expand_audio_button);
+        ImageButton playPauseButton = findViewById(R.id.audio_play_pause_button);
+        ImageButton previousButton = findViewById(R.id.audio_previous_button);
+        ImageButton nextButton = findViewById(R.id.audio_next_button);
+        currentVolume = findViewById(R.id.audio_slider_volume);
+        ImageView audioButton = findViewById(R.id.audiocycle);
+        audioControlPanel = findViewById(R.id.audio_control_panel);
+        audioRecyclerViewOptions = findViewById(R.id.audio_recyclerview);
+
+        audioRecyclerViewOptions.setLayoutManager(new LinearLayoutManager(this));
+        audioRecyclerAdapter = new AudioRecyclerAdapter(new ArrayList<>());
+        audioRecyclerViewOptions.setAdapter(audioRecyclerAdapter);
+
+        volumeSlider.setProgress(100);
+
+        // Display Recycler
+        displayRecyclerViewOptions = findViewById(R.id.display_recyclerview);
+
+        displayRecyclerViewOptions.setLayoutManager(new LinearLayoutManager(this));
+        displayProfilesRecyclerAdapter = new DisplayProfilesRecyclerAdapter(new ArrayList<>());
+        displayRecyclerViewOptions.setAdapter(displayProfilesRecyclerAdapter);
 
         TutorialMediator tutorial = TutorialMediator.GetInstance(new AlertDialog.Builder(InteractionPage.this));
         if (tutorial.getTutorialOn()) {
@@ -186,13 +230,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     return false;
                 }
             });
-            float startX, startY, x, y, deltaX, deltaY, currentX, currentY, deltaT;
-            long startTime;
-            final int CLICK_THRESHOLD = 125; // Maximum time to register
-            boolean rmbDetected = false;    // Suppress movement during rmb
-            boolean scrolling = false; // Suppress other inputs during scroll
-            final float mouseSensitivity = 1;
-            int initialPointerCount = 0;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -260,6 +297,10 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             @Override
             public void onClick(View v) {
                 if (ConnectionManager.GetConnectionEstablished()) {
+                    // Hide Audio Control Panel && Display Profiles List
+                    hideAudioControlPanel();
+                    hideDisplayProfilesList();
+
                     editText.setVisibility(View.VISIBLE);
                     editText.setCursorVisible(false);
                     editText.requestFocus();
@@ -267,12 +308,101 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
                 } else {
-                    MainActivity.connectionManager.Shutdown();
-                    notifyUser(InteractionPage.this, "Disconnected from host");
-                    startActivity(new Intent(InteractionPage.this, MainActivity.class));
-                    finish();
+                    startHome();
                 }
+            }
+        });
 
+        displayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ConnectionManager.GetConnectionEstablished()) {
+                    displayListVisible = !displayListVisible;
+                    if(displayListVisible) {
+                        hideAudioControlPanel();
+                        try {
+                            requestDisplayProfiles();
+                        } catch (SocketException e) {
+                            throw new RuntimeException(e);
+                        }
+                        displayRecyclerViewOptions.setVisibility(View.VISIBLE);
+                    } else {
+                        displayRecyclerViewOptions.setVisibility(View.GONE);
+                        displayListVisible = false;
+                    }
+                } else {
+                    startHome();
+                }
+            }
+        });
+
+        audioButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ConnectionManager.GetConnectionEstablished()) {
+                    if (audioControlPanel.getVisibility() == View.GONE) {
+                        hideDisplayProfilesList();
+                        audioControlPanel.setVisibility(View.VISIBLE);
+                        try {
+                            requestAudioDevices();
+                        } catch (SocketException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        hideAudioControlPanel();
+                    }
+                } else {
+                    startHome();
+                }
+            }
+        });
+
+        // Handle Expand Button Click
+        expandButton.setOnClickListener(v -> {
+            audioListVisible = !audioListVisible;
+            if(audioListVisible) {
+                audioRecyclerViewOptions.setVisibility(View.VISIBLE);
+                expandButton.setText("v");
+            } else {
+                audioRecyclerViewOptions.setVisibility(View.GONE);
+                expandButton.setText("^");
+            }
+        });
+
+        playPauseButton.setOnClickListener(v -> {
+            if (!MainActivity.connectionManager.SendHostMessage("AUDIO TogglePlay")) {
+                startHome();
+            }
+        });
+
+        previousButton.setOnClickListener(v -> {
+            if (!MainActivity.connectionManager.SendHostMessage("AUDIO PreviousTrack")) {
+                startHome();
+            }
+        });
+
+        nextButton.setOnClickListener(v -> {
+            if (!MainActivity.connectionManager.SendHostMessage("AUDIO NextTrack")) {
+                startHome();
+            }
+        });
+
+        volumeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (!MainActivity.connectionManager.SendHostMessage("AudioVolume " + seekBar.getProgress())) {
+                    startHome();
+                } else {
+                    currentVolume.setText(String.valueOf(progress));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
 
@@ -332,7 +462,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         startHome();
                     } else if (modifierToggled) {
                         keyCombination.append(addedChar);
-                        Log.d("KeyCombination", keyCombination.toString());
+                        Log.i("KeyCombination", keyCombination.toString());
                     }
                     keyboardTextInputView.append(String.valueOf(addedChar));
                 }
@@ -349,9 +479,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             public void onClick(View v) {
                 if (ConnectionManager.GetConnectionEstablished()) {
                     MainActivity.connectionManager.Shutdown();
-                    notifyUser(InteractionPage.this, "Disconnected from host");
-                    startActivity(new Intent(InteractionPage.this, MainActivity.class));
-                    finish();
+                    startHome();
                 }
             }
         });
@@ -530,7 +658,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             }
 
             MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE " + keyCombination);
-            Log.d("KeyboardToolbar", "KEYBOARD_WRITE " + keyCombination);
+            Log.i("KeyboardToolbar", "KEYBOARD_WRITE " + keyCombination);
 
             resetKeyboardModifiers();
 
@@ -547,10 +675,10 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             keyboardTextInputView.append(msg);
         } else if (audio) {
             MainActivity.connectionManager.SendHostMessage("AUDIO " + msg);
-            Log.d("KeyboardToolbar", "AUDIO " + msg);
+            Log.i("KeyboardToolbar", "AUDIO " + msg);
         } else if (!msg.isEmpty()) {
             MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE " + msg);
-            Log.d("KeyboardToolbar", "KEYBOARD_WRITE " + msg);
+            Log.i("KeyboardToolbar", "KEYBOARD_WRITE " + msg);
         }
     }
 
@@ -591,7 +719,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     }
 
     private void keyboardExtraNextPage() {
-        currentPageIndex = (currentPageIndex + 1) % keyboardExtraRows.length;
+        currentPageIndex = (currentPageIndex + 1) % 2;
         keyboardExtraSetRowVisibility(currentPageIndex);
     }
 
@@ -635,6 +763,15 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
+        } else if (audioListVisible) {
+            audioRecyclerViewOptions.setVisibility(View.GONE);
+            expandButton.setText("^");
+            audioListVisible = false;
+        }  else if (audioControlPanel.getVisibility() == View.VISIBLE) {
+            audioControlPanel.setVisibility(View.GONE);
+        }  else if (displayListVisible) {
+            displayRecyclerViewOptions.setVisibility(View.GONE);
+            displayListVisible = false;
         } else if (!(editText.getVisibility() == View.VISIBLE)) {
             startActivity(new Intent(InteractionPage.this, MainActivity.class));
         } else {
@@ -645,6 +782,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     @Override
     protected void onPause() {
         if (connectionMonitor.IsHeartbeatRunning()) {
+            Log.d("TEST", "STOPPING HEARTBEAT");
             connectionMonitor.StopHeartbeat();
         }
         super.onPause();
@@ -664,16 +802,21 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         int itemId = item.getItemId();
         Log.d("Navigation", "Item selected: " + itemId);
 
-        if (itemId == R.id.nav_home) {
+        if (itemId == R.id.nav_remote) {
+            // Current page, do nothing
+        } else if (itemId == R.id.nav_home) {
             startActivity(new Intent(this, MainActivity.class));
+            finish();
         } else if (itemId == R.id.nav_server) {
             startActivity(new Intent(this, ServersPage.class));
+            finish();
         } else if (itemId == R.id.nav_help) {
             startActivity(new Intent(this, InstructionsPage.class));
+            finish();
         } else if (itemId == R.id.nav_about) {
             startActivity(new Intent(this, AboutPage.class));
+            finish();
         }
-        finish();
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
@@ -681,8 +824,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
     public void drawerSetup(int page) {
         drawerLayout = findViewById(R.id.drawer_layout);
-        navigationView = findViewById(R.id.nav_view);
-        toolbar = findViewById(R.id.toolbar);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        Toolbar toolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
 
@@ -700,5 +843,118 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
         // Select the home icon by default when opening navigation menu
         navigationView.setCheckedItem(page);
+    }
+
+    private void hideAudioControlPanel() {
+        if(audioControlPanel.getVisibility() == View.VISIBLE) {
+            audioRecyclerViewOptions.setVisibility(View.GONE);
+            expandButton.setText("^");
+            audioControlPanel.setVisibility(View.GONE);
+            audioListVisible = false;
+        }
+    }
+
+    private void hideDisplayProfilesList () {
+        if(displayListVisible) {
+            displayRecyclerViewOptions.setVisibility(View.GONE);
+            displayListVisible = false;
+        }
+    }
+
+    private void loadAudioDevices(List<String> audioDevices) {
+        audioRecyclerAdapter.updateOptions(audioDevices);
+    }
+
+    private void loadAudioDeviceDefault(String defaultAudioDevice) {
+        audioRecyclerAdapter.SetSelectedPosition(defaultAudioDevice);
+    }
+
+    private void loadDisplayProfiles(List<String> displayProfiles) {
+        displayProfilesRecyclerAdapter.updateOptions(displayProfiles);
+    }
+
+    private void requestAudioDevices() throws SocketException {
+        if (!isRequestAudioDevicesTaskRunning) {
+            isRequestAudioDevicesTaskRunning = true;
+            new RequestAudioDevicesTask().execute();
+        }
+    }
+
+    private void requestDisplayProfiles() throws SocketException {
+        if (!isRequestDisplayProfilesTaskRunning) {
+            isRequestDisplayProfilesTaskRunning = true;
+            new RequestDisplayProfilesTask().execute();
+        }
+    }
+
+    private class RequestAudioDevicesTask extends AsyncTask<Void, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            return MainActivity.connectionManager.RequestHostAudioDevices();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if (!result) {
+                startHome();
+            } else {
+                String response = MainActivity.connectionManager.GetHostAudioList();
+
+                if (response != null && response.startsWith("AudioDevices: ")) {
+                    // Split using "|" as the delimiter
+                    String[] parts = response.split("\\|");
+
+                    if (parts.length >= 3) {
+                        // Load audio devices on recycler
+                        String devicesPart = parts[0].substring("AudioDevices: ".length());
+                        List<String> deviceList = Arrays.asList(devicesPart.split(","));
+                        Log.d("InteractionPageAudio", "Audio devices: " + deviceList);
+                        loadAudioDevices(deviceList);
+                        Log.d("InteractionPageAudio", "Audio default device: " + parts[2].substring("DefaultAudioDevice: ".length()));
+                        loadAudioDeviceDefault(parts[2].substring("DefaultAudioDevice: ".length()));
+
+                        // Set seekbar to current host volume
+                        String volumePart = parts[1].substring("Volume: ".length());
+                        Log.d("InteractionPageAudio", "Volume: " + Integer.parseInt(volumePart));
+                        volumeSlider.setProgress(Integer.parseInt(volumePart));
+                        currentVolume.setText(volumePart);
+                    } else {
+                        Log.e("InteractionPageAudio", "Unexpected response format: " + response);
+                    }
+                } else {
+                    Log.e("InteractionPageAudio", "Unexpected response format: " + response);
+                }
+            }
+            isRequestAudioDevicesTaskRunning = false;
+        }
+    }
+
+    private class RequestDisplayProfilesTask extends AsyncTask<Void, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            return MainActivity.connectionManager.RequestHostDisplayProfiles();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if (!result) {
+                startHome();
+            } else {
+                String response = MainActivity.connectionManager.GetHostDisplayProfilesList();
+
+                if (response != null && response.startsWith("DisplayProfiles: ")) {
+                    // Load audio devices on recycler
+                    String displayProfiles = response.substring("DisplayProfiles: ".length());
+                    List<String> deviceList = Arrays.asList(displayProfiles.split(","));
+                    Log.d("InteractionPageDisplays", "Display Profiles: " + deviceList);
+                    loadDisplayProfiles(deviceList);
+                } else {
+                    Log.e("InteractionPageDisplays", "Unexpected response format: " + response);
+                }
+            }
+            isRequestDisplayProfilesTaskRunning = false;
+        }
     }
 }

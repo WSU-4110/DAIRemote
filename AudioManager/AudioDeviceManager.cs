@@ -11,8 +11,6 @@ public class AudioDeviceManager
     private CoreAudioDevice defaultAudioDevice;
     private CoreAudioController audioController;
     private List<CoreAudioDevice> audioDevices;
-    private double defaultAudioDeviceVolume;
-    private bool defaultAudioMuteStatus;
 
     public delegate void AudioDevicesUpdatedEventHandler(List<string> devices);
     public event AudioDevicesUpdatedEventHandler AudioDevicesUpdated;
@@ -38,9 +36,6 @@ public class AudioDeviceManager
     {
         // Set the initial values for variables needed for functions
         defaultAudioDevice = audioController.DefaultPlaybackDevice;
-        defaultAudioDeviceVolume = this.defaultAudioDevice.Volume;
-        defaultAudioMuteStatus = defaultAudioDevice.IsMuted;
-
         // Get list of active devices
         SetActiveDevices();
     }
@@ -62,8 +57,11 @@ public class AudioDeviceManager
 
     public void SetDefaultAudioDevice(CoreAudioDevice audioDevice)
     {
-        this.defaultAudioDevice = audioDevice;
-        this.defaultAudioDevice.SetAsDefault();
+		if (audioDevice != this.defaultAudioDevice)
+		{
+			this.defaultAudioDevice = audioDevice;
+			this.defaultAudioDevice.SetAsDefault();
+		}
     }
 
     public void SetDefaultAudioDevice(string deviceFullName)
@@ -72,7 +70,10 @@ public class AudioDeviceManager
 
         if (matchedDevice != null)
         {
-            SetDefaultAudioDevice(matchedDevice);
+			if ((matchedDevice != this.defaultAudioDevice))
+			{
+				SetDefaultAudioDevice(matchedDevice);
+			}
         }
         else
         {
@@ -94,11 +95,15 @@ public class AudioDeviceManager
 
     public List<string> ActiveDeviceNames => audioDevices.Select(d => d.FullName).ToList();
 
-    public void SetVolume(int volume)
+    public void SetVolume(double volume)
     {
-        defaultAudioDeviceVolume = volume;
-        this.defaultAudioDevice.Volume = volume;
+		this.defaultAudioDevice.Volume = volume;
     }
+
+	public double GetVolume()
+	{
+		return this.defaultAudioDevice.Volume;
+	}
 
     public void IncreaseVolume(int increment = 1)
     {
@@ -108,7 +113,7 @@ public class AudioDeviceManager
             double setVolume = volume + increment;
             if (setVolume <= 100)
             {
-                SetVolume((int)setVolume);
+                SetVolume(setVolume);
             }
             else
             {
@@ -125,7 +130,7 @@ public class AudioDeviceManager
             double setVolume = volume - decrement;
             if (setVolume >= 0)
             {
-                SetVolume((int)setVolume);
+                SetVolume(setVolume);
             }
             else
             {
@@ -134,20 +139,14 @@ public class AudioDeviceManager
         }
     }
 
-    public double GetVolume()
-    {
-        return defaultAudioDeviceVolume;
-    }
-
     public void SetAudioMute(bool mute = true)
     {
-        defaultAudioMuteStatus = mute;
         this.defaultAudioDevice.Mute(mute);
     }
 
     public void ToggleAudioMute()
     {
-        SetAudioMute(!defaultAudioMuteStatus);
+		SetAudioMute(!this.defaultAudioDevice.IsMuted);
     }
 
     public void CycleAudioDevice()

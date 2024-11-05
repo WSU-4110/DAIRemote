@@ -174,18 +174,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        Log.d("MainActivity", "Item selected: " + itemId);
+        Log.i("MainActivity", "Item selected: " + itemId);
 
         if (itemId == R.id.nav_remote) {
-            startActivity(new Intent(this, InteractionPage.class));
-        } else if (itemId == R.id.nav_help) {
-            startActivity(new Intent(this, InstructionsPage.class));
+            if (ConnectionManager.GetConnectionEstablished()) {
+                startActivity(new Intent(this, InteractionPage.class));
+            } else {
+                notifyUser(this, "Not currently connected");
+                startActivity(new Intent(this, MainActivity.class));
+            }
+            finish();
+        } else if (itemId == R.id.nav_home) {
+            // Current page, do nothing
         } else if (itemId == R.id.nav_server) {
             startActivity(new Intent(this, ServersPage.class));
+            finish();
+        } else if (itemId == R.id.nav_help) {
+            startActivity(new Intent(this, InstructionsPage.class));
+            finish();
         } else if (itemId == R.id.nav_about) {
             startActivity(new Intent(this, AboutPage.class));
+            finish();
         }
-        finish();
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;

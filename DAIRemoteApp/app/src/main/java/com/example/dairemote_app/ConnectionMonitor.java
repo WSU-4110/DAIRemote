@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import java.net.DatagramSocket;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,12 +12,15 @@ import java.util.concurrent.Executors;
 public class ConnectionMonitor {
     public static ConnectionMonitor connectionMonitorInstance;
     private ConnectionManager connectionManager;
-    private static ExecutorService executorService;
+    private static ExecutorService heartbeatExecutorService;
     private Handler handler;
     private Runnable heartbeatService;
-    private boolean serviceRunning = true;
+    private static String heartbeatResponse;
+    private boolean serviceRunning = false;
+    private SocketManager heartbeatSocket;
 
     public ConnectionMonitor(ConnectionManager manager) {
+        SetHeartbeatSocket(new SocketManager(ConnectionManager.GetInetAddress(), ConnectionManager.GetPort()));
         SetConnectionManager(manager);
         handler = new Handler(Looper.getMainLooper());
         heartbeatService = new Runnable() {
@@ -26,13 +30,13 @@ public class ConnectionMonitor {
                 if (SendHeartbeat()) {
                     handler.postDelayed(this, 2000); // Repeat every 2 seconds
                 } else {
-                    serviceRunning = false;
-                    connectionManager.SetConnectionEstablished(false);
+                    SetServiceRunning(false);
+                    GetConnectionManager().SetConnectionEstablished(false);
                 }
             }
         };
 
-        this.executorService = Executors.newCachedThreadPool();
+        this.heartbeatExecutorService = Executors.newCachedThreadPool();
     }
 
     public static ConnectionMonitor GetInstance(ConnectionManager manager) {
@@ -50,63 +54,94 @@ public class ConnectionMonitor {
         return this.connectionManager;
     }
 
-    public boolean IsHeartbeatRunning() {
-        return serviceRunning;
+    public void SetHeartbeatSocket(SocketManager socket) { this.heartbeatSocket = socket; }
+
+    public SocketManager GetHeartbeatSocket() { return this.heartbeatSocket; }
+
+    public static void SetHeartbeatResponse(String response) {
+        heartbeatResponse = response;
     }
 
+    public static String GetHeartbeatResponse() {
+        return heartbeatResponse;
+    }
+
+    public boolean IsHeartbeatRunning() {
+        return GetServiceRunning();
+    }
+
+    public void SetServiceRunning(boolean serviceRunning) { this.serviceRunning = serviceRunning; };
+
+    public boolean GetServiceRunning() { return this.serviceRunning; };
+
     public void StartHeartbeat() {
-        if(!serviceRunning) {
+        if(!GetServiceRunning()) {
             handler.post(heartbeatService);
-            serviceRunning = true;
+            SetServiceRunning(true);
         }
     }
 
     public void StartHeartbeat(int delay) {
-        if(!serviceRunning) {
+        if(!GetServiceRunning()) {
             handler.postDelayed(heartbeatService, delay);
-            serviceRunning = true;
+            SetServiceRunning(true);
         }
     }
 
     public boolean SendHeartbeat() {
-        ConnectionManager manager = GetConnectionManager();
-        CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
-            try {
-                manager.SendData("DroidHeartBeat", manager.GetInetAddress());
-                manager.WaitForResponse(3000);
+        if (heartbeatExecutorService.isShutdown()) {
+            Log.e("ConnectionMonitor", "Heartbeat service is not running, cannot send heartbeat.");
+            return false;
+        }
 
-                if (!ConnectionManager.GetServerResponse().equalsIgnoreCase("HeartBeat Ack")) {
-                    Log.e("ConnectionManager", "heartbeat was not acknowledged");
-                    return false;
-                } else {
-                    Log.d("ConnectionManager", "Received heartbeat response: " + ConnectionManager.GetServerResponse());
+        // Retry heartbeat 5 times
+        for (int attempt = 0; attempt < 5; attempt++) {
+            CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+                try {
+                    GetHeartbeatSocket().SendData("DroidHeartBeat");
+                    SetHeartbeatResponse(GetHeartbeatSocket().WaitForResponse(3000));
+
+                    if (GetHeartbeatResponse().equalsIgnoreCase("HeartBeat Ack")) {
+                        Log.d("ConnectionManager", "Received heartbeat response: " + GetHeartbeatResponse());
+                        return true;
+                    }
+                    Log.e("ConnectionManager", "heartbeat was not acknowledged, response was: " + GetHeartbeatResponse());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.e("ConnectionMonitor", "Error sending message from sendMessage(String message): " + e.getMessage());
+                }
+                return false;
+            }, heartbeatExecutorService);
+
+            try {
+                boolean result = future.get();
+                if (result) {
                     return true;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.e("ConnectionMonitor", "Error sending message from sendMessage(String message): " + e.getMessage());
-                return false;
             }
-        }, executorService);
 
-        try {
-            // Wait for the future to complete and get the result
-            return future.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            try {
+                Thread.sleep(125);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+
+        return false;
     }
 
     public void StopHeartbeat() {
         handler.removeCallbacks(heartbeatService);
-        serviceRunning = false;
+        SetServiceRunning(false);
     }
 
     public void ShutDownHeartbeat() {
         StopHeartbeat();
-        if (executorService != null && !executorService.isShutdown()) {
-            executorService.shutdownNow();
+        if (heartbeatExecutorService != null && !heartbeatExecutorService.isShutdown()) {
+            heartbeatExecutorService.shutdownNow();
         }
+        GetHeartbeatSocket().CloseSocket();
     }
 }

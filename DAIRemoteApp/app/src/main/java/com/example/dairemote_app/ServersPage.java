@@ -54,25 +54,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         builder.setPositiveButton(text, (dialog, which) -> {
             selectedHost = inputField.getText().toString().trim();
             if (!selectedHost.isEmpty()) {
-                if(!PriorConnectionEstablishedCheck(selectedHost)) {
-                    MainActivity.connectionManager = new ConnectionManager(selectedHost);
-                    // Initialize ConnectionManager with the found server IP
-                    if(!executor.isShutdown()) {
-                        executor.execute(() -> {
-                            if (MainActivity.connectionManager.InitializeConnection()) {
-                                // only add server host to the list if connection was successful
-                                availableHosts.add(selectedHost);
-                                runOnUiThread(() -> adapter.notifyDataSetChanged());
-
-                                InitiateInteractionPage("Connection approved");
-                            } else {
-                                notifyUser(ServersPage.this, "Connection failed");
-                                MainActivity.connectionManager.ResetConnectionManager();
-                            }
-                            executor.shutdownNow();
-                        });
-                    }
-                }
+                AttemptConnection(selectedHost);
             } else {
                 notifyUser(ServersPage.this, "Server IP cannot be empty");
             }
@@ -121,6 +103,25 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         return false;
     }
 
+    public void AttemptConnection(String server) {
+        if(!PriorConnectionEstablishedCheck(server)) {
+            MainActivity.connectionManager = new ConnectionManager(server);
+
+            // Start the new connection process in the background
+            if(!executor.isShutdown()) {
+                executor.execute(() -> {
+                    if (MainActivity.connectionManager.InitializeConnection()) {
+                        InitiateInteractionPage("Connected to: " + server);
+                    } else {
+                        notifyUser(ServersPage.this, "Connection failed");
+                        MainActivity.connectionManager.ResetConnectionManager();
+                    }
+                    executor.shutdownNow();
+                });
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -160,24 +161,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         }, "Hello, DAIRemote");
 
         hostListView.setOnItemClickListener((parent, view, position, id) -> {
-            selectedHost = availableHosts.get(position);
-
-            if(!PriorConnectionEstablishedCheck(selectedHost)) {
-                MainActivity.connectionManager = new ConnectionManager(selectedHost);
-
-                // Start the new connection process in the background
-                if(!executor.isShutdown()) {
-                    executor.execute(() -> {
-                        if (MainActivity.connectionManager.InitializeConnection()) {
-                            InitiateInteractionPage("Connected to: " + selectedHost);
-                        } else {
-                            notifyUser(ServersPage.this, "Connection failed");
-                            MainActivity.connectionManager.ResetConnectionManager();
-                        }
-                        executor.shutdownNow();
-                    });
-                }
-            }
+            AttemptConnection(availableHosts.get(position));
         });
 
         addServer.setOnClickListener(v -> {
@@ -206,16 +190,26 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         int itemId = item.getItemId();
         Log.d("Navigation", "Item selected: " + itemId);
 
-        if (itemId == R.id.nav_home) {
+        if (itemId == R.id.nav_remote) {
+            if (ConnectionManager.GetConnectionEstablished()) {
+                startActivity(new Intent(this, InteractionPage.class));
+            } else {
+                notifyUser(this, "Not currently connected");
+                startActivity(new Intent(this, MainActivity.class));
+            }
+            finish();
+        } else if (itemId == R.id.nav_home) {
             startActivity(new Intent(this, MainActivity.class));
+            finish();
+        } else if (itemId == R.id.nav_server) {
+            // Current page, do nothing
         } else if (itemId == R.id.nav_help) {
             startActivity(new Intent(this, InstructionsPage.class));
-        } else if (itemId == R.id.nav_remote) {
-            startActivity(new Intent(this, InteractionPage.class));
+            finish();
         } else if (itemId == R.id.nav_about) {
             startActivity(new Intent(this, AboutPage.class));
+            finish();
         }
-        finish();
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
