@@ -29,6 +29,21 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <ImageButton
+            android:id="@+id/interactionsHelp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="15dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Provide mouse simulation instructions"
+            android:elevation="8dp"
+            android:padding="12dp"
+            android:src="@drawable/interactions_help_icon"
+            android:visibility="visible"
+            app:layout_constraintBottom_toTopOf="@+id/touchpadFrame"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <TextView
             android:id="@+id/tutorialStartBtn"
             android:layout_width="wrap_content"
@@ -43,21 +58,6 @@
             app:layout_constraintBottom_toTopOf="@+id/touchpadFrame"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageButton
-            android:id="@+id/interactionsHelp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="15dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Provide mouse simulation instructions"
-            android:elevation="8dp"
-            android:padding="12dp"
-            android:src="@drawable/interactions_help_icon"
-            android:visibility="visible"
-            app:layout_constraintBottom_toTopOf="@+id/touchpadFrame"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <FrameLayout
@@ -324,19 +324,141 @@
 
         </FrameLayout>
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/audio_control_panel"
+            android:layout_width="match_parent"
+            android:layout_height="115dp"
+            android:background="@color/material_dynamic_neutral20"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/touchpadFrame"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/audio_slider_volume"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:text=""
+                app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/expand_audio_button"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_marginStart="-8dp"
+                android:layout_marginTop="-5dp"
+                android:layout_marginEnd="-8dp"
+                android:text="^"
+                android:textColor="@color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+            <SeekBar
+                android:id="@+id/volume_slider"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toTopOf="@+id/volume_slider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <ImageButton
+                    android:id="@+id/audio_previous_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="150dp"
+                    android:padding="10dp"
+                    android:src="@drawable/audio_previous_track"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/audio_play_pause_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:src="@drawable/audio_play"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/audio_next_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="150dp"
+                    android:padding="10dp"
+                    android:src="@drawable/audio_next_track"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/audio_recyclerview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="-15dp"
+            android:layout_marginEnd="-15dp"
+            android:layout_marginBottom="-3dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/audio_control_panel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" >
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/display_recyclerview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="-15dp"
+            android:layout_marginEnd="-15dp"
+            android:layout_marginBottom="-3dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/touchpadFrame"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
         <GridLayout
             android:id="@+id/InteractionShortcuts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:columnCount="4"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/touchpadFrame">
 
             <ImageButton
-                style="@style/InteractionShortcutsStyle"
                 android:id="@+id/udptest"
+                style="@style/InteractionShortcutsStyle"
                 android:layout_row="0"
                 android:layout_column="0"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -344,8 +466,8 @@
                 android:src="@drawable/udpmsg_icon" />
 
             <ImageButton
-                style="@style/InteractionShortcutsStyle"
                 android:id="@+id/audiocycle"
+                style="@style/InteractionShortcutsStyle"
                 android:layout_row="0"
                 android:layout_column="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -353,8 +475,8 @@
                 android:src="@drawable/audio_cycle_icon" />
 
             <ImageButton
-                style="@style/InteractionShortcutsStyle"
                 android:id="@+id/displays"
+                style="@style/InteractionShortcutsStyle"
                 android:layout_row="0"
                 android:layout_column="2"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -362,8 +484,8 @@
                 android:src="@drawable/display_profile_icon" />
 
             <ImageButton
-                style="@style/InteractionShortcutsStyle"
                 android:id="@+id/keyboardImgBtn"
+                style="@style/InteractionShortcutsStyle"
                 android:layout_row="0"
                 android:layout_column="3"
                 android:background="?attr/selectableItemBackgroundBorderless"
