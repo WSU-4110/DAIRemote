@@ -39,7 +39,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 
 import java.net.SocketException;
@@ -84,10 +83,13 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     private SeekBar volumeSlider;
     private TextView currentVolume;
     private Button expandButton;
+    private ImageView expandArrowUp;
+    private ImageView expandArrowDown;
     private boolean isRequestAudioDevicesTaskRunning = false;
     private RecyclerView audioRecyclerViewOptions;
     private AudioRecyclerAdapter audioRecyclerAdapter;
     private boolean audioListVisible = false;
+    private boolean audioMuted = false;
 
     // Host Display Profiles variables
     private boolean isRequestDisplayProfilesTaskRunning = false;
@@ -162,9 +164,13 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         // Audio Control Panel
         volumeSlider = findViewById(R.id.volume_slider);
         expandButton = findViewById(R.id.expand_audio_button);
+        expandArrowUp = findViewById(R.id.expand_arrowup);
+        expandArrowDown = findViewById(R.id.expand_arrowdown);
         ImageButton playPauseButton = findViewById(R.id.audio_play_pause_button);
         ImageButton previousButton = findViewById(R.id.audio_previous_button);
         ImageButton nextButton = findViewById(R.id.audio_next_button);
+        ImageButton audioCycleButton = findViewById(R.id.audio_cycle_button);
+        ImageButton audioToggleMuteButton = findViewById(R.id.audio_togglemute_button);
         currentVolume = findViewById(R.id.audio_slider_volume);
         ImageView audioButton = findViewById(R.id.audiocycle);
         audioControlPanel = findViewById(R.id.audio_control_panel);
@@ -298,8 +304,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             public void onClick(View v) {
                 if (ConnectionManager.GetConnectionEstablished()) {
                     // Hide Audio Control Panel && Display Profiles List
-                    hideAudioControlPanel();
-                    hideDisplayProfilesList();
+                    HideAudioControlPanel();
+                    HideDisplayProfilesList();
 
                     editText.setVisibility(View.VISIBLE);
                     editText.setCursorVisible(false);
@@ -319,9 +325,9 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                 if (ConnectionManager.GetConnectionEstablished()) {
                     displayListVisible = !displayListVisible;
                     if(displayListVisible) {
-                        hideAudioControlPanel();
+                        HideAudioControlPanel();
                         try {
-                            requestDisplayProfiles();
+                            RequestDisplayProfiles();
                         } catch (SocketException e) {
                             throw new RuntimeException(e);
                         }
@@ -341,15 +347,15 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             public void onClick(View v) {
                 if (ConnectionManager.GetConnectionEstablished()) {
                     if (audioControlPanel.getVisibility() == View.GONE) {
-                        hideDisplayProfilesList();
+                        HideDisplayProfilesList();
                         audioControlPanel.setVisibility(View.VISIBLE);
                         try {
-                            requestAudioDevices();
+                            RequestAudioDevices();
                         } catch (SocketException e) {
                             throw new RuntimeException(e);
                         }
                     } else {
-                        hideAudioControlPanel();
+                        HideAudioControlPanel();
                     }
                 } else {
                     startHome();
@@ -362,10 +368,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             audioListVisible = !audioListVisible;
             if(audioListVisible) {
                 audioRecyclerViewOptions.setVisibility(View.VISIBLE);
-                expandButton.setText("v");
+                expandArrowUp.setVisibility(View.GONE);
+                expandArrowDown.setVisibility(View.VISIBLE);
             } else {
                 audioRecyclerViewOptions.setVisibility(View.GONE);
-                expandButton.setText("^");
+                expandArrowUp.setVisibility(View.VISIBLE);
+                expandArrowDown.setVisibility(View.GONE);
             }
         });
 
@@ -384,6 +392,29 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         nextButton.setOnClickListener(v -> {
             if (!MainActivity.connectionManager.SendHostMessage("AUDIO NextTrack")) {
                 startHome();
+            }
+        });
+
+        audioCycleButton.setOnClickListener(v -> {
+            if (!MainActivity.connectionManager.SendHostMessage("AUDIO CycleDevices")) {
+                startHome();
+            } else {
+                CycleAudioDevice();
+            }
+        });
+
+        audioToggleMuteButton.setOnClickListener(v -> {
+            if (!MainActivity.connectionManager.SendHostMessage("AUDIO MUTE")) {
+                startHome();
+            } else {
+                audioMuted = !audioMuted;
+                if(audioMuted) {
+                    audioToggleMuteButton.setColorFilter(getColor(R.color.black));
+                    currentVolume.setTextColor(getColor(R.color.black));
+                } else {
+                    audioToggleMuteButton.setColorFilter(getColor(R.color.grey));
+                    currentVolume.setTextColor(getColor(R.color.grey));
+                }
             }
         });
 
@@ -409,11 +440,11 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content).getRootView(), (v, insets) -> {
             if (insets.isVisible(WindowInsetsCompat.Type.ime())) {
                 // Keyboard is visible
-                toggleKeyboardToolbar(true);
+                ToggleKeyboardToolbar(true);
                 keyboardTextInputView.setVisibility(View.VISIBLE);
             } else {
                 // Keyboard is not visible
-                toggleKeyboardToolbar(false);
+                ToggleKeyboardToolbar(false);
                 clearEditText();
                 keyboardTextInputView.setText("");
                 keyboardTextInputView.setVisibility(View.GONE);
@@ -524,7 +555,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         editText.clearFocus();
     }
 
-    private void toggleKeyboardToolbar(boolean open) {
+    private void ToggleKeyboardToolbar(boolean open) {
         if (open) {
             if (keyboardToolbar != null && !(keyboardToolbar.getVisibility() == View.VISIBLE)) {
                 keyboardToolbar.setVisibility(View.VISIBLE);
@@ -539,7 +570,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         }
     }
 
-    private void resetKeyboardModifiers() {
+    private void ResetKeyboardModifiers() {
         winActive = false;
         ctrlActive = false;
         shiftActive = false;
@@ -612,31 +643,17 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                 modifierToggled = false;
             }
         } else {
-            if (currentPageIndex == 0) {
-                for(int i = 0; i < 6; i++) {
-                    if(viewID == p1r2Buttons[i].getId()) {
-                        msg = p1r2Keys[i];
+            for(int i = 0; i < 6; i++) {
+                if((currentPageIndex == 0) ? viewID == p1r2Buttons[i].getId():viewID == p2r2Buttons[i].getId()) {
+                    if(currentPageIndex == 1 && (i == 0 || i == 1 || i == 2)) {
+                        audio = true;
                     }
+                    msg = (currentPageIndex == 0) ? p1r2Keys[i]:p2r2Keys[i];
                 }
-                for(int i = 0; i < 6; i++) {
-                    if(viewID == p1r3Buttons[i].getId()) {
-                        msg = p1r3Keys[i];
-                    }
-                }
-
-            } else if (currentPageIndex == 1) {
-                for(int i = 0; i < 6; i++) {
-                    if(viewID == p2r2Buttons[i].getId()) {
-                        if(i == 0 || i == 1 || i == 2) {
-                            audio = true;
-                        }
-                        msg = p2r2Keys[i];
-                    }
-                }
-                for(int i = 0; i < 6; i++) {
-                    if(viewID == p2r3Buttons[i].getId()) {
-                        msg = p2r3Keys[i];
-                    }
+            }
+            for(int i = 0; i < 6; i++) {
+                if((currentPageIndex == 0) ? viewID == p1r3Buttons[i].getId():viewID == p2r3Buttons[i].getId()) {
+                    msg = (currentPageIndex == 0) ? p1r3Keys[i]:p2r3Keys[i];
                 }
             }
         }
@@ -660,7 +677,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE " + keyCombination);
             Log.i("KeyboardToolbar", "KEYBOARD_WRITE " + keyCombination);
 
-            resetKeyboardModifiers();
+            ResetKeyboardModifiers();
 
             new Handler().postDelayed(() -> {
                 for (int i = 0; i < keyboardExtraBtnsLayout.getChildCount(); i++) {
@@ -724,38 +741,20 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     }
 
     private void keyboardExtraSetRowVisibility(int pageIndex) {
-        // Hide row 2 & 3 buttons initially
-        if (pageIndex == 0) {
-            for (TextView button : p2r2Buttons) {
-                button.setVisibility(View.GONE);
-            }
-            for (TextView button : p2r3Buttons) {
-                button.setVisibility(View.GONE);
-            }
-        } else {
-            for (TextView button : p1r2Buttons) {
-                button.setVisibility(View.GONE);
-            }
-            for (TextView button : p1r3Buttons) {
-                button.setVisibility(View.GONE);
-            }
+        // Hide buttons for the current page
+        for (TextView button : (pageIndex == 0) ? p2r2Buttons:p1r2Buttons) {
+            button.setVisibility(View.GONE);
+        }
+        for (TextView button : (pageIndex == 0) ? p2r3Buttons:p1r3Buttons) {
+            button.setVisibility(View.GONE);
         }
 
         // Show buttons for the current page
-        if (pageIndex == 0) {
-            for (TextView button : p1r2Buttons) {
-                button.setVisibility(View.VISIBLE);
-            }
-            for (TextView button : p1r3Buttons) {
-                button.setVisibility(View.VISIBLE);
-            }
-        } else if (pageIndex == 1) {
-            for (TextView button : p2r2Buttons) {
-                button.setVisibility(View.VISIBLE);
-            }
-            for (TextView button : p2r3Buttons) {
-                button.setVisibility(View.VISIBLE);
-            }
+        for (TextView button : (pageIndex == 0) ? p1r2Buttons:p2r2Buttons) {
+            button.setVisibility(View.VISIBLE);
+        }
+        for (TextView button : (pageIndex == 0) ? p1r3Buttons:p2r3Buttons) {
+            button.setVisibility(View.VISIBLE);
         }
     }
 
@@ -765,7 +764,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             drawerLayout.closeDrawer(GravityCompat.START);
         } else if (audioListVisible) {
             audioRecyclerViewOptions.setVisibility(View.GONE);
-            expandButton.setText("^");
+            expandArrowUp.setVisibility(View.VISIBLE);
+            expandArrowDown.setVisibility(View.GONE);
             audioListVisible = false;
         }  else if (audioControlPanel.getVisibility() == View.VISIBLE) {
             audioControlPanel.setVisibility(View.GONE);
@@ -782,7 +782,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     @Override
     protected void onPause() {
         if (connectionMonitor.IsHeartbeatRunning()) {
-            Log.d("TEST", "STOPPING HEARTBEAT");
             connectionMonitor.StopHeartbeat();
         }
         super.onPause();
@@ -792,7 +791,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     protected void onResume() {
         super.onResume();
         if (!connectionMonitor.IsHeartbeatRunning()) {
-            Log.d("TEST", "HEARTBEAT ON RESUME");
             connectionMonitor.StartHeartbeat();
         }
     }
@@ -845,42 +843,47 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         navigationView.setCheckedItem(page);
     }
 
-    private void hideAudioControlPanel() {
+    private void HideAudioControlPanel() {
         if(audioControlPanel.getVisibility() == View.VISIBLE) {
             audioRecyclerViewOptions.setVisibility(View.GONE);
-            expandButton.setText("^");
+            expandArrowUp.setVisibility(View.VISIBLE);
+            expandArrowDown.setVisibility(View.GONE);
             audioControlPanel.setVisibility(View.GONE);
             audioListVisible = false;
         }
     }
 
-    private void hideDisplayProfilesList () {
+    private void HideDisplayProfilesList() {
         if(displayListVisible) {
             displayRecyclerViewOptions.setVisibility(View.GONE);
             displayListVisible = false;
         }
     }
 
-    private void loadAudioDevices(List<String> audioDevices) {
+    private void UpdateAudioDevices(List<String> audioDevices) {
         audioRecyclerAdapter.updateOptions(audioDevices);
     }
 
-    private void loadAudioDeviceDefault(String defaultAudioDevice) {
+    private void SetAudioDeviceDefault(String defaultAudioDevice) {
         audioRecyclerAdapter.SetSelectedPosition(defaultAudioDevice);
     }
 
-    private void loadDisplayProfiles(List<String> displayProfiles) {
+    private void CycleAudioDevice() {
+        audioRecyclerAdapter.CyclePosition();
+    }
+
+    private void UpdateDisplayProfiles(List<String> displayProfiles) {
         displayProfilesRecyclerAdapter.updateOptions(displayProfiles);
     }
 
-    private void requestAudioDevices() throws SocketException {
+    private void RequestAudioDevices() throws SocketException {
         if (!isRequestAudioDevicesTaskRunning) {
             isRequestAudioDevicesTaskRunning = true;
             new RequestAudioDevicesTask().execute();
         }
     }
 
-    private void requestDisplayProfiles() throws SocketException {
+    private void RequestDisplayProfiles() throws SocketException {
         if (!isRequestDisplayProfilesTaskRunning) {
             isRequestDisplayProfilesTaskRunning = true;
             new RequestDisplayProfilesTask().execute();
@@ -910,9 +913,9 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         String devicesPart = parts[0].substring("AudioDevices: ".length());
                         List<String> deviceList = Arrays.asList(devicesPart.split(","));
                         Log.d("InteractionPageAudio", "Audio devices: " + deviceList);
-                        loadAudioDevices(deviceList);
+                        UpdateAudioDevices(deviceList);
                         Log.d("InteractionPageAudio", "Audio default device: " + parts[2].substring("DefaultAudioDevice: ".length()));
-                        loadAudioDeviceDefault(parts[2].substring("DefaultAudioDevice: ".length()));
+                        SetAudioDeviceDefault(parts[2].substring("DefaultAudioDevice: ".length()));
 
                         // Set seekbar to current host volume
                         String volumePart = parts[1].substring("Volume: ".length());
@@ -949,7 +952,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     String displayProfiles = response.substring("DisplayProfiles: ".length());
                     List<String> deviceList = Arrays.asList(displayProfiles.split(","));
                     Log.d("InteractionPageDisplays", "Display Profiles: " + deviceList);
-                    loadDisplayProfiles(deviceList);
+                    UpdateDisplayProfiles(deviceList);
                 } else {
                     Log.e("InteractionPageDisplays", "Unexpected response format: " + response);
                 }

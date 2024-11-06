@@ -334,7 +334,8 @@
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@+id/touchpadFrame"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            tools:visibility="visible">
 
             <TextView
                 android:id="@+id/audio_slider_volume"
@@ -354,12 +355,31 @@
                 android:layout_marginStart="-8dp"
                 android:layout_marginTop="-5dp"
                 android:layout_marginEnd="-8dp"
-                android:text="^"
                 android:textColor="@color/white"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/expand_arrowup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/expand_audio_button"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="visible" />
+                app:srcCompat="@drawable/expand_arrowup" />
+
+            <ImageView
+                android:id="@+id/expand_arrowdown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/expand_audio_button"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/expand_arrowdown" />
 
             <SeekBar
                 android:id="@+id/volume_slider"
@@ -411,6 +431,30 @@
                     android:layout_marginStart="150dp"
                     android:padding="10dp"
                     android:src="@drawable/audio_next_track"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/audio_cycle_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="300dp"
+                    android:padding="10dp"
+                    android:src="@drawable/audio_cycle"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/audio_togglemute_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="-300dp"
+                    android:padding="10dp"
+                    android:src="@drawable/audio_togglemuted"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
