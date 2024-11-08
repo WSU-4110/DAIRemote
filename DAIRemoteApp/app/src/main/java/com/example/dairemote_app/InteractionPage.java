@@ -57,12 +57,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     private final Handler handler = new Handler();
 
     // Keyboard & Keyboard Toolbar variables
-    private Toolbar keyboardToolbar;
-    private GridLayout keyboardExtraBtnsLayout;
-    private TextView[] p1RowsButtons;
-    private TextView[] p2RowsButtons;
-    private final String[] p1Keys = {"{INS}", "{DEL}", "{PRTSC}", "{TAB}", "{UP}", "{ESC}", "UP", "DOWN", "MUTE", "{LEFT}", "{DOWN}", "{RIGHT}"};
-    private final String[] p2Keys = {"{F1}", "{F2}", "{F3}", "{F4}", "{F5}", "{F6}", "{F7}", "{F8}", "{F9}", "{F10}", "{F11}", "{F12}"};
     private KeyboardToolbar toolbar;
 
     // Audio Control Panel and Host Audio Devices variables
@@ -138,16 +132,14 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         drawerSetup(R.id.nav_remote);
         ImageView keyboardImgBtn = findViewById(R.id.keyboardImgBtn);
         editText = findViewById(R.id.editText);
-        keyboardToolbar = findViewById(R.id.keyboardToolbar);
-        keyboardExtraBtnsLayout = findViewById(R.id.keyboardExtraButtonsGrid);
         // Initialize row 2 and 3 button arrays for keyboardToolbar
-        p1RowsButtons = new TextView[]{findViewById(R.id.insertKey), findViewById(R.id.deleteKey), findViewById(R.id.printScreenKey), findViewById(R.id.tabKey), findViewById(R.id.upKey), findViewById(R.id.escKey),
-                findViewById(R.id.soundUpKey), findViewById(R.id.soundDownKey), findViewById(R.id.muteKey), findViewById(R.id.leftKey), findViewById(R.id.downKey), findViewById(R.id.rightKey)};
-        p2RowsButtons = new TextView[]{findViewById(R.id.f1Key), findViewById(R.id.f2Key), findViewById(R.id.f3Key), findViewById(R.id.f4Key), findViewById(R.id.f5Key), findViewById(R.id.f6Key),
-                findViewById(R.id.f7Key), findViewById(R.id.f8Key), findViewById(R.id.f9Key), findViewById(R.id.f10Key), findViewById(R.id.f11Key), findViewById(R.id.f12Key)};
-        toolbar = new KeyboardToolbar(R.id.moreOpt, R.id.winKey, R.id.fnKey, R.id.altKey, R.id.ctrlKey, R.id.shiftKey, findViewById(R.id.keyboardInputView));
+        toolbar = new KeyboardToolbar(R.id.moreOpt, R.id.winKey, R.id.fnKey, R.id.altKey, R.id.ctrlKey, R.id.shiftKey, findViewById(R.id.keyboardInputView), findViewById(R.id.keyboardToolbar), findViewById(R.id.keyboardExtraButtonsGrid),
+                new TextView[]{findViewById(R.id.insertKey), findViewById(R.id.deleteKey), findViewById(R.id.printScreenKey), findViewById(R.id.tabKey), findViewById(R.id.upKey), findViewById(R.id.escKey),
+                findViewById(R.id.soundUpKey), findViewById(R.id.soundDownKey), findViewById(R.id.muteKey), findViewById(R.id.leftKey), findViewById(R.id.downKey), findViewById(R.id.rightKey)},
+                new TextView[]{findViewById(R.id.f1Key), findViewById(R.id.f2Key), findViewById(R.id.f3Key), findViewById(R.id.f4Key), findViewById(R.id.f5Key), findViewById(R.id.f6Key),
+                findViewById(R.id.f7Key), findViewById(R.id.f8Key), findViewById(R.id.f9Key), findViewById(R.id.f10Key), findViewById(R.id.f11Key), findViewById(R.id.f12Key)});
         TextView moreOpts = findViewById(R.id.moreOpt);
-        moreOpts.setOnClickListener(v -> keyboardExtraSetRowVisibility(toolbar.NextToolbarPage()));
+        moreOpts.setOnClickListener(v -> toolbar.keyboardExtraSetRowVisibility(toolbar.NextToolbarPage()));
 
         ImageView sendButton = findViewById(R.id.disconnectHost);
         ImageView displayButton = findViewById(R.id.displays);
@@ -405,11 +397,11 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content).getRootView(), (v, insets) -> {
             if (insets.isVisible(WindowInsetsCompat.Type.ime())) {
                 // Keyboard is visible
-                ToggleKeyboardToolbar(true);
+                toolbar.ToggleKeyboardToolbar(true);
                 toolbar.GetKeyboardTextView().setVisibility(View.VISIBLE);
             } else {
                 // Keyboard is not visible
-                ToggleKeyboardToolbar(false);
+                toolbar.ToggleKeyboardToolbar(false);
                 clearEditText();
                 toolbar.GetKeyboardTextView().setText("");
                 toolbar.GetKeyboardTextView().setVisibility(View.GONE);
@@ -518,21 +510,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         editText.clearFocus();
     }
 
-    private void ToggleKeyboardToolbar(boolean open) {
-        if (open) {
-            if (keyboardToolbar != null && !(keyboardToolbar.getVisibility() == View.VISIBLE)) {
-                keyboardToolbar.setVisibility(View.VISIBLE);
-                keyboardExtraBtnsLayout.setVisibility(View.VISIBLE);
-                keyboardExtraSetRowVisibility(toolbar.GetCurrentToolbarPage());
-            }
-        } else {
-            if (keyboardToolbar != null && keyboardToolbar.getVisibility() == View.VISIBLE) {
-                keyboardToolbar.setVisibility(View.GONE);
-                keyboardExtraBtnsLayout.setVisibility(View.GONE);
-            }
-        }
-    }
-
     private void ResetKeyboardModifiers() {
         toolbar.ResetKeyboardModifiers();
 
@@ -550,11 +527,11 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         toolbar.SetModifierToggled(toolbar.KeyboardToolbarModifier(view.getId()));
         if (!toolbar.GetModifierToggled()) {
             for(int i = 0; i < 12; i++) {
-                if((toolbar.GetCurrentToolbarPage() == 0) ? viewID == p1RowsButtons[i].getId():viewID == p2RowsButtons[i].getId()) {
+                if((toolbar.GetCurrentToolbarPage() == 0) ? viewID == toolbar.GetButtons(0)[i].getId():viewID == toolbar.GetButtons(1)[i].getId()) {
                     if(toolbar.GetCurrentToolbarPage() == 0 && (i == 6 || i == 7 || i == 8)) {
                         audio = true;
                     }
-                    msg = (toolbar.GetCurrentToolbarPage() == 0) ? p1Keys[i]:p2Keys[i];
+                    msg = (toolbar.GetCurrentToolbarPage() == 0) ? toolbar.GetKeys(0)[i]:toolbar.GetKeys(1)[i];
                 }
             }
         }
@@ -575,8 +552,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             ResetKeyboardModifiers();
 
             new Handler().postDelayed(() -> {
-                for (int i = 0; i < keyboardExtraBtnsLayout.getChildCount(); i++) {
-                    View child = keyboardExtraBtnsLayout.getChildAt(i);
+                for (int i = 0; i < toolbar.GeyKeyboardLayout().getChildCount(); i++) {
+                    View child = toolbar.GeyKeyboardLayout().getChildAt(i);
                     if (child instanceof TextView) {
                         child.setBackgroundColor(Color.TRANSPARENT);
                     }
@@ -591,18 +568,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         } else if (!msg.isEmpty()) {
             MessageHost("KEYBOARD_WRITE " + msg);
             Log.i("KeyboardToolbar", "KEYBOARD_WRITE " + msg);
-        }
-    }
-
-    private void keyboardExtraSetRowVisibility(int pageIndex) {
-        // Hide buttons for the current page
-        for (TextView button : (pageIndex == 0) ? p2RowsButtons:p1RowsButtons) {
-            button.setVisibility(View.GONE);
-        }
-
-        // Show buttons for the current page
-        for (TextView button : (pageIndex == 0) ? p1RowsButtons:p2RowsButtons) {
-            button.setVisibility(View.VISIBLE);
         }
     }
 

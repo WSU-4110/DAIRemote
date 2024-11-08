@@ -1,16 +1,26 @@
 package com.example.dairemote_app;
 
+import android.view.View;
+import android.widget.GridLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.Toolbar;
+
 public class KeyboardToolbar {
+    private Toolbar keyboardToolbar;
+    private GridLayout keyboardExtraBtnsLayout;
     int modifier1, modifier2, modifier3, modifier4, modifier5, moreOpts;
     private final StringBuilder keyCombination = new StringBuilder();
     private boolean winActive, ctrlActive, shiftActive, altActive, fnActive, modifierToggled = false;
+    private final String[] p1Keys = {"{INS}", "{DEL}", "{PRTSC}", "{TAB}", "{UP}", "{ESC}", "UP", "DOWN", "MUTE", "{LEFT}", "{DOWN}", "{RIGHT}"};
+    private final String[] p2Keys = {"{F1}", "{F2}", "{F3}", "{F4}", "{F5}", "{F6}", "{F7}", "{F8}", "{F9}", "{F10}", "{F11}", "{F12}"};
+    private TextView[] p1RowsButtons;
+    private TextView[] p2RowsButtons;
     private TextView keyboardTextInputView;
     private int parenthesesCount = 0;
     private int currentPageIndex = 0;
 
-    KeyboardToolbar(int moreopts, int modifier1, int modifier2, int modifier3, int modifier4, int modifier5, TextView textView) {
+    KeyboardToolbar(int moreopts, int modifier1, int modifier2, int modifier3, int modifier4, int modifier5, TextView textView, Toolbar toolbar, GridLayout toolbarLayout, TextView[] page1, TextView[] page2) {
         this.moreOpts = moreopts;
         this.modifier1 = modifier1;
         this.modifier2 = modifier2;
@@ -18,10 +28,22 @@ public class KeyboardToolbar {
         this.modifier4 = modifier4;
         this.modifier5 = modifier5;
         this.keyboardTextInputView = textView;
+        this.keyboardToolbar = toolbar;
+        this.keyboardExtraBtnsLayout = toolbarLayout;
+        this.p1RowsButtons = page1;
+        this.p2RowsButtons = page2;
     }
 
     public int GetParenthesesCount() {
         return this.parenthesesCount;
+    }
+
+    public Toolbar GetKeyboardToolbar() {
+        return this.keyboardToolbar;
+    }
+
+    public GridLayout GeyKeyboardLayout() {
+        return this.keyboardExtraBtnsLayout;
     }
 
     public boolean GetModifierToggled() {
@@ -30,6 +52,20 @@ public class KeyboardToolbar {
 
     public void SetModifierToggled(boolean toggled) {
         this.modifierToggled = toggled;
+    }
+
+    public String[] GetKeys(int page) {
+        if(page == 0) {
+            return p1Keys;
+        }
+        return p2Keys;
+    }
+
+    public TextView[] GetButtons(int page) {
+        if(page == 0) {
+            return p1RowsButtons;
+        }
+        return p2RowsButtons;
     }
 
     public int GetCurrentToolbarPage() {
@@ -67,6 +103,33 @@ public class KeyboardToolbar {
                 AppendKeyCombination(")");
             }
             keyboardTextInputView.setText("");
+        }
+    }
+
+    public void ToggleKeyboardToolbar(boolean open) {
+        if (open) {
+            if (GetKeyboardToolbar() != null && !(GetKeyboardToolbar().getVisibility() == View.VISIBLE)) {
+                GetKeyboardToolbar().setVisibility(View.VISIBLE);
+                GeyKeyboardLayout().setVisibility(View.VISIBLE);
+                keyboardExtraSetRowVisibility(GetCurrentToolbarPage());
+            }
+        } else {
+            if (GetKeyboardToolbar() != null && GetKeyboardToolbar().getVisibility() == View.VISIBLE) {
+                GetKeyboardToolbar().setVisibility(View.GONE);
+                GeyKeyboardLayout().setVisibility(View.GONE);
+            }
+        }
+    }
+
+    public void keyboardExtraSetRowVisibility(int pageIndex) {
+        // Hide buttons for the current page
+        for (TextView button : (pageIndex == 0) ? GetButtons(1):GetButtons(0)) {
+            button.setVisibility(View.GONE);
+        }
+
+        // Show buttons for the current page
+        for (TextView button : (pageIndex == 0) ? GetButtons(0):GetButtons(1)) {
+            button.setVisibility(View.VISIBLE);
         }
     }
 
