@@ -5,7 +5,7 @@ import android.widget.TextView;
 public class KeyboardToolbar {
     int modifier1, modifier2, modifier3, modifier4, modifier5, moreOpts;
     private final StringBuilder keyCombination = new StringBuilder();
-    private boolean winActive, ctrlActive, shiftActive, altActive, fnActive = false;
+    private boolean winActive, ctrlActive, shiftActive, altActive, fnActive, modifierToggled = false;
     private TextView keyboardTextInputView;
     private int parenthesesCount = 0;
     private int currentPageIndex = 0;
@@ -22,6 +22,14 @@ public class KeyboardToolbar {
 
     public int GetParenthesesCount() {
         return this.parenthesesCount;
+    }
+
+    public boolean GetModifierToggled() {
+        return this.modifierToggled;
+    }
+
+    public void SetModifierToggled(boolean toggled) {
+        this.modifierToggled = toggled;
     }
 
     public int GetCurrentToolbarPage() {

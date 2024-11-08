@@ -59,7 +59,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     // Keyboard & Keyboard Toolbar variables
     private Toolbar keyboardToolbar;
     private GridLayout keyboardExtraBtnsLayout;
-    private boolean modifierToggled = false;
     private TextView[] p1RowsButtons;
     private TextView[] p2RowsButtons;
     private final String[] p1Keys = {"{INS}", "{DEL}", "{PRTSC}", "{TAB}", "{UP}", "{ESC}", "UP", "DOWN", "MUTE", "{LEFT}", "{DOWN}", "{RIGHT}"};
@@ -430,11 +429,11 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                             toolbar.GetKeyboardTextView().setText(textViewText.substring(0, textViewText.length() - 1));
                         }
                     }
-                    if(!modifierToggled) {
+                    if(!toolbar.GetModifierToggled()) {
                         MessageHost("KEYBOARD_WRITE {BS}");
                     }
                     return true;
-                } else if (!modifierToggled && keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
+                } else if (!toolbar.GetModifierToggled() && keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
                     MessageHost("KEYBOARD_WRITE {ENTER}");
                     return true;
                 }
@@ -453,7 +452,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (count > before) {
                     char addedChar = s.charAt(start + count - 1);
-                    if (!modifierToggled) {
+                    if (!toolbar.GetModifierToggled()) {
                         MessageHost("KEYBOARD_WRITE " + addedChar);
                     } else {
                         toolbar.AppendKeyCombination(addedChar);
@@ -537,7 +536,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     private void ResetKeyboardModifiers() {
         toolbar.ResetKeyboardModifiers();
 
-        modifierToggled = false;
+        toolbar.SetModifierToggled(false);
         editText.setText("");
     }
 
@@ -548,8 +547,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         int viewID = view.getId();
         boolean audio = false;
 
-        modifierToggled = toolbar.KeyboardToolbarModifier(view.getId());
-        if (!modifierToggled) {
+        toolbar.SetModifierToggled(toolbar.KeyboardToolbarModifier(view.getId()));
+        if (!toolbar.GetModifierToggled()) {
             for(int i = 0; i < 12; i++) {
                 if((toolbar.GetCurrentToolbarPage() == 0) ? viewID == p1RowsButtons[i].getId():viewID == p2RowsButtons[i].getId()) {
                     if(toolbar.GetCurrentToolbarPage() == 0 && (i == 6 || i == 7 || i == 8)) {
@@ -561,13 +560,13 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         }
 
         view.setBackgroundColor(Color.LTGRAY);
-        if (!modifierToggled) {
+        if (!toolbar.GetModifierToggled()) {
             new Handler().postDelayed(() -> {
                 view.setBackgroundColor(Color.TRANSPARENT);
             }, 75); // Delay in milliseconds
         }
 
-        if (!modifierToggled && !audio && !toolbar.GetKeyCombination().toString().isEmpty()) {
+        if (!toolbar.GetModifierToggled() && !audio && !toolbar.GetKeyCombination().toString().isEmpty()) {
             toolbar.AddParentheses();
 
             MessageHost("KEYBOARD_WRITE " + toolbar.GetKeyCombination());
@@ -583,7 +582,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     }
                 }
             }, 10);
-        } else if (modifierToggled && !msg.isEmpty() && !audio) {
+        } else if (toolbar.GetModifierToggled() && !msg.isEmpty() && !audio) {
             toolbar.AppendKeyCombination(msg);
             toolbar.GetKeyboardTextView().append(msg);
         } else if (audio) {
