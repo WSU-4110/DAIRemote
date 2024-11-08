@@ -59,24 +59,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     // Keyboard & Keyboard Toolbar variables
     private Toolbar keyboardToolbar;
     private GridLayout keyboardExtraBtnsLayout;
-    private int parenthesesCount = 0;
-    private int currentPageIndex = 0;
-    private TextView keyboardTextInputView;
-    private final StringBuilder keyCombination = new StringBuilder();
-    private boolean winActive = false;
-    private boolean ctrlActive = false;
-    private boolean shiftActive = false;
-    private boolean altActive = false;
-    private boolean fnActive = false;
     private boolean modifierToggled = false;
-    private final TextView[] p1r2Buttons = new TextView[6];
-    private final TextView[] p1r3Buttons = new TextView[6];
-    private final TextView[] p2r2Buttons = new TextView[6];
-    private final TextView[] p2r3Buttons = new TextView[6];
-    private final String[] p1r2Keys = {"{F1}", "{F2}", "{F3}", "{F4}", "{F5}", "{F6}"};
-    private final String[] p1r3Keys = {"{F7}", "{F8}", "{F9}", "{F10}", "{F11}", "{F12}"};
-    private final String[] p2r2Keys = {"UP", "DOWN", "MUTE", "{TAB}", "{UP}", "{ESC}"};
-    private final String[] p2r3Keys = {"{INS}", "{DEL}", "{PRTSC}", "{LEFT}", "{DOWN}", "{RIGHT}"};
+    private TextView[] p1RowsButtons;
+    private TextView[] p2RowsButtons;
+    private final String[] p1Keys = {"{INS}", "{DEL}", "{PRTSC}", "{TAB}", "{UP}", "{ESC}", "UP", "DOWN", "MUTE", "{LEFT}", "{DOWN}", "{RIGHT}"};
+    private final String[] p2Keys = {"{F1}", "{F2}", "{F3}", "{F4}", "{F5}", "{F6}", "{F7}", "{F8}", "{F9}", "{F10}", "{F11}", "{F12}"};
+    private KeyboardToolbar toolbar;
 
     // Audio Control Panel and Host Audio Devices variables
     private ConstraintLayout audioControlPanel;
@@ -110,6 +98,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         notifyUser(InteractionPage.this, "Connection lost");
         startActivity(new Intent(InteractionPage.this, MainActivity.class));
         finish();
+    }
+
+    public void MessageHost(String message) {
+        if (!MainActivity.connectionManager.SendHostMessage(message)) {
+            startHome();
+        }
     }
 
     public void notifyUser(Context context, String msg) {
@@ -147,15 +141,16 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         editText = findViewById(R.id.editText);
         keyboardToolbar = findViewById(R.id.keyboardToolbar);
         keyboardExtraBtnsLayout = findViewById(R.id.keyboardExtraButtonsGrid);
-        keyboardTextInputView = findViewById(R.id.keyboardInputView);
         // Initialize row 2 and 3 button arrays for keyboardToolbar
-        initButtonRows();
+        p1RowsButtons = new TextView[]{findViewById(R.id.insertKey), findViewById(R.id.deleteKey), findViewById(R.id.printScreenKey), findViewById(R.id.tabKey), findViewById(R.id.upKey), findViewById(R.id.escKey),
+                findViewById(R.id.soundUpKey), findViewById(R.id.soundDownKey), findViewById(R.id.muteKey), findViewById(R.id.leftKey), findViewById(R.id.downKey), findViewById(R.id.rightKey)};
+        p2RowsButtons = new TextView[]{findViewById(R.id.f1Key), findViewById(R.id.f2Key), findViewById(R.id.f3Key), findViewById(R.id.f4Key), findViewById(R.id.f5Key), findViewById(R.id.f6Key),
+                findViewById(R.id.f7Key), findViewById(R.id.f8Key), findViewById(R.id.f9Key), findViewById(R.id.f10Key), findViewById(R.id.f11Key), findViewById(R.id.f12Key)};
+        toolbar = new KeyboardToolbar(R.id.moreOpt, R.id.winKey, R.id.fnKey, R.id.altKey, R.id.ctrlKey, R.id.shiftKey, findViewById(R.id.keyboardInputView));
         TextView moreOpts = findViewById(R.id.moreOpt);
-        moreOpts.setOnClickListener(v -> keyboardExtraNextPage());
-        // Commented out the text view to display the system's response
-        // Maybe future feature
-        // responseTextView = findViewById(R.id.responseTextView);
-        ImageView sendButton = findViewById(R.id.udptest);
+        moreOpts.setOnClickListener(v -> keyboardExtraSetRowVisibility(toolbar.NextToolbarPage()));
+
+        ImageView sendButton = findViewById(R.id.disconnectHost);
         ImageView displayButton = findViewById(R.id.displays);
         ImageView interactionHelp = findViewById(R.id.interactionsHelp);
         interactionsHelpText = findViewById(R.id.interationsHelpTextView);
@@ -198,17 +193,13 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             final GestureDetector gestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.SimpleOnGestureListener() {
                 @Override
                 public boolean onSingleTapUp(@NonNull MotionEvent e) {
-                    if (!MainActivity.connectionManager.SendHostMessage("MOUSE_LMB")) {
-                        startHome();
-                    }
+                    MessageHost("MOUSE_LMB");
                     return super.onSingleTapUp(e);
                 }
 
                 @Override
                 public boolean onDoubleTap(@NonNull MotionEvent e) {
-                    if (!MainActivity.connectionManager.SendHostMessage("MOUSE_LMB")) {
-                        startHome();
-                    }
+                    MessageHost("MOUSE_LMB");
                     return super.onDoubleTap(e);
                 }
 
@@ -217,9 +208,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     if (vibrator != null && vibrator.hasVibrator()) {
                         vibrator.vibrate(10); // Vibrate for 50 milliseconds
                     }
-                    if (!MainActivity.connectionManager.SendHostMessage("MOUSE_LMB_HOLD")) {
-                        startHome();
-                    }
+                    MessageHost("MOUSE_LMB_HOLD");
                     super.onLongPress(e);
                 }
 
@@ -228,9 +217,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     // Handle two-finger scroll here for vertical scrolling
                     if (e2.getPointerCount() == 2) {
                         scrolling = true; // Set scrolling flag
-                        if (!MainActivity.connectionManager.SendHostMessage("MOUSE_SCROLL " + distanceY)) {
-                            startHome();
-                        }
+                        MessageHost("MOUSE_SCROLL " + distanceY);
                         return true;
                     }
                     return false;
@@ -255,9 +242,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         deltaX = (x - currentX) * mouseSensitivity;
                         deltaY = (y - currentY) * mouseSensitivity;
                         if (!rmbDetected && !scrolling) {
-                            if (!MainActivity.connectionManager.SendHostMessage("MOUSE_MOVE " + deltaX + " " + deltaY)) {
-                                startHome();
-                            }
+                            MessageHost("MOUSE_MOVE " + deltaX + " " + deltaY);
                             currentX = x;
                             currentY = y;
                         }
@@ -274,15 +259,11 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     case MotionEvent.ACTION_POINTER_UP:
                         deltaT = System.currentTimeMillis() - startTime;
                         if (initialPointerCount == 2 && (deltaT < CLICK_THRESHOLD && deltaT > 10)) {
-                            if (!MainActivity.connectionManager.SendHostMessage("MOUSE_RMB")) {
-                                startHome();
-                            }
+                            MessageHost("MOUSE_RMB");
                             initialPointerCount = 0;
                             return true;
                         } else if (initialPointerCount == 3 && (deltaT < CLICK_THRESHOLD && deltaT > 10)) {
-                            if (!MainActivity.connectionManager.SendHostMessage("MOUSE_MMB")) {
-                                startHome();
-                            }
+                            MessageHost("MOUSE_MMB");
                             initialPointerCount = 0;
                             return true;
                         } else if (event.getPointerCount() <= 1) {
@@ -378,54 +359,39 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         });
 
         playPauseButton.setOnClickListener(v -> {
-            if (!MainActivity.connectionManager.SendHostMessage("AUDIO TogglePlay")) {
-                startHome();
-            }
+            MessageHost("AUDIO TogglePlay");
         });
 
         previousButton.setOnClickListener(v -> {
-            if (!MainActivity.connectionManager.SendHostMessage("AUDIO PreviousTrack")) {
-                startHome();
-            }
+            MessageHost("AUDIO PreviousTrack");
         });
 
         nextButton.setOnClickListener(v -> {
-            if (!MainActivity.connectionManager.SendHostMessage("AUDIO NextTrack")) {
-                startHome();
-            }
+            MessageHost("AUDIO NextTrack");
         });
 
         audioCycleButton.setOnClickListener(v -> {
-            if (!MainActivity.connectionManager.SendHostMessage("AUDIO CycleDevices")) {
-                startHome();
-            } else {
-                CycleAudioDevice();
-            }
+            MessageHost("AUDIO CycleDevices");
+            CycleAudioDevice();
         });
 
         audioToggleMuteButton.setOnClickListener(v -> {
-            if (!MainActivity.connectionManager.SendHostMessage("AUDIO MUTE")) {
-                startHome();
+            MessageHost("AUDIO MUTE");
+            audioMuted = !audioMuted;
+            if(audioMuted) {
+                audioToggleMuteButton.setColorFilter(getColor(R.color.black));
+                currentVolume.setTextColor(getColor(R.color.black));
             } else {
-                audioMuted = !audioMuted;
-                if(audioMuted) {
-                    audioToggleMuteButton.setColorFilter(getColor(R.color.black));
-                    currentVolume.setTextColor(getColor(R.color.black));
-                } else {
-                    audioToggleMuteButton.setColorFilter(getColor(R.color.grey));
-                    currentVolume.setTextColor(getColor(R.color.grey));
-                }
+                audioToggleMuteButton.setColorFilter(getColor(R.color.grey));
+                currentVolume.setTextColor(getColor(R.color.grey));
             }
         });
 
         volumeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (!MainActivity.connectionManager.SendHostMessage("AudioVolume " + seekBar.getProgress())) {
-                    startHome();
-                } else {
-                    currentVolume.setText(String.valueOf(progress));
-                }
+                MessageHost("AudioVolume " + seekBar.getProgress());
+                currentVolume.setText(String.valueOf(progress));
             }
 
             @Override
@@ -441,13 +407,13 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             if (insets.isVisible(WindowInsetsCompat.Type.ime())) {
                 // Keyboard is visible
                 ToggleKeyboardToolbar(true);
-                keyboardTextInputView.setVisibility(View.VISIBLE);
+                toolbar.GetKeyboardTextView().setVisibility(View.VISIBLE);
             } else {
                 // Keyboard is not visible
                 ToggleKeyboardToolbar(false);
                 clearEditText();
-                keyboardTextInputView.setText("");
-                keyboardTextInputView.setVisibility(View.GONE);
+                toolbar.GetKeyboardTextView().setText("");
+                toolbar.GetKeyboardTextView().setVisibility(View.GONE);
             }
             return insets;
         });
@@ -459,19 +425,17 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     int cursorPosition = editText.getSelectionStart();
                     if (cursorPosition > 0) {
                         editText.getText().delete(cursorPosition - 1, cursorPosition);
-                        String textViewText = keyboardTextInputView.getText().toString();
+                        String textViewText = toolbar.GetKeyboardTextView().getText().toString();
                         if (textViewText.length() > 0) {
-                            keyboardTextInputView.setText(textViewText.substring(0, textViewText.length() - 1));
+                            toolbar.GetKeyboardTextView().setText(textViewText.substring(0, textViewText.length() - 1));
                         }
                     }
-                    if (!MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE {BS}")) {
-                        startHome();
+                    if(!modifierToggled) {
+                        MessageHost("KEYBOARD_WRITE {BS}");
                     }
                     return true;
-                } else if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    if (!MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE {ENTER}")) {
-                        startHome();
-                    }
+                } else if (!modifierToggled && keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
+                    MessageHost("KEYBOARD_WRITE {ENTER}");
                     return true;
                 }
                 return false;
@@ -489,13 +453,13 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (count > before) {
                     char addedChar = s.charAt(start + count - 1);
-                    if (!modifierToggled && !MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE " + addedChar)) {
-                        startHome();
-                    } else if (modifierToggled) {
-                        keyCombination.append(addedChar);
-                        Log.i("KeyCombination", keyCombination.toString());
+                    if (!modifierToggled) {
+                        MessageHost("KEYBOARD_WRITE " + addedChar);
+                    } else {
+                        toolbar.AppendKeyCombination(addedChar);
+                        Log.i("KeyCombination", toolbar.GetKeyCombination().toString());
                     }
-                    keyboardTextInputView.append(String.valueOf(addedChar));
+                    toolbar.GetKeyboardTextView().append(String.valueOf(addedChar));
                 }
             }
 
@@ -560,7 +524,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             if (keyboardToolbar != null && !(keyboardToolbar.getVisibility() == View.VISIBLE)) {
                 keyboardToolbar.setVisibility(View.VISIBLE);
                 keyboardExtraBtnsLayout.setVisibility(View.VISIBLE);
-                keyboardExtraSetRowVisibility(currentPageIndex);
+                keyboardExtraSetRowVisibility(toolbar.GetCurrentToolbarPage());
             }
         } else {
             if (keyboardToolbar != null && keyboardToolbar.getVisibility() == View.VISIBLE) {
@@ -571,15 +535,9 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     }
 
     private void ResetKeyboardModifiers() {
-        winActive = false;
-        ctrlActive = false;
-        shiftActive = false;
-        altActive = false;
-        fnActive = false;
-        modifierToggled = false;
-        parenthesesCount = 0;
-        keyCombination.setLength(0);
+        toolbar.ResetKeyboardModifiers();
 
+        modifierToggled = false;
         editText.setText("");
     }
 
@@ -590,70 +548,14 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         int viewID = view.getId();
         boolean audio = false;
 
-        if (viewID == R.id.moreOpt) {
-            // Place holder to do nothing,
-            // on click listener will be done instead and is setup
-        } else if (viewID == R.id.winKey) {
-            if (!winActive) {
-                winActive = true;
-                modifierToggled = true;
-                keyCombination.append("WIN(");
-                keyboardTextInputView.append("Win(");
-                parenthesesCount += 1;
-            } else {
-                modifierToggled = false;
-            }
-        } else if (viewID == R.id.fnKey) {
-            if (!fnActive) {
-                fnActive = true;
-                modifierToggled = true;
-                keyCombination.append("FN+");
-                parenthesesCount += 1;
-            } else {
-                modifierToggled = false;
-            }
-        } else if (viewID == R.id.altKey) {
-            if (!altActive) {
-                altActive = true;
-                modifierToggled = true;
-                keyCombination.append("%(");
-                keyboardTextInputView.append("Alt(");
-                parenthesesCount += 1;
-            } else {
-                modifierToggled = false;
-            }
-        } else if (viewID == R.id.ctrlKey) {
-            if (!ctrlActive) {
-                ctrlActive = true;
-                modifierToggled = true;
-                keyCombination.append("^(");
-                keyboardTextInputView.append("Ctrl(");
-                parenthesesCount += 1;
-            } else {
-                modifierToggled = false;
-            }
-        } else if (viewID == R.id.shiftKey) {
-            if (!shiftActive) {
-                shiftActive = true;
-                modifierToggled = true;
-                keyCombination.append("+(");
-                keyboardTextInputView.append("Shift(");
-                parenthesesCount += 1;
-            } else {
-                modifierToggled = false;
-            }
-        } else {
-            for(int i = 0; i < 6; i++) {
-                if((currentPageIndex == 0) ? viewID == p1r2Buttons[i].getId():viewID == p2r2Buttons[i].getId()) {
-                    if(currentPageIndex == 1 && (i == 0 || i == 1 || i == 2)) {
+        modifierToggled = toolbar.KeyboardToolbarModifier(view.getId());
+        if (!modifierToggled) {
+            for(int i = 0; i < 12; i++) {
+                if((toolbar.GetCurrentToolbarPage() == 0) ? viewID == p1RowsButtons[i].getId():viewID == p2RowsButtons[i].getId()) {
+                    if(toolbar.GetCurrentToolbarPage() == 0 && (i == 6 || i == 7 || i == 8)) {
                         audio = true;
                     }
-                    msg = (currentPageIndex == 0) ? p1r2Keys[i]:p2r2Keys[i];
-                }
-            }
-            for(int i = 0; i < 6; i++) {
-                if((currentPageIndex == 0) ? viewID == p1r3Buttons[i].getId():viewID == p2r3Buttons[i].getId()) {
-                    msg = (currentPageIndex == 0) ? p1r3Keys[i]:p2r3Keys[i];
+                    msg = (toolbar.GetCurrentToolbarPage() == 0) ? p1Keys[i]:p2Keys[i];
                 }
             }
         }
@@ -665,17 +567,11 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             }, 75); // Delay in milliseconds
         }
 
-        if (!modifierToggled && !audio && !keyCombination.toString().isEmpty()) {
-            if (parenthesesCount > 0) {
-                for (int i = 0; i < parenthesesCount; i++) {
-                    keyCombination.append(")");
-                }
+        if (!modifierToggled && !audio && !toolbar.GetKeyCombination().toString().isEmpty()) {
+            toolbar.AddParentheses();
 
-                keyboardTextInputView.setText("");
-            }
-
-            MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE " + keyCombination);
-            Log.i("KeyboardToolbar", "KEYBOARD_WRITE " + keyCombination);
+            MessageHost("KEYBOARD_WRITE " + toolbar.GetKeyCombination());
+            Log.i("KeyboardToolbar", "KEYBOARD_WRITE " + toolbar.GetKeyCombination());
 
             ResetKeyboardModifiers();
 
@@ -688,72 +584,25 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                 }
             }, 10);
         } else if (modifierToggled && !msg.isEmpty() && !audio) {
-            keyCombination.append(msg);
-            keyboardTextInputView.append(msg);
+            toolbar.AppendKeyCombination(msg);
+            toolbar.GetKeyboardTextView().append(msg);
         } else if (audio) {
-            MainActivity.connectionManager.SendHostMessage("AUDIO " + msg);
+            MessageHost("AUDIO " + msg);
             Log.i("KeyboardToolbar", "AUDIO " + msg);
         } else if (!msg.isEmpty()) {
-            MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE " + msg);
+            MessageHost("KEYBOARD_WRITE " + msg);
             Log.i("KeyboardToolbar", "KEYBOARD_WRITE " + msg);
         }
     }
 
-    private void initButtonRows() {
-        // Keyboard extra toolbar Page 1 Row 2
-        p1r2Buttons[0] = findViewById(R.id.f1Key);
-        p1r2Buttons[1] = findViewById(R.id.f2Key);
-        p1r2Buttons[2] = findViewById(R.id.f3Key);
-        p1r2Buttons[3] = findViewById(R.id.f4Key);
-        p1r2Buttons[4] = findViewById(R.id.f5Key);
-        p1r2Buttons[5] = findViewById(R.id.f6Key);
-
-        // Keyboard extra toolbar Page 1 Row 3
-        p1r3Buttons[0] = findViewById(R.id.f7Key);
-        p1r3Buttons[1] = findViewById(R.id.f8Key);
-        p1r3Buttons[2] = findViewById(R.id.f9Key);
-        p1r3Buttons[3] = findViewById(R.id.f10Key);
-        p1r3Buttons[4] = findViewById(R.id.f11Key);
-        p1r3Buttons[5] = findViewById(R.id.f12Key);
-
-        // PAGE 2
-
-        // Keyboard extra toolbar Page 2 Row 2
-        p2r2Buttons[0] = findViewById(R.id.soundUpKey);
-        p2r2Buttons[1] = findViewById(R.id.soundDownKey);
-        p2r2Buttons[2] = findViewById(R.id.muteKey);
-        p2r2Buttons[3] = findViewById(R.id.tabKey);
-        p2r2Buttons[4] = findViewById(R.id.upKey);
-        p2r2Buttons[5] = findViewById(R.id.escKey);
-
-        // Keyboard extra toolbar Page 2 Row 3
-        p2r3Buttons[0] = findViewById(R.id.insertKey);
-        p2r3Buttons[1] = findViewById(R.id.deleteKey);
-        p2r3Buttons[2] = findViewById(R.id.printScreenKey);
-        p2r3Buttons[3] = findViewById(R.id.leftKey);
-        p2r3Buttons[4] = findViewById(R.id.downKey);
-        p2r3Buttons[5] = findViewById(R.id.rightKey);
-    }
-
-    private void keyboardExtraNextPage() {
-        currentPageIndex = (currentPageIndex + 1) % 2;
-        keyboardExtraSetRowVisibility(currentPageIndex);
-    }
-
     private void keyboardExtraSetRowVisibility(int pageIndex) {
         // Hide buttons for the current page
-        for (TextView button : (pageIndex == 0) ? p2r2Buttons:p1r2Buttons) {
-            button.setVisibility(View.GONE);
-        }
-        for (TextView button : (pageIndex == 0) ? p2r3Buttons:p1r3Buttons) {
+        for (TextView button : (pageIndex == 0) ? p2RowsButtons:p1RowsButtons) {
             button.setVisibility(View.GONE);
         }
 
         // Show buttons for the current page
-        for (TextView button : (pageIndex == 0) ? p1r2Buttons:p2r2Buttons) {
-            button.setVisibility(View.VISIBLE);
-        }
-        for (TextView button : (pageIndex == 0) ? p1r3Buttons:p2r3Buttons) {
+        for (TextView button : (pageIndex == 0) ? p1RowsButtons:p2RowsButtons) {
             button.setVisibility(View.VISIBLE);
         }
     }

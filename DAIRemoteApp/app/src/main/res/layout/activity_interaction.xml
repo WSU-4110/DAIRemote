@@ -74,7 +74,8 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="95dp">
+                android:layout_height="95dp"
+                tools:visibility="visible">
 
                 <androidx.appcompat.widget.Toolbar
                     android:id="@+id/keyboardToolbar"
@@ -229,28 +230,25 @@
                         android:text="F12" />
 
                     <TextView
-                        android:id="@+id/soundUpKey"
+                        android:id="@+id/insertKey"
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="1"
                         android:layout_column="0"
-                        android:drawableLeft="@drawable/keyboard_toolbar_soundup"
-                        android:paddingLeft="20dp" />
+                        android:text="INS" />
 
                     <TextView
-                        android:id="@+id/soundDownKey"
+                        android:id="@+id/deleteKey"
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="1"
                         android:layout_column="1"
-                        android:drawableLeft="@drawable/keyboard_toolbar_sounddown"
-                        android:paddingLeft="20dp" />
+                        android:text="DEL" />
 
                     <TextView
-                        android:id="@+id/muteKey"
+                        android:id="@+id/printScreenKey"
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="1"
                         android:layout_column="2"
-                        android:drawableLeft="@drawable/keyboard_toolbar_soundmute"
-                        android:paddingLeft="20dp" />
+                        android:text="PRSC" />
 
                     <TextView
                         android:id="@+id/tabKey"
@@ -275,25 +273,28 @@
                         android:text="ESC" />
 
                     <TextView
-                        android:id="@+id/insertKey"
+                        android:id="@+id/soundUpKey"
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="2"
                         android:layout_column="0"
-                        android:text="INS" />
+                        android:drawableLeft="@drawable/keyboard_toolbar_soundup"
+                        android:paddingLeft="20dp" />
 
                     <TextView
-                        android:id="@+id/deleteKey"
+                        android:id="@+id/soundDownKey"
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="2"
                         android:layout_column="1"
-                        android:text="DEL" />
+                        android:drawableLeft="@drawable/keyboard_toolbar_sounddown"
+                        android:paddingLeft="20dp" />
 
                     <TextView
-                        android:id="@+id/printScreenKey"
+                        android:id="@+id/muteKey"
                         style="@style/KeyboardExtrasStyle"
                         android:layout_row="2"
                         android:layout_column="2"
-                        android:text="PRSC" />
+                        android:drawableLeft="@drawable/keyboard_toolbar_soundmute"
+                        android:paddingLeft="20dp" />
 
                     <TextView
                         android:id="@+id/leftKey"
@@ -503,7 +504,7 @@
             app:layout_constraintTop_toBottomOf="@+id/touchpadFrame">
 
             <ImageButton
-                android:id="@+id/udptest"
+                android:id="@+id/disconnectHost"
                 style="@style/InteractionShortcutsStyle"
                 android:layout_row="0"
                 android:layout_column="0"
