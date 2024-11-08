@@ -331,6 +331,7 @@
             android:background="@color/material_dynamic_neutral20"
             android:gravity="center"
             android:orientation="horizontal"
+            android:clickable="true"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@+id/touchpadFrame"
             app:layout_constraintEnd_toEndOf="parent"
