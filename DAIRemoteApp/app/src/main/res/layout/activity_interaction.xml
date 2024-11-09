@@ -74,8 +74,7 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="95dp"
-                tools:visibility="visible">
+                android:layout_height="95dp">
 
                 <androidx.appcompat.widget.Toolbar
                     android:id="@+id/keyboardToolbar"
@@ -98,6 +97,7 @@
                     android:columnCount="6"
                     android:gravity="center"
                     android:rowCount="3"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
