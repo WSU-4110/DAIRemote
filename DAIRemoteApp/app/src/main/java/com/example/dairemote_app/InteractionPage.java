@@ -502,7 +502,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
                                 // Initiate tutorial starting at remote page steps
                                 tutorial.setTutorialOn(true);
-                                tutorial.setCurrentStep(1);
+                                tutorial.setCurrentStep(5);
                                 tutorial.showNextStep();
                             }
                         });

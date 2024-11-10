@@ -95,6 +95,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             tutorial.showSteps(tutorial.getCurrentStep());
         });
 
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra("cameFromServersPage", false)) {
+            tutorial.showNextStep();
+        }
+
+
         ImageButton remotePage = findViewById(R.id.DAIRemoteLogoBtn);
         remotePage.setOnClickListener(v -> {
             connectionProgress.setVisibility(View.VISIBLE);

@@ -112,6 +112,14 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
                 executor.execute(() -> {
                     if (MainActivity.connectionManager.InitializeConnection()) {
                         InitiateInteractionPage("Connected to: " + server);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ServersPage.this);
+                        TutorialMediator tutorial = TutorialMediator.GetInstance(builder);
+                        if (tutorial.getTutorialOn()) {
+                            tutorial.setCurrentStep(3);
+                            Intent intent = new Intent(ServersPage.this, MainActivity.class);
+                            intent.putExtra("cameFromServersPage", true);
+                            startActivity(intent);
+                        }
                     } else {
                         notifyUser(ServersPage.this, "Connection failed");
                         MainActivity.connectionManager.ResetConnectionManager();
@@ -132,6 +140,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         AlertDialog.Builder builder = new AlertDialog.Builder(ServersPage.this);
         TutorialMediator tutorial = TutorialMediator.GetInstance(builder);
         if (tutorial.getTutorialOn()) {
+            tutorial.setCurrentStep(0);
             tutorial.showNextStep();
         }
 
@@ -167,11 +176,14 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         addServer.setOnClickListener(v -> {
             inputField = new EditText(ServersPage.this);
             inputField.setHint("Enter IP Address here");
-            builderTitleMsg(builder, "Add your server host here:", "");
-            builder.setView(inputField);
-            builderPositiveBtn(builder, "Connect");
-            builderNegativeBtn(builder, "Cancel");
-            builderShow(builder);
+
+            AlertDialog.Builder addServerBuilder = new AlertDialog.Builder(ServersPage.this);
+            builderTitleMsg(addServerBuilder, "Add your server host here:", "");
+            addServerBuilder.setView(inputField);
+            builderPositiveBtn(addServerBuilder, "Connect");
+            builderNegativeBtn(addServerBuilder, "Cancel");
+
+            builderShow(addServerBuilder);
         });
     }
 
