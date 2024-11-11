@@ -39,7 +39,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 
 import java.net.SocketException;
@@ -58,36 +57,20 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     private final Handler handler = new Handler();
 
     // Keyboard & Keyboard Toolbar variables
-    private Toolbar keyboardToolbar;
-    private GridLayout keyboardExtraBtnsLayout;
-    private int parenthesesCount = 0;
-    private int currentPageIndex = 0;
-    private TextView keyboardTextInputView;
-    private final StringBuilder keyCombination = new StringBuilder();
-    private boolean winActive = false;
-    private boolean ctrlActive = false;
-    private boolean shiftActive = false;
-    private boolean altActive = false;
-    private boolean fnActive = false;
-    private boolean modifierToggled = false;
-    private final TextView[] p1r2Buttons = new TextView[6];
-    private final TextView[] p1r3Buttons = new TextView[6];
-    private final TextView[] p2r2Buttons = new TextView[6];
-    private final TextView[] p2r3Buttons = new TextView[6];
-    private final String[] p1r2Keys = {"{F1}", "{F2}", "{F3}", "{F4}", "{F5}", "{F6}"};
-    private final String[] p1r3Keys = {"{F7}", "{F8}", "{F9}", "{F10}", "{F11}", "{F12}"};
-    private final String[] p2r2Keys = {"UP", "DOWN", "MUTE", "{TAB}", "{UP}", "{ESC}"};
-    private final String[] p2r3Keys = {"{INS}", "{DEL}", "{PRTSC}", "{LEFT}", "{DOWN}", "{RIGHT}"};
+    private KeyboardToolbar toolbar;
 
     // Audio Control Panel and Host Audio Devices variables
     private ConstraintLayout audioControlPanel;
     private SeekBar volumeSlider;
     private TextView currentVolume;
     private Button expandButton;
+    private ImageView expandArrowUp;
+    private ImageView expandArrowDown;
     private boolean isRequestAudioDevicesTaskRunning = false;
     private RecyclerView audioRecyclerViewOptions;
     private AudioRecyclerAdapter audioRecyclerAdapter;
     private boolean audioListVisible = false;
+    private boolean audioMuted = false;
 
     // Host Display Profiles variables
     private boolean isRequestDisplayProfilesTaskRunning = false;
@@ -108,6 +91,12 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         notifyUser(InteractionPage.this, "Connection lost");
         startActivity(new Intent(InteractionPage.this, MainActivity.class));
         finish();
+    }
+
+    public void MessageHost(String message) {
+        if (!MainActivity.connectionManager.SendHostMessage(message)) {
+            startHome();
+        }
     }
 
     public void notifyUser(Context context, String msg) {
@@ -143,17 +132,16 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         drawerSetup(R.id.nav_remote);
         ImageView keyboardImgBtn = findViewById(R.id.keyboardImgBtn);
         editText = findViewById(R.id.editText);
-        keyboardToolbar = findViewById(R.id.keyboardToolbar);
-        keyboardExtraBtnsLayout = findViewById(R.id.keyboardExtraButtonsGrid);
-        keyboardTextInputView = findViewById(R.id.keyboardInputView);
         // Initialize row 2 and 3 button arrays for keyboardToolbar
-        initButtonRows();
+        toolbar = new KeyboardToolbar(R.id.moreOpt, R.id.winKey, R.id.fnKey, R.id.altKey, R.id.ctrlKey, R.id.shiftKey, findViewById(R.id.keyboardInputView), findViewById(R.id.keyboardToolbar), findViewById(R.id.keyboardExtraButtonsGrid),
+                new TextView[]{findViewById(R.id.insertKey), findViewById(R.id.deleteKey), findViewById(R.id.printScreenKey), findViewById(R.id.tabKey), findViewById(R.id.upKey), findViewById(R.id.escKey),
+                findViewById(R.id.soundUpKey), findViewById(R.id.soundDownKey), findViewById(R.id.muteKey), findViewById(R.id.leftKey), findViewById(R.id.downKey), findViewById(R.id.rightKey)},
+                new TextView[]{findViewById(R.id.f1Key), findViewById(R.id.f2Key), findViewById(R.id.f3Key), findViewById(R.id.f4Key), findViewById(R.id.f5Key), findViewById(R.id.f6Key),
+                findViewById(R.id.f7Key), findViewById(R.id.f8Key), findViewById(R.id.f9Key), findViewById(R.id.f10Key), findViewById(R.id.f11Key), findViewById(R.id.f12Key)});
         TextView moreOpts = findViewById(R.id.moreOpt);
-        moreOpts.setOnClickListener(v -> keyboardExtraNextPage());
-        // Commented out the text view to display the system's response
-        // Maybe future feature
-        // responseTextView = findViewById(R.id.responseTextView);
-        ImageView sendButton = findViewById(R.id.udptest);
+        moreOpts.setOnClickListener(v -> toolbar.keyboardExtraSetRowVisibility(toolbar.NextToolbarPage()));
+
+        ImageView sendButton = findViewById(R.id.disconnectHost);
         ImageView displayButton = findViewById(R.id.displays);
         ImageView interactionHelp = findViewById(R.id.interactionsHelp);
         interactionsHelpText = findViewById(R.id.interationsHelpTextView);
@@ -162,9 +150,13 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         // Audio Control Panel
         volumeSlider = findViewById(R.id.volume_slider);
         expandButton = findViewById(R.id.expand_audio_button);
+        expandArrowUp = findViewById(R.id.expand_arrowup);
+        expandArrowDown = findViewById(R.id.expand_arrowdown);
         ImageButton playPauseButton = findViewById(R.id.audio_play_pause_button);
         ImageButton previousButton = findViewById(R.id.audio_previous_button);
         ImageButton nextButton = findViewById(R.id.audio_next_button);
+        ImageButton audioCycleButton = findViewById(R.id.audio_cycle_button);
+        ImageButton audioToggleMuteButton = findViewById(R.id.audio_togglemute_button);
         currentVolume = findViewById(R.id.audio_slider_volume);
         ImageView audioButton = findViewById(R.id.audiocycle);
         audioControlPanel = findViewById(R.id.audio_control_panel);
@@ -192,17 +184,13 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             final GestureDetector gestureDetector = new GestureDetector(getApplicationContext(), new GestureDetector.SimpleOnGestureListener() {
                 @Override
                 public boolean onSingleTapUp(@NonNull MotionEvent e) {
-                    if (!MainActivity.connectionManager.SendHostMessage("MOUSE_LMB")) {
-                        startHome();
-                    }
+                    MessageHost("MOUSE_LMB");
                     return super.onSingleTapUp(e);
                 }
 
                 @Override
                 public boolean onDoubleTap(@NonNull MotionEvent e) {
-                    if (!MainActivity.connectionManager.SendHostMessage("MOUSE_LMB")) {
-                        startHome();
-                    }
+                    MessageHost("MOUSE_LMB");
                     return super.onDoubleTap(e);
                 }
 
@@ -211,9 +199,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     if (vibrator != null && vibrator.hasVibrator()) {
                         vibrator.vibrate(10); // Vibrate for 50 milliseconds
                     }
-                    if (!MainActivity.connectionManager.SendHostMessage("MOUSE_LMB_HOLD")) {
-                        startHome();
-                    }
+                    MessageHost("MOUSE_LMB_HOLD");
                     super.onLongPress(e);
                 }
 
@@ -222,9 +208,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     // Handle two-finger scroll here for vertical scrolling
                     if (e2.getPointerCount() == 2) {
                         scrolling = true; // Set scrolling flag
-                        if (!MainActivity.connectionManager.SendHostMessage("MOUSE_SCROLL " + distanceY)) {
-                            startHome();
-                        }
+                        MessageHost("MOUSE_SCROLL " + distanceY);
                         return true;
                     }
                     return false;
@@ -249,9 +233,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         deltaX = (x - currentX) * mouseSensitivity;
                         deltaY = (y - currentY) * mouseSensitivity;
                         if (!rmbDetected && !scrolling) {
-                            if (!MainActivity.connectionManager.SendHostMessage("MOUSE_MOVE " + deltaX + " " + deltaY)) {
-                                startHome();
-                            }
+                            MessageHost("MOUSE_MOVE " + deltaX + " " + deltaY);
                             currentX = x;
                             currentY = y;
                         }
@@ -268,15 +250,11 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     case MotionEvent.ACTION_POINTER_UP:
                         deltaT = System.currentTimeMillis() - startTime;
                         if (initialPointerCount == 2 && (deltaT < CLICK_THRESHOLD && deltaT > 10)) {
-                            if (!MainActivity.connectionManager.SendHostMessage("MOUSE_RMB")) {
-                                startHome();
-                            }
+                            MessageHost("MOUSE_RMB");
                             initialPointerCount = 0;
                             return true;
                         } else if (initialPointerCount == 3 && (deltaT < CLICK_THRESHOLD && deltaT > 10)) {
-                            if (!MainActivity.connectionManager.SendHostMessage("MOUSE_MMB")) {
-                                startHome();
-                            }
+                            MessageHost("MOUSE_MMB");
                             initialPointerCount = 0;
                             return true;
                         } else if (event.getPointerCount() <= 1) {
@@ -298,8 +276,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             public void onClick(View v) {
                 if (ConnectionManager.GetConnectionEstablished()) {
                     // Hide Audio Control Panel && Display Profiles List
-                    hideAudioControlPanel();
-                    hideDisplayProfilesList();
+                    HideAudioControlPanel();
+                    HideDisplayProfilesList();
 
                     editText.setVisibility(View.VISIBLE);
                     editText.setCursorVisible(false);
@@ -319,9 +297,9 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                 if (ConnectionManager.GetConnectionEstablished()) {
                     displayListVisible = !displayListVisible;
                     if(displayListVisible) {
-                        hideAudioControlPanel();
+                        HideAudioControlPanel();
                         try {
-                            requestDisplayProfiles();
+                            RequestDisplayProfiles();
                         } catch (SocketException e) {
                             throw new RuntimeException(e);
                         }
@@ -341,15 +319,15 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             public void onClick(View v) {
                 if (ConnectionManager.GetConnectionEstablished()) {
                     if (audioControlPanel.getVisibility() == View.GONE) {
-                        hideDisplayProfilesList();
+                        HideDisplayProfilesList();
                         audioControlPanel.setVisibility(View.VISIBLE);
                         try {
-                            requestAudioDevices();
+                            RequestAudioDevices();
                         } catch (SocketException e) {
                             throw new RuntimeException(e);
                         }
                     } else {
-                        hideAudioControlPanel();
+                        HideAudioControlPanel();
                     }
                 } else {
                     startHome();
@@ -362,39 +340,49 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             audioListVisible = !audioListVisible;
             if(audioListVisible) {
                 audioRecyclerViewOptions.setVisibility(View.VISIBLE);
-                expandButton.setText("v");
+                expandArrowUp.setVisibility(View.GONE);
+                expandArrowDown.setVisibility(View.VISIBLE);
             } else {
                 audioRecyclerViewOptions.setVisibility(View.GONE);
-                expandButton.setText("^");
+                expandArrowUp.setVisibility(View.VISIBLE);
+                expandArrowDown.setVisibility(View.GONE);
             }
         });
 
         playPauseButton.setOnClickListener(v -> {
-            if (!MainActivity.connectionManager.SendHostMessage("AUDIO TogglePlay")) {
-                startHome();
-            }
+            MessageHost("AUDIO TogglePlay");
         });
 
         previousButton.setOnClickListener(v -> {
-            if (!MainActivity.connectionManager.SendHostMessage("AUDIO PreviousTrack")) {
-                startHome();
-            }
+            MessageHost("AUDIO PreviousTrack");
         });
 
         nextButton.setOnClickListener(v -> {
-            if (!MainActivity.connectionManager.SendHostMessage("AUDIO NextTrack")) {
-                startHome();
+            MessageHost("AUDIO NextTrack");
+        });
+
+        audioCycleButton.setOnClickListener(v -> {
+            MessageHost("AUDIO CycleDevices");
+            CycleAudioDevice();
+        });
+
+        audioToggleMuteButton.setOnClickListener(v -> {
+            MessageHost("AUDIO MUTE");
+            audioMuted = !audioMuted;
+            if(audioMuted) {
+                audioToggleMuteButton.setColorFilter(getColor(R.color.black));
+                currentVolume.setTextColor(getColor(R.color.black));
+            } else {
+                audioToggleMuteButton.setColorFilter(getColor(R.color.grey));
+                currentVolume.setTextColor(getColor(R.color.grey));
             }
         });
 
         volumeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (!MainActivity.connectionManager.SendHostMessage("AudioVolume " + seekBar.getProgress())) {
-                    startHome();
-                } else {
-                    currentVolume.setText(String.valueOf(progress));
-                }
+                MessageHost("AudioVolume " + seekBar.getProgress());
+                currentVolume.setText(String.valueOf(progress));
             }
 
             @Override
@@ -409,14 +397,14 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content).getRootView(), (v, insets) -> {
             if (insets.isVisible(WindowInsetsCompat.Type.ime())) {
                 // Keyboard is visible
-                toggleKeyboardToolbar(true);
-                keyboardTextInputView.setVisibility(View.VISIBLE);
+                toolbar.ToggleKeyboardToolbar(true);
+                toolbar.GetKeyboardTextView().setVisibility(View.VISIBLE);
             } else {
                 // Keyboard is not visible
-                toggleKeyboardToolbar(false);
+                toolbar.ToggleKeyboardToolbar(false);
                 clearEditText();
-                keyboardTextInputView.setText("");
-                keyboardTextInputView.setVisibility(View.GONE);
+                toolbar.GetKeyboardTextView().setText("");
+                toolbar.GetKeyboardTextView().setVisibility(View.GONE);
             }
             return insets;
         });
@@ -428,19 +416,17 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     int cursorPosition = editText.getSelectionStart();
                     if (cursorPosition > 0) {
                         editText.getText().delete(cursorPosition - 1, cursorPosition);
-                        String textViewText = keyboardTextInputView.getText().toString();
+                        String textViewText = toolbar.GetKeyboardTextView().getText().toString();
                         if (textViewText.length() > 0) {
-                            keyboardTextInputView.setText(textViewText.substring(0, textViewText.length() - 1));
+                            toolbar.GetKeyboardTextView().setText(textViewText.substring(0, textViewText.length() - 1));
                         }
                     }
-                    if (!MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE {BS}")) {
-                        startHome();
+                    if(!toolbar.GetModifierToggled()) {
+                        MessageHost("KEYBOARD_WRITE {BS}");
                     }
                     return true;
-                } else if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    if (!MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE {ENTER}")) {
-                        startHome();
-                    }
+                } else if (!toolbar.GetModifierToggled() && keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
+                    MessageHost("KEYBOARD_WRITE {ENTER}");
                     return true;
                 }
                 return false;
@@ -458,13 +444,13 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (count > before) {
                     char addedChar = s.charAt(start + count - 1);
-                    if (!modifierToggled && !MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE " + addedChar)) {
-                        startHome();
-                    } else if (modifierToggled) {
-                        keyCombination.append(addedChar);
-                        Log.i("KeyCombination", keyCombination.toString());
+                    if (!toolbar.GetModifierToggled()) {
+                        MessageHost("KEYBOARD_WRITE " + addedChar);
+                    } else {
+                        toolbar.AppendKeyCombination(addedChar);
+                        Log.i("KeyCombination", toolbar.GetKeyCombination().toString());
                     }
-                    keyboardTextInputView.append(String.valueOf(addedChar));
+                    toolbar.GetKeyboardTextView().append(String.valueOf(addedChar));
                 }
             }
 
@@ -528,31 +514,10 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         editText.clearFocus();
     }
 
-    private void toggleKeyboardToolbar(boolean open) {
-        if (open) {
-            if (keyboardToolbar != null && !(keyboardToolbar.getVisibility() == View.VISIBLE)) {
-                keyboardToolbar.setVisibility(View.VISIBLE);
-                keyboardExtraBtnsLayout.setVisibility(View.VISIBLE);
-                keyboardExtraSetRowVisibility(currentPageIndex);
-            }
-        } else {
-            if (keyboardToolbar != null && keyboardToolbar.getVisibility() == View.VISIBLE) {
-                keyboardToolbar.setVisibility(View.GONE);
-                keyboardExtraBtnsLayout.setVisibility(View.GONE);
-            }
-        }
-    }
+    private void ResetKeyboardModifiers() {
+        toolbar.ResetKeyboardModifiers();
 
-    private void resetKeyboardModifiers() {
-        winActive = false;
-        ctrlActive = false;
-        shiftActive = false;
-        altActive = false;
-        fnActive = false;
-        modifierToggled = false;
-        parenthesesCount = 0;
-        keyCombination.setLength(0);
-
+        toolbar.SetModifierToggled(false);
         editText.setText("");
     }
 
@@ -563,203 +528,50 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         int viewID = view.getId();
         boolean audio = false;
 
-        if (viewID == R.id.moreOpt) {
-            // Place holder to do nothing,
-            // on click listener will be done instead and is setup
-        } else if (viewID == R.id.winKey) {
-            if (!winActive) {
-                winActive = true;
-                modifierToggled = true;
-                keyCombination.append("WIN(");
-                keyboardTextInputView.append("Win(");
-                parenthesesCount += 1;
-            } else {
-                modifierToggled = false;
-            }
-        } else if (viewID == R.id.fnKey) {
-            if (!fnActive) {
-                fnActive = true;
-                modifierToggled = true;
-                keyCombination.append("FN+");
-                parenthesesCount += 1;
-            } else {
-                modifierToggled = false;
-            }
-        } else if (viewID == R.id.altKey) {
-            if (!altActive) {
-                altActive = true;
-                modifierToggled = true;
-                keyCombination.append("%(");
-                keyboardTextInputView.append("Alt(");
-                parenthesesCount += 1;
-            } else {
-                modifierToggled = false;
-            }
-        } else if (viewID == R.id.ctrlKey) {
-            if (!ctrlActive) {
-                ctrlActive = true;
-                modifierToggled = true;
-                keyCombination.append("^(");
-                keyboardTextInputView.append("Ctrl(");
-                parenthesesCount += 1;
-            } else {
-                modifierToggled = false;
-            }
-        } else if (viewID == R.id.shiftKey) {
-            if (!shiftActive) {
-                shiftActive = true;
-                modifierToggled = true;
-                keyCombination.append("+(");
-                keyboardTextInputView.append("Shift(");
-                parenthesesCount += 1;
-            } else {
-                modifierToggled = false;
-            }
-        } else {
-            if (currentPageIndex == 0) {
-                for(int i = 0; i < 6; i++) {
-                    if(viewID == p1r2Buttons[i].getId()) {
-                        msg = p1r2Keys[i];
+        toolbar.SetModifierToggled(toolbar.KeyboardToolbarModifier(view.getId()));
+        if (!toolbar.GetModifierToggled()) {
+            for(int i = 0; i < 12; i++) {
+                if((toolbar.GetCurrentToolbarPage() == 0) ? viewID == toolbar.GetButtons(0)[i].getId():viewID == toolbar.GetButtons(1)[i].getId()) {
+                    if(toolbar.GetCurrentToolbarPage() == 0 && (i == 6 || i == 7 || i == 8)) {
+                        audio = true;
                     }
-                }
-                for(int i = 0; i < 6; i++) {
-                    if(viewID == p1r3Buttons[i].getId()) {
-                        msg = p1r3Keys[i];
-                    }
-                }
-
-            } else if (currentPageIndex == 1) {
-                for(int i = 0; i < 6; i++) {
-                    if(viewID == p2r2Buttons[i].getId()) {
-                        if(i == 0 || i == 1 || i == 2) {
-                            audio = true;
-                        }
-                        msg = p2r2Keys[i];
-                    }
-                }
-                for(int i = 0; i < 6; i++) {
-                    if(viewID == p2r3Buttons[i].getId()) {
-                        msg = p2r3Keys[i];
-                    }
+                    msg = (toolbar.GetCurrentToolbarPage() == 0) ? toolbar.GetKeys(0)[i]:toolbar.GetKeys(1)[i];
                 }
             }
         }
 
         view.setBackgroundColor(Color.LTGRAY);
-        if (!modifierToggled) {
+        if (!toolbar.GetModifierToggled()) {
             new Handler().postDelayed(() -> {
                 view.setBackgroundColor(Color.TRANSPARENT);
             }, 75); // Delay in milliseconds
         }
 
-        if (!modifierToggled && !audio && !keyCombination.toString().isEmpty()) {
-            if (parenthesesCount > 0) {
-                for (int i = 0; i < parenthesesCount; i++) {
-                    keyCombination.append(")");
-                }
+        if (!toolbar.GetModifierToggled() && !audio && !toolbar.GetKeyCombination().toString().isEmpty()) {
+            toolbar.AddParentheses();
 
-                keyboardTextInputView.setText("");
-            }
+            MessageHost("KEYBOARD_WRITE " + toolbar.GetKeyCombination());
+            Log.i("KeyboardToolbar", "KEYBOARD_WRITE " + toolbar.GetKeyCombination());
 
-            MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE " + keyCombination);
-            Log.i("KeyboardToolbar", "KEYBOARD_WRITE " + keyCombination);
-
-            resetKeyboardModifiers();
+            ResetKeyboardModifiers();
 
             new Handler().postDelayed(() -> {
-                for (int i = 0; i < keyboardExtraBtnsLayout.getChildCount(); i++) {
-                    View child = keyboardExtraBtnsLayout.getChildAt(i);
+                for (int i = 0; i < toolbar.GeyKeyboardLayout().getChildCount(); i++) {
+                    View child = toolbar.GeyKeyboardLayout().getChildAt(i);
                     if (child instanceof TextView) {
                         child.setBackgroundColor(Color.TRANSPARENT);
                     }
                 }
             }, 10);
-        } else if (modifierToggled && !msg.isEmpty() && !audio) {
-            keyCombination.append(msg);
-            keyboardTextInputView.append(msg);
+        } else if (toolbar.GetModifierToggled() && !msg.isEmpty() && !audio) {
+            toolbar.AppendKeyCombination(msg);
+            toolbar.GetKeyboardTextView().append(msg);
         } else if (audio) {
-            MainActivity.connectionManager.SendHostMessage("AUDIO " + msg);
+            MessageHost("AUDIO " + msg);
             Log.i("KeyboardToolbar", "AUDIO " + msg);
         } else if (!msg.isEmpty()) {
-            MainActivity.connectionManager.SendHostMessage("KEYBOARD_WRITE " + msg);
+            MessageHost("KEYBOARD_WRITE " + msg);
             Log.i("KeyboardToolbar", "KEYBOARD_WRITE " + msg);
-        }
-    }
-
-    private void initButtonRows() {
-        // Keyboard extra toolbar Page 1 Row 2
-        p1r2Buttons[0] = findViewById(R.id.f1Key);
-        p1r2Buttons[1] = findViewById(R.id.f2Key);
-        p1r2Buttons[2] = findViewById(R.id.f3Key);
-        p1r2Buttons[3] = findViewById(R.id.f4Key);
-        p1r2Buttons[4] = findViewById(R.id.f5Key);
-        p1r2Buttons[5] = findViewById(R.id.f6Key);
-
-        // Keyboard extra toolbar Page 1 Row 3
-        p1r3Buttons[0] = findViewById(R.id.f7Key);
-        p1r3Buttons[1] = findViewById(R.id.f8Key);
-        p1r3Buttons[2] = findViewById(R.id.f9Key);
-        p1r3Buttons[3] = findViewById(R.id.f10Key);
-        p1r3Buttons[4] = findViewById(R.id.f11Key);
-        p1r3Buttons[5] = findViewById(R.id.f12Key);
-
-        // PAGE 2
-
-        // Keyboard extra toolbar Page 2 Row 2
-        p2r2Buttons[0] = findViewById(R.id.soundUpKey);
-        p2r2Buttons[1] = findViewById(R.id.soundDownKey);
-        p2r2Buttons[2] = findViewById(R.id.muteKey);
-        p2r2Buttons[3] = findViewById(R.id.tabKey);
-        p2r2Buttons[4] = findViewById(R.id.upKey);
-        p2r2Buttons[5] = findViewById(R.id.escKey);
-
-        // Keyboard extra toolbar Page 2 Row 3
-        p2r3Buttons[0] = findViewById(R.id.insertKey);
-        p2r3Buttons[1] = findViewById(R.id.deleteKey);
-        p2r3Buttons[2] = findViewById(R.id.printScreenKey);
-        p2r3Buttons[3] = findViewById(R.id.leftKey);
-        p2r3Buttons[4] = findViewById(R.id.downKey);
-        p2r3Buttons[5] = findViewById(R.id.rightKey);
-    }
-
-    private void keyboardExtraNextPage() {
-        currentPageIndex = (currentPageIndex + 1) % 2;
-        keyboardExtraSetRowVisibility(currentPageIndex);
-    }
-
-    private void keyboardExtraSetRowVisibility(int pageIndex) {
-        // Hide row 2 & 3 buttons initially
-        if (pageIndex == 0) {
-            for (TextView button : p2r2Buttons) {
-                button.setVisibility(View.GONE);
-            }
-            for (TextView button : p2r3Buttons) {
-                button.setVisibility(View.GONE);
-            }
-        } else {
-            for (TextView button : p1r2Buttons) {
-                button.setVisibility(View.GONE);
-            }
-            for (TextView button : p1r3Buttons) {
-                button.setVisibility(View.GONE);
-            }
-        }
-
-        // Show buttons for the current page
-        if (pageIndex == 0) {
-            for (TextView button : p1r2Buttons) {
-                button.setVisibility(View.VISIBLE);
-            }
-            for (TextView button : p1r3Buttons) {
-                button.setVisibility(View.VISIBLE);
-            }
-        } else if (pageIndex == 1) {
-            for (TextView button : p2r2Buttons) {
-                button.setVisibility(View.VISIBLE);
-            }
-            for (TextView button : p2r3Buttons) {
-                button.setVisibility(View.VISIBLE);
-            }
         }
     }
 
@@ -769,7 +581,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             drawerLayout.closeDrawer(GravityCompat.START);
         } else if (audioListVisible) {
             audioRecyclerViewOptions.setVisibility(View.GONE);
-            expandButton.setText("^");
+            expandArrowUp.setVisibility(View.VISIBLE);
+            expandArrowDown.setVisibility(View.GONE);
             audioListVisible = false;
         }  else if (audioControlPanel.getVisibility() == View.VISIBLE) {
             audioControlPanel.setVisibility(View.GONE);
@@ -786,7 +599,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     @Override
     protected void onPause() {
         if (connectionMonitor.IsHeartbeatRunning()) {
-            Log.d("TEST", "STOPPING HEARTBEAT");
             connectionMonitor.StopHeartbeat();
         }
         super.onPause();
@@ -796,7 +608,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     protected void onResume() {
         super.onResume();
         if (!connectionMonitor.IsHeartbeatRunning()) {
-            Log.d("TEST", "HEARTBEAT ON RESUME");
             connectionMonitor.StartHeartbeat();
         }
     }
@@ -849,42 +660,47 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         navigationView.setCheckedItem(page);
     }
 
-    private void hideAudioControlPanel() {
+    private void HideAudioControlPanel() {
         if(audioControlPanel.getVisibility() == View.VISIBLE) {
             audioRecyclerViewOptions.setVisibility(View.GONE);
-            expandButton.setText("^");
+            expandArrowUp.setVisibility(View.VISIBLE);
+            expandArrowDown.setVisibility(View.GONE);
             audioControlPanel.setVisibility(View.GONE);
             audioListVisible = false;
         }
     }
 
-    private void hideDisplayProfilesList () {
+    private void HideDisplayProfilesList() {
         if(displayListVisible) {
             displayRecyclerViewOptions.setVisibility(View.GONE);
             displayListVisible = false;
         }
     }
 
-    private void loadAudioDevices(List<String> audioDevices) {
+    private void UpdateAudioDevices(List<String> audioDevices) {
         audioRecyclerAdapter.updateOptions(audioDevices);
     }
 
-    private void loadAudioDeviceDefault(String defaultAudioDevice) {
+    private void SetAudioDeviceDefault(String defaultAudioDevice) {
         audioRecyclerAdapter.SetSelectedPosition(defaultAudioDevice);
     }
 
-    private void loadDisplayProfiles(List<String> displayProfiles) {
+    private void CycleAudioDevice() {
+        audioRecyclerAdapter.CyclePosition();
+    }
+
+    private void UpdateDisplayProfiles(List<String> displayProfiles) {
         displayProfilesRecyclerAdapter.updateOptions(displayProfiles);
     }
 
-    private void requestAudioDevices() throws SocketException {
+    private void RequestAudioDevices() throws SocketException {
         if (!isRequestAudioDevicesTaskRunning) {
             isRequestAudioDevicesTaskRunning = true;
             new RequestAudioDevicesTask().execute();
         }
     }
 
-    private void requestDisplayProfiles() throws SocketException {
+    private void RequestDisplayProfiles() throws SocketException {
         if (!isRequestDisplayProfilesTaskRunning) {
             isRequestDisplayProfilesTaskRunning = true;
             new RequestDisplayProfilesTask().execute();
@@ -914,9 +730,9 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         String devicesPart = parts[0].substring("AudioDevices: ".length());
                         List<String> deviceList = Arrays.asList(devicesPart.split(","));
                         Log.d("InteractionPageAudio", "Audio devices: " + deviceList);
-                        loadAudioDevices(deviceList);
+                        UpdateAudioDevices(deviceList);
                         Log.d("InteractionPageAudio", "Audio default device: " + parts[2].substring("DefaultAudioDevice: ".length()));
-                        loadAudioDeviceDefault(parts[2].substring("DefaultAudioDevice: ".length()));
+                        SetAudioDeviceDefault(parts[2].substring("DefaultAudioDevice: ".length()));
 
                         // Set seekbar to current host volume
                         String volumePart = parts[1].substring("Volume: ".length());
@@ -953,7 +769,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     String displayProfiles = response.substring("DisplayProfiles: ".length());
                     List<String> deviceList = Arrays.asList(displayProfiles.split(","));
                     Log.d("InteractionPageDisplays", "Display Profiles: " + deviceList);
-                    loadDisplayProfiles(deviceList);
+                    UpdateDisplayProfiles(deviceList);
                 } else {
                     Log.e("InteractionPageDisplays", "Unexpected response format: " + response);
                 }

@@ -362,6 +362,10 @@ public class UDPServerHost
                 {
                     SpecialKeys.PressKey(SpecialKeys.nextTrack);
                 }
+                else if (parts[1] == "CycleDevices")
+                {
+                    audioManager.CycleAudioDevice();
+                }
                 break;
             case "AudioVolume":
                 audioManager.SetVolume(Convert.ToDouble(parts[1]));

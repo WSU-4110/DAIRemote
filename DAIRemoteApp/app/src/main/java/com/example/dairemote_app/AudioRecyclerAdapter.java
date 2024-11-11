@@ -32,6 +32,18 @@ public class AudioRecyclerAdapter extends RecyclerView.Adapter<AudioRecyclerAdap
         }
     }
 
+    public void CyclePosition() {
+        if (selectedPosition != -1) {
+            int previousPosition = selectedPosition;
+            selectedPosition = (selectedPosition+1)%audioDevices.size();
+
+            if (previousPosition != -1) {
+                notifyItemChanged(previousPosition);
+            }
+            notifyItemChanged(selectedPosition);
+        }
+    }
+
     @NonNull
     @Override
     public OptionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

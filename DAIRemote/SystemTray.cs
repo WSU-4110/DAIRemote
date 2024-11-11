@@ -132,8 +132,7 @@ public class TrayIconManager
         {
             string fileName = Path.GetFileNameWithoutExtension(profile);
             ToolStripMenuItem profileLoadItem = new(fileName, monitorIcon, (sender, e) => DisplayConfig.SetDisplaySettings(profile));
-
-            menu.Items.Insert(2, profileLoadItem);
+            menu.Items.Add(profileLoadItem);
 
             ToolStripMenuItem profileDeleteItem = new(fileName, monitorIcon, (sender, e) => DeleteProfile(profile));
 
