@@ -49,6 +49,8 @@ public partial class DAIRemoteApplicationUI : Form
 
     private void InitializeDisplayProfilesLayouts()
     {
+        DisplayLoadProfilesLayout.Controls.Clear();
+        DisplayDeleteProfilesLayout.Controls.Clear();
         string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
         if (!Directory.Exists(folderPath))
         {
@@ -91,6 +93,7 @@ public partial class DAIRemoteApplicationUI : Form
         Button clickedButton = sender as Button;
         string profileName = clickedButton.Tag.ToString();
         DisplayConfig.DeleteDisplaySettings(profileName);
+        InitializeDisplayProfilesLayouts();
     }
 
     private void LoadProfileButton_Click(object sender, EventArgs e)
@@ -98,6 +101,7 @@ public partial class DAIRemoteApplicationUI : Form
         Button clickedButton = sender as Button;
         string profileName = clickedButton.Tag.ToString();
         DisplayConfig.SetDisplaySettings(profileName);
+        InitializeDisplayProfilesLayouts();
     }
 
     private void DAIRemoteApplicationUI_FormClosing(object sender, FormClosingEventArgs e)
@@ -113,7 +117,7 @@ public partial class DAIRemoteApplicationUI : Form
     {
         this.audioFormPanel = new Panel
         {
-            Location = new System.Drawing.Point(10, 60),
+            Location = new System.Drawing.Point(10, 310),
             Size = new System.Drawing.Size(760, 370),
         };
 
@@ -127,12 +131,15 @@ public partial class DAIRemoteApplicationUI : Form
     private void BtnAddDisplayConfig_Click(object sender, EventArgs e)
     {
         TrayIconManager.SaveNewProfile(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"));
+        DisplayLoadProfilesLayout.Controls.Clear();
+        DisplayDeleteProfilesLayout.Controls.Clear();
+        InitializeDisplayProfilesLayouts();
     }
 
-    private void BtnLoadDisplayConfig_Click(object sender, EventArgs e)
+    /*private void BtnLoadDisplayConfig_Click(object sender, EventArgs e)
     {
         DisplayConfig.SetDisplaySettings("displayConfig" + ".json");
-    }
+    }*/
 
     private void CheckBoxStartup_CheckedChanged(object sender, EventArgs e)
     {
