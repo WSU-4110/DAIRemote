@@ -9,6 +9,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -39,7 +40,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
     private String selectedHost = null;
 
     private EditText inputField;
-    private FloatingActionButton addServer;
+    public FloatingActionButton addServer;
     private ExecutorService executor;
 
     public void notifyUser(Context context, String msg) {
@@ -106,19 +107,21 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
     public void AttemptConnection(String server) {
         if(!PriorConnectionEstablishedCheck(server)) {
             MainActivity.connectionManager = new ConnectionManager(server);
+            AlertDialog.Builder builder = new AlertDialog.Builder(ServersPage.this);
+            TutorialMediator tutorial = TutorialMediator.GetInstance(builder);
 
             // Start the new connection process in the background
             if(!executor.isShutdown()) {
                 executor.execute(() -> {
                     if (MainActivity.connectionManager.InitializeConnection()) {
-                        InitiateInteractionPage("Connected to: " + server);
-                        AlertDialog.Builder builder = new AlertDialog.Builder(ServersPage.this);
-                        TutorialMediator tutorial = TutorialMediator.GetInstance(builder);
                         if (tutorial.getTutorialOn()) {
                             tutorial.setCurrentStep(3);
                             Intent intent = new Intent(ServersPage.this, MainActivity.class);
                             intent.putExtra("cameFromServersPage", true);
                             startActivity(intent);
+                        }
+                        else {
+                            InitiateInteractionPage("Connected to: " + server);
                         }
                     } else {
                         notifyUser(ServersPage.this, "Connection failed");
@@ -143,6 +146,12 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
             tutorial.setCurrentStep(0);
             tutorial.showNextStep();
         }
+
+        ImageButton helpButton = findViewById(R.id.helpButton);
+        helpButton.setOnClickListener(v -> {
+            tutorial.setCurrentStep(1);
+            tutorial.showSteps(tutorial.getCurrentStep());
+        });
 
         hostListView = findViewById(R.id.hostList);
         addServer = findViewById(R.id.addServerBtn);
@@ -173,6 +182,7 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
             AttemptConnection(availableHosts.get(position));
         });
 
+        tutorial.setServersPage(ServersPage.this);
         addServer.setOnClickListener(v -> {
             inputField = new EditText(ServersPage.this);
             inputField.setHint("Enter IP Address here");
@@ -185,6 +195,13 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
 
             builderShow(addServerBuilder);
         });
+
+        // when the user comes from the main page (after trying to connect to host from there)
+        // addServer pop up button appears automatically
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra("cameFromMainActivity", false)) {
+            addServer.performClick();
+        }
     }
 
     @Override

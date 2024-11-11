@@ -487,6 +487,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         interactionHelp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(InteractionPage.this);
+                TutorialMediator tutorial = TutorialMediator.GetInstance(builder);
                 if (interactionsHelpText.getVisibility() == View.VISIBLE) {
                     interactionsHelpText.setVisibility(View.GONE); // Hide the TextView
                 } else {
@@ -502,7 +504,9 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
 
                                 // Initiate tutorial starting at remote page steps
                                 tutorial.setTutorialOn(true);
-                                tutorial.setCurrentStep(5);
+                                tutorial.setCurrentStep(0);
+                                Intent intent = new Intent(InteractionPage.this, ServersPage.class);
+                                startActivity(intent);
                                 tutorial.showNextStep();
                             }
                         });

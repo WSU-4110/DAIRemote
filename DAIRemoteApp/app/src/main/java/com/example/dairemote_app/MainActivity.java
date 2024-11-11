@@ -54,8 +54,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void builderPositiveBtn(AlertDialog.Builder builder, String text) {
         builder.setPositiveButton(text, (dialog, which) -> {
-            startActivity(new Intent(MainActivity.this, ServersPage.class));
-        });
+            Intent intent = new Intent(MainActivity.this, ServersPage.class);
+            intent.putExtra("cameFromMainActivity", true);
+            startActivity(intent);        });
     }
 
     public void builderNegativeBtn(AlertDialog.Builder builder, String text) {
@@ -96,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         Intent intent = getIntent();
-        if (intent != null && intent.getBooleanExtra("cameFromServersPage", false)) {
+        if (tutorial.getTutorialOn() && intent != null && intent.getBooleanExtra("cameFromServersPage", false)) {
             tutorial.showNextStep();
         }
 

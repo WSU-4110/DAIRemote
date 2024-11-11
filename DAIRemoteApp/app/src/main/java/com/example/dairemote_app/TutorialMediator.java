@@ -5,6 +5,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -14,6 +16,8 @@ public class TutorialMediator implements IBuilderTemplate {
     private static Window window;
     private boolean tutorialOn = false; // tracks if tutorial is active
     private int currentStep = 0;
+    private ServersPage serversPage;
+
 
     public static TutorialMediator GetInstance(AlertDialog.Builder builder) {
         if(tutorialInstance == null) {
@@ -58,6 +62,10 @@ public class TutorialMediator implements IBuilderTemplate {
         this.currentStep = currentStep;
     }
 
+    public void setServersPage(ServersPage serversPage) {
+        this.serversPage = serversPage;
+    }
+
     public void builderTitleMsg(AlertDialog.Builder builder, String title, String message) {
         builder.setTitle(title);
         builder.setMessage(message);
@@ -65,9 +73,14 @@ public class TutorialMediator implements IBuilderTemplate {
 
     public void builderPositiveBtn(AlertDialog.Builder builder, String text) {
         builder.setPositiveButton(text, (dialog, which) -> {
+            if (getCurrentStep() == 3) {
+                serversPage.addServer.performClick();
+            }
+
             if (checkIfStepCompleted()) {
                 showNextStep();
             }
+
         });
     }
 
@@ -146,14 +159,14 @@ public class TutorialMediator implements IBuilderTemplate {
                         "Next", "Exit", Gravity.BOTTOM | Gravity.START);
                 break;
             case 2:
-                ShowCurrentStep("Checking for Hosts",
-                        "If there are no available hosts in the list, you will have to add a server host manually. Otherwise, the tutorial cannot be continued without an available host.",
-                        "Next", "Exit", Gravity.BOTTOM | Gravity.START);
-                break;
-            case 3:
                 ShowCurrentStep("+ Add Server Button",
                         "Tap the + button to manually add a server host to connect to.",
                         "Next", "Exit", Gravity.TOP | Gravity.START);
+                break;
+            case 3:
+                ShowCurrentStep("Checking for Hosts",
+                        "If there are no available hosts in the list, you will have to add a server host manually. Otherwise, the tutorial cannot be continued without an available host.",
+                        "Next", "Exit", Gravity.BOTTOM | Gravity.START);
                 break;
             case 4:
                 ShowCurrentStep("Main Page",
@@ -181,4 +194,6 @@ public class TutorialMediator implements IBuilderTemplate {
                 break;
         }
     }
+
+
 }
