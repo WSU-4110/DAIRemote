@@ -1,67 +1,109 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text.Json;
-using System.Windows.Forms;
+﻿using System.Text.Json;
 
-namespace DAIRemote
+public class HotkeyManager
 {
-    public class HotkeyManager
+    public Keys SelectedHotkey { get; private set; }
+    private Label lblCurrentHotkey;
+    private AudioManager.AudioDeviceManager audioManager;
+    private ComboBox hotkeyComboBox;
+
+    internal const string HotkeyConfigFile = "hotkeys.json";
+    private bool isUpdatingComboBoxSelection = false;
+
+    public HotkeyManager(Label hotkeyLabel, AudioManager.AudioDeviceManager audioDeviceManager, ComboBox hotkeyComboBox)
     {
-        public Keys SelectedHotkey { get; private set; }
-        private Label lblCurrentHotkey;
-        private AudioManager.AudioDeviceManager audioManager;
-        internal const string HotkeyConfigFile = "hotkeys.json";  // Changed to internal for access
+        lblCurrentHotkey = hotkeyLabel;
+        audioManager = audioDeviceManager;
+        this.hotkeyComboBox = hotkeyComboBox;
+        SelectedHotkey = Keys.None;
+        LoadHotkeys();
+    }
 
-        public HotkeyManager(Label hotkeyLabel, AudioManager.AudioDeviceManager audioDeviceManager)
+    public void SetHotkey(Keys hotkey)
+    {
+        SelectedHotkey = hotkey;
+        lblCurrentHotkey.Text = $"Current Hotkey: {SelectedHotkey}";
+
+        var existingHotkeys = LoadHotkeys();
+
+        if (!existingHotkeys.Contains(SelectedHotkey.ToString()))
         {
-            lblCurrentHotkey = hotkeyLabel;
-            audioManager = audioDeviceManager;
-            SelectedHotkey = Keys.None;
-            LoadHotkeys();
+            existingHotkeys.Add(SelectedHotkey.ToString());
+            SaveHotkeys(existingHotkeys);
         }
 
-        public void SetHotkey(Keys hotkey)
+        if (!isUpdatingComboBoxSelection)
         {
-            SelectedHotkey = hotkey;
-            lblCurrentHotkey.Text = $"Current Hotkey: {SelectedHotkey}";
-            SaveHotkeys();
+            isUpdatingComboBoxSelection = true;
+            UpdateHotkeyComboBox(existingHotkeys);
+            hotkeyComboBox.SelectedItem = SelectedHotkey != Keys.None ? SelectedHotkey.ToString() : "None";
+            isUpdatingComboBoxSelection = false;
+        }
+    }
+
+    private void SaveHotkeys(List<string> hotkeys)
+    {
+        var hotkeyData = new HotkeyData { Hotkeys = hotkeys };
+        var json = JsonSerializer.Serialize(hotkeyData);
+        File.WriteAllText(HotkeyConfigFile, json);
+    }
+
+    private void UpdateHotkeyComboBox(List<string> existingHotkeys)
+    {
+        hotkeyComboBox.Items.Clear();
+        hotkeyComboBox.Items.Add("None");
+
+        foreach (var hotkey in existingHotkeys)
+        {
+            hotkeyComboBox.Items.Add(hotkey);
+        }
+    }
+
+    public List<string> LoadHotkeys()
+    {
+        if (File.Exists(HotkeyConfigFile))
+        {
+            var json = File.ReadAllText(HotkeyConfigFile);
+            var hotkeyData = JsonSerializer.Deserialize<HotkeyData>(json);
+            return hotkeyData?.Hotkeys ?? new List<string>();
+        }
+        return new List<string>();
+    }
+
+    private class HotkeyData
+    {
+        public List<string> Hotkeys { get; set; }
+    }
+
+    public void HandleKeyPress(Keys keyData)
+    {
+        if (keyData == SelectedHotkey)
+        {
+            audioManager.CycleAudioDevice();
+        }
+    }
+
+    public void OnComboBoxSelectionChanged(object sender, EventArgs e)
+    {
+        if (isUpdatingComboBoxSelection)
+        {
+            return;
         }
 
-        private void SaveHotkeys()
+        if (hotkeyComboBox.SelectedItem != null)
         {
-            var existingHotkeys = LoadHotkeys();
+            var selectedHotkey = hotkeyComboBox.SelectedItem.ToString();
 
-            if (!existingHotkeys.Contains(SelectedHotkey.ToString()))
+            if (selectedHotkey != "None")
             {
-                existingHotkeys.Add(SelectedHotkey.ToString());
-                var hotkeyData = new HotkeyData { Hotkeys = existingHotkeys };
-                var json = JsonSerializer.Serialize(hotkeyData);
-                File.WriteAllText(HotkeyConfigFile, json);
+                if (Enum.TryParse<Keys>(selectedHotkey, out Keys parsedHotkey))
+                {
+                    SetHotkey(parsedHotkey);
+                }
             }
-        }
-
-
-        public List<string> LoadHotkeys()
-        {
-            if (File.Exists(HotkeyConfigFile))
+            else
             {
-                var json = File.ReadAllText(HotkeyConfigFile);
-                var hotkeyData = JsonSerializer.Deserialize<HotkeyData>(json);
-                return hotkeyData?.Hotkeys ?? new List<string>();
-            }
-            return new List<string>();
-        }
-        private class HotkeyData
-        {
-            public List<string> Hotkeys { get; set; }
-        }
-
-        public void HandleKeyPress(Keys keyData)
-        {
-            if (keyData == SelectedHotkey)
-            {
-                audioManager.CycleAudioDevice();
+                SetHotkey(Keys.None);
             }
         }
     }

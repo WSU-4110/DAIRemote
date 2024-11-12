@@ -1,12 +1,9 @@
-
 using AudioManager;
 using DisplayProfileManager;
 using Microsoft.Win32;
 using UDPServerManagerForm;
 using System.Text.Json;
 using AudioManager;
-
-
 
 namespace DAIRemote
 {
@@ -21,10 +18,7 @@ namespace DAIRemote
         public DAIRemoteApplicationUI()
         {
             UDPServerHost udpServer = new UDPServerHost();
-            Thread udpThread = new Thread(() => udpServer.HostUDPServer())
-            {
-                IsBackground = true
-            };
+            Thread udpThread = new Thread(() => udpServer.HostUDPServer()) { IsBackground = true };
             udpThread.Start();
 
             InitializeComponent();
@@ -57,28 +51,38 @@ namespace DAIRemote
                 hotkeyComboBox.Items.AddRange(Enum.GetNames(typeof(Keys)));
             }
 
-            hotkeyManager = new HotkeyManager(lblCurrentHotkey, audioManager);
-            LoadSavedHotkeys(); // Only load hotkeys once
+            hotkeyManager = new HotkeyManager(lblCurrentHotkey, audioManager, hotkeyComboBox);
 
-            hotkeyComboBox.SelectedIndexChanged += (s, e) =>
+            var savedHotkeys = hotkeyManager.LoadHotkeys();
+            hotkeyComboBox.Items.Clear();
+            hotkeyComboBox.Items.Add("None");
+            foreach (var hotkey in savedHotkeys)
             {
-                var selectedHotkey = (Keys)Enum.Parse(typeof(Keys), hotkeyComboBox.SelectedItem.ToString());
-                hotkeyManager.SetHotkey(selectedHotkey);
-            };
+                hotkeyComboBox.Items.Add(hotkey);
+            }
+
+            if (savedHotkeys.Count > 0)
+            {
+                hotkeyComboBox.SelectedItem = savedHotkeys[0];
+                lblCurrentHotkey.Text = $"Current Hotkey: {savedHotkeys[0]}";
+            }
+            else
+            {
+                lblCurrentHotkey.Text = "Current Hotkey: None";
+            }
+
+            hotkeyComboBox.SelectedIndexChanged += hotkeyManager.OnComboBoxSelectionChanged;
         }
 
         private void LoadSavedHotkeys()
         {
             var savedHotkeys = hotkeyManager.LoadHotkeys();
-
             hotkeyComboBox.Items.Clear();
             foreach (var hotkey in savedHotkeys)
             {
                 hotkeyComboBox.Items.Add(hotkey);
             }
-            hotkeyComboBox.Items.Add("None"); // Add "None" as a selectable option
         }
-
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
@@ -88,21 +92,17 @@ namespace DAIRemote
 
         private void btnSetHotkey_Click(object sender, EventArgs e)
         {
-            if (hotkeyComboBox.SelectedItem != null)
-            {
-                var selectedHotkey = (Keys)Enum.Parse(typeof(Keys), hotkeyComboBox.SelectedItem.ToString());
-                hotkeyManager.SetHotkey(selectedHotkey);
-            }
+            MessageBox.Show("Press the key you want to set as a hotkey.");
+            KeySelectionForm keySelectionForm = new KeySelectionForm(hotkeyManager);
+            keySelectionForm.ShowDialog();
         }
-
 
         private void DAIRemoteApplicationUI_Load(object sender, EventArgs e)
         {
-            hotkeyManager = new HotkeyManager(lblCurrentHotkey, audioManager);
+            hotkeyManager = new HotkeyManager(lblCurrentHotkey, audioManager, hotkeyComboBox);
             var loadedHotkeys = hotkeyManager.LoadHotkeys();
 
             hotkeyComboBox.Items.Clear();
-
             foreach (var hotkey in loadedHotkeys)
             {
                 hotkeyComboBox.Items.Add(hotkey);
@@ -121,7 +121,6 @@ namespace DAIRemote
                 lblCurrentHotkey.Text = "Current Hotkey: None";
             }
         }
-
 
         private void InitializeDisplayProfilesLayouts()
         {
@@ -269,6 +268,7 @@ namespace DAIRemote
         {
             audioManager.CycleAudioDevice();
         }
+
         private void hotkeyComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (hotkeyComboBox.SelectedItem != null)
@@ -277,7 +277,6 @@ namespace DAIRemote
 
                 if (selectedHotkey != "None")
                 {
-                    // Parse the selected item to a Keys enum value
                     if (Enum.TryParse<Keys>(selectedHotkey, out Keys parsedHotkey))
                     {
                         hotkeyManager.SetHotkey(parsedHotkey);
@@ -285,15 +284,11 @@ namespace DAIRemote
                 }
                 else
                 {
-                    hotkeyManager.SetHotkey(Keys.None); // Handle "None" selection
+                    hotkeyManager.SetHotkey(Keys.None);
                 }
             }
         }
 
-
-        private void lblCurrentHotkey_Click(object sender, EventArgs e)
-        {
-
-        }
+        private void lblCurrentHotkey_Click(object sender, EventArgs e) { }
     }
 }
