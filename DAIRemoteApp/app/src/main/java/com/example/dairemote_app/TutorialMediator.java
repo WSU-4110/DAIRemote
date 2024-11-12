@@ -1,9 +1,12 @@
 package com.example.dairemote_app;
 
+import android.content.Intent;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -13,6 +16,8 @@ public class TutorialMediator implements IBuilderTemplate {
     private static Window window;
     private boolean tutorialOn = false; // tracks if tutorial is active
     private int currentStep = 0;
+    private ServersPage serversPage;
+
 
     public static TutorialMediator GetInstance(AlertDialog.Builder builder) {
         if(tutorialInstance == null) {
@@ -57,6 +62,10 @@ public class TutorialMediator implements IBuilderTemplate {
         this.currentStep = currentStep;
     }
 
+    public void setServersPage(ServersPage serversPage) {
+        this.serversPage = serversPage;
+    }
+
     public void builderTitleMsg(AlertDialog.Builder builder, String title, String message) {
         builder.setTitle(title);
         builder.setMessage(message);
@@ -64,9 +73,14 @@ public class TutorialMediator implements IBuilderTemplate {
 
     public void builderPositiveBtn(AlertDialog.Builder builder, String text) {
         builder.setPositiveButton(text, (dialog, which) -> {
+            if (getCurrentStep() == 3) {
+                serversPage.addServer.performClick();
+            }
+
             if (checkIfStepCompleted()) {
                 showNextStep();
             }
+
         });
     }
 
@@ -98,12 +112,14 @@ public class TutorialMediator implements IBuilderTemplate {
         builder.setPositiveButton("Start Tutorial", (dialog, which) -> {
             setTutorialOn(true);
             showNextStep();
+            Intent intent = new Intent(builder.getContext(), ServersPage.class);
+            builder.getContext().startActivity(intent);
         });
     }
 
     // checking if specific action was completed for current step
     public boolean checkIfStepCompleted() {
-        return getCurrentStep() == 0 || getCurrentStep() == 2 || getCurrentStep() == 3 || getCurrentStep() == 5;
+        return getCurrentStep() == 0 || getCurrentStep() == 1 || getCurrentStep() == 2 || getCurrentStep() == 5 || getCurrentStep() == 6;
     }
 
     public void ShowStartStep(String title, String message, String negative, int gravity) {
@@ -138,38 +154,38 @@ public class TutorialMediator implements IBuilderTemplate {
 
                 break;
             case 1:
-                ShowCurrentStep("Main Page",
-                        "Tap on the center icon to connect to your local host. Ensure the desktop application is open.",
-                        "Next", "Exit", Gravity.TOP | Gravity.START);
-
-                break;
-            case 2:
-                ShowCurrentStep("Remote Page",
-                        "If you ever need a refresher, click the help icon above to start the tutorial.",
-                        "Next", "Exit", Gravity.TOP | Gravity.START);
-
-                break;
-            case 3:
-                ShowCurrentStep("Lower Panel Buttons",
-                        "Display Modes, Audio Cycling, Hotkeys, App Keyboard.",
-                        "Next", "Exit", Gravity.BOTTOM | Gravity.START);
-
-                break;
-            case 4:
-                ShowCurrentStep("ToolBar",
-                        "Click on the ToolBar button to navigate between pages.",
-                        "Next", "Exit", Gravity.TOP | Gravity.START);
-
-                break;
-            case 5:
                 ShowCurrentStep("Servers Page",
                         "A list of all available nearby hosts. If not already connected, select a host from the list and you will be redirected to the Remote Page.",
                         "Next", "Exit", Gravity.BOTTOM | Gravity.START);
-
                 break;
-            case 6:
+            case 2:
                 ShowCurrentStep("+ Add Server Button",
                         "Tap the + button to manually add a server host to connect to.",
+                        "Next", "Exit", Gravity.TOP | Gravity.START);
+                break;
+            case 3:
+                ShowCurrentStep("Checking for Hosts",
+                        "If there are no available hosts in the list, you will have to add a server host manually. Otherwise, the tutorial cannot be continued without an available host.",
+                        "Next", "Exit", Gravity.BOTTOM | Gravity.START);
+                break;
+            case 4:
+                ShowCurrentStep("Main Page",
+                        "Tap on the center icon to connect to your local host. Ensure the desktop application is open.",
+                        "Next", "Exit", Gravity.TOP | Gravity.START);
+                break;
+            case 5:
+                ShowCurrentStep("Remote Page",
+                        "If you ever need a refresher, click the help icon above to start the tutorial.",
+                        "Next", "Exit", Gravity.TOP | Gravity.START);
+                break;
+            case 6:
+                ShowCurrentStep("Lower Panel Buttons",
+                        "Display Modes, Audio Cycling, Hotkeys, App Keyboard.",
+                        "Next", "Exit", Gravity.BOTTOM | Gravity.START);
+                break;
+            case 7:
+                ShowCurrentStep("ToolBar",
+                        "Click on the ToolBar button to navigate between pages.",
                         "", "Finish", Gravity.TOP | Gravity.START);
 
                 break;
@@ -178,4 +194,6 @@ public class TutorialMediator implements IBuilderTemplate {
                 break;
         }
     }
+
+
 }

@@ -5,11 +5,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,8 +42,10 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
     private String selectedHost = null;
 
     private EditText inputField;
-    private FloatingActionButton addServer;
+    public FloatingActionButton addServer;
     private ExecutorService executor;
+    private ProgressBar connectionProgress;
+
 
     public void notifyUser(Context context, String msg) {
         runOnUiThread(() -> Toast.makeText(context, msg, Toast.LENGTH_SHORT).show());
@@ -104,16 +109,52 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
     }
 
     public void AttemptConnection(String server) {
+        runOnUiThread(() -> connectionProgress.setVisibility(View.VISIBLE));
+
         if(!PriorConnectionEstablishedCheck(server)) {
             MainActivity.connectionManager = new ConnectionManager(server);
+            AlertDialog.Builder builder = new AlertDialog.Builder(ServersPage.this);
+            TutorialMediator tutorial = TutorialMediator.GetInstance(builder);
+
+            runOnUiThread(() -> connectionProgress.setVisibility(View.VISIBLE));
 
             // Start the new connection process in the background
             if(!executor.isShutdown()) {
                 executor.execute(() -> {
+
                     if (MainActivity.connectionManager.InitializeConnection()) {
-                        InitiateInteractionPage("Connected to: " + server);
+                        runOnUiThread(() -> connectionProgress.setVisibility(View.GONE));
+
+                        if (tutorial.getTutorialOn()) {
+                            tutorial.setCurrentStep(3);
+                            Intent intent = new Intent(ServersPage.this, MainActivity.class);
+                            intent.putExtra("cameFromServersPage", true);
+                            startActivity(intent);
+                        }
+                        else {
+                            runOnUiThread(() -> connectionProgress.setVisibility(View.GONE));
+
+                            InitiateInteractionPage("Connected to: " + server);
+                        }
                     } else {
+                        runOnUiThread(() -> connectionProgress.setVisibility(View.GONE));
+
                         notifyUser(ServersPage.this, "Connection failed");
+                        if (tutorial.getTutorialOn()) {
+                            runOnUiThread(() -> {
+                                AlertDialog.Builder retryExitDialog = new AlertDialog.Builder(ServersPage.this);
+                                retryExitDialog.setTitle("Connection Failed")
+                                        .setMessage("Tutorial cannot continue without a connection. Would you like to retry connecting or exit? Note, you may also restart the tutorial by clicking the help button above.")
+                                        .setPositiveButton("Retry", (dialog, which) -> {
+                                            addServer.performClick();
+                                        })
+                                        .setNegativeButton("Exit", (dialog, which) -> {
+                                            tutorial.setTutorialOn(false);
+                                            dialog.dismiss();
+                                        })
+                                        .show();
+                            });
+                        }
                         MainActivity.connectionManager.ResetConnectionManager();
                     }
                     executor.shutdownNow();
@@ -127,13 +168,21 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_servers_page);
         drawerSetup(R.id.nav_server);
+        connectionProgress = findViewById(R.id.connectionLoading);
 
         //  if tutorial is still active on navigation button clicked
         AlertDialog.Builder builder = new AlertDialog.Builder(ServersPage.this);
         TutorialMediator tutorial = TutorialMediator.GetInstance(builder);
         if (tutorial.getTutorialOn()) {
+            tutorial.setCurrentStep(0);
             tutorial.showNextStep();
         }
+
+        ImageButton helpButton = findViewById(R.id.helpButton);
+        helpButton.setOnClickListener(v -> {
+            tutorial.setCurrentStep(1);
+            tutorial.showSteps(tutorial.getCurrentStep());
+        });
 
         hostListView = findViewById(R.id.hostList);
         addServer = findViewById(R.id.addServerBtn);
@@ -164,15 +213,26 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
             AttemptConnection(availableHosts.get(position));
         });
 
+        tutorial.setServersPage(ServersPage.this);
         addServer.setOnClickListener(v -> {
             inputField = new EditText(ServersPage.this);
             inputField.setHint("Enter IP Address here");
-            builderTitleMsg(builder, "Add your server host here:", "");
-            builder.setView(inputField);
-            builderPositiveBtn(builder, "Connect");
-            builderNegativeBtn(builder, "Cancel");
-            builderShow(builder);
+
+            AlertDialog.Builder addServerBuilder = new AlertDialog.Builder(ServersPage.this);
+            builderTitleMsg(addServerBuilder, "Add your server host here:", "");
+            addServerBuilder.setView(inputField);
+            builderPositiveBtn(addServerBuilder, "Connect");
+            builderNegativeBtn(addServerBuilder, "Cancel");
+
+            builderShow(addServerBuilder);
         });
+
+        // when the user comes from the main page (after trying to connect to host from there)
+        // addServer pop up button appears automatically
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra("cameFromMainActivity", false)) {
+            addServer.performClick();
+        }
     }
 
     @Override
