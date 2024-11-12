@@ -15,10 +15,6 @@ public class AudioDeviceManager
     public delegate void AudioDevicesUpdatedEventHandler(List<string> devices);
     public event AudioDevicesUpdatedEventHandler AudioDevicesUpdated;
 
-        public AudioDeviceManager()
-        {
-            
-            controller = new CoreAudioController();
     public AudioDeviceManager()
     {
         // Initialize CoreAudioController, which combs through
@@ -61,11 +57,11 @@ public class AudioDeviceManager
 
     public void SetDefaultAudioDevice(CoreAudioDevice audioDevice)
     {
-		if (audioDevice != this.defaultAudioDevice)
-		{
-			this.defaultAudioDevice = audioDevice;
-			this.defaultAudioDevice.SetAsDefault();
-		}
+        if (audioDevice != this.defaultAudioDevice)
+        {
+            this.defaultAudioDevice = audioDevice;
+            this.defaultAudioDevice.SetAsDefault();
+        }
     }
 
     public void SetDefaultAudioDevice(string deviceFullName)
@@ -74,10 +70,10 @@ public class AudioDeviceManager
 
         if (matchedDevice != null)
         {
-			if ((matchedDevice != this.defaultAudioDevice))
-			{
-				SetDefaultAudioDevice(matchedDevice);
-			}
+            if ((matchedDevice != this.defaultAudioDevice))
+            {
+                SetDefaultAudioDevice(matchedDevice);
+            }
         }
         else
         {
@@ -101,13 +97,13 @@ public class AudioDeviceManager
 
     public void SetVolume(double volume)
     {
-		this.defaultAudioDevice.Volume = volume;
+        this.defaultAudioDevice.Volume = volume;
     }
 
-	public double GetVolume()
-	{
-		return this.defaultAudioDevice.Volume;
-	}
+    public double GetVolume()
+    {
+        return this.defaultAudioDevice.Volume;
+    }
 
     public void IncreaseVolume(int increment = 1)
     {
@@ -150,7 +146,7 @@ public class AudioDeviceManager
 
     public void ToggleAudioMute()
     {
-		SetAudioMute(!this.defaultAudioDevice.IsMuted);
+        SetAudioMute(!this.defaultAudioDevice.IsMuted);
     }
 
     public void CycleAudioDevice()
@@ -163,24 +159,5 @@ public class AudioDeviceManager
         SetDefaultAudioDevice(audioDevices[nextIndex]);
         Debug.WriteLine($"Switched to {defaultAudioDevice.FullName}");
         AudioDevicesUpdated?.Invoke(ActiveDeviceNames);
-        public void CycleToNextAudioDevice()
-        {
-            // Get the index of the current default device
-            int currentIndex = devices.FindIndex(device => device.Id == defaultAudioDevice.Id);
-            // Calculate the next index in a circular manner
-            int nextIndex = (currentIndex + 1) % devices.Count;
-            // Set the next device as the default audio device
-            setDefaultAudioDevice(devices[nextIndex]);
-            Debug.WriteLine($"Switched to {defaultAudioDevice.FullName}");
-            audioDevicesUpdated?.Invoke(ActiveDeviceNames);
-        }
-        public void RefreshDeviceList()
-        {
-            setActiveDevices();
-            defaultAudioDevice = controller.DefaultPlaybackDevice;
-            audioDevicesUpdated?.Invoke(ActiveDeviceNames);
-        }
-
-
     }
 }

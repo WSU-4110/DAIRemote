@@ -10,10 +10,10 @@ namespace DAIRemote
     {
         public Keys SelectedHotkey { get; private set; }
         private Label lblCurrentHotkey;
-        private AudioDeviceManager.AudioDeviceManager audioManager;
+        private AudioManager.AudioDeviceManager audioManager;
         internal const string HotkeyConfigFile = "hotkeys.json";  // Changed to internal for access
 
-        public HotkeyManager(Label hotkeyLabel, AudioDeviceManager.AudioDeviceManager audioDeviceManager)
+        public HotkeyManager(Label hotkeyLabel, AudioManager.AudioDeviceManager audioDeviceManager)
         {
             lblCurrentHotkey = hotkeyLabel;
             audioManager = audioDeviceManager;
@@ -61,7 +61,7 @@ namespace DAIRemote
         {
             if (keyData == SelectedHotkey)
             {
-                audioManager.CycleToNextAudioDevice();
+                audioManager.CycleAudioDevice();
             }
         }
     }

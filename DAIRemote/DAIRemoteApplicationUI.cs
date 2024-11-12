@@ -1,8 +1,10 @@
+
 using AudioManager;
 using DisplayProfileManager;
 using Microsoft.Win32;
 using UDPServerManagerForm;
 using System.Text.Json;
+using AudioManager;
 
 
 
@@ -13,32 +15,24 @@ namespace DAIRemote
         private TrayIconManager trayIconManager;
         private AudioOutputForm audioForm;
         private Panel audioFormPanel;
-        private AudioDeviceManager.AudioDeviceManager audioManager;
+        private AudioManager.AudioDeviceManager audioManager;
         private HotkeyManager hotkeyManager;
-namespace DAIRemote;
 
-public partial class DAIRemoteApplicationUI : Form
-{
-    private TrayIconManager trayIconManager;
-    private AudioOutputForm audioForm;
-    private Panel audioFormPanel;
-    private AudioManager.AudioDeviceManager audioManager;
-
-    public DAIRemoteApplicationUI()
-    {
-        UDPServerHost udpServer = new();
-        Thread udpThread = new(() => udpServer.HostUDPServer())
+        public DAIRemoteApplicationUI()
         {
-            IsBackground = true
-        };
-        udpThread.Start();
+            UDPServerHost udpServer = new UDPServerHost();
+            Thread udpThread = new Thread(() => udpServer.HostUDPServer())
+            {
+                IsBackground = true
+            };
+            udpThread.Start();
 
-        InitializeComponent();
-        InitializeDisplayProfilesLayouts();
+            InitializeComponent();
+            InitializeDisplayProfilesLayouts();
 
-        Task.Run(() =>
-        {
-            this.audioManager = AudioManager.AudioDeviceManager.GetInstance();
+            Task.Run(() =>
+            {
+                this.audioManager = AudioManager.AudioDeviceManager.GetInstance();
 
                 this.Invoke((MethodInvoker)(() =>
                 {
@@ -46,21 +40,12 @@ public partial class DAIRemoteApplicationUI : Form
                     InitializeHotkeySelection();
                 }));
             });
-            this.Invoke((MethodInvoker)(() => InitializeAudioDropDown()));
-        });
 
             this.Icon = new Icon("Resources/DAIRemoteLogo.ico");
             trayIconManager = new TrayIconManager(this);
             this.Load += DAIRemoteApplicationUI_Load;
             this.FormClosing += DAIRemoteApplicationUI_FormClosing;
             this.StartPosition = FormStartPosition.CenterScreen;
-        // Updated the property of the form itself to start with the color
-        //this.BackColor = Color.FromArgb(50, 50, 50);
-        this.Icon = new Icon("Resources/DAIRemoteLogo.ico");
-        trayIconManager = new TrayIconManager(this);
-        this.Load += DAIRemoteApplicationUI_Load;
-        this.FormClosing += DAIRemoteApplicationUI_FormClosing;
-        this.StartPosition = FormStartPosition.CenterScreen;
 
             LoadStartupSetting();
         }
@@ -100,7 +85,7 @@ public partial class DAIRemoteApplicationUI : Form
             hotkeyManager.HandleKeyPress(keyData);
             return base.ProcessCmdKey(ref msg, keyData);
         }
-       
+
         private void btnSetHotkey_Click(object sender, EventArgs e)
         {
             if (hotkeyComboBox.SelectedItem != null)
@@ -110,8 +95,6 @@ public partial class DAIRemoteApplicationUI : Form
             }
         }
 
-        SetStartupStatus();   // Checks onStartup default value to set
-    }
 
         private void DAIRemoteApplicationUI_Load(object sender, EventArgs e)
         {
@@ -139,163 +122,152 @@ public partial class DAIRemoteApplicationUI : Form
             }
         }
 
-    private void DAIRemoteApplicationUI_Load(object sender, EventArgs e)
-    {
-        this.Hide();
-    }
 
-    private void InitializeDisplayProfilesLayouts()
-    {
-        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
-        if (!Directory.Exists(folderPath))
+        private void InitializeDisplayProfilesLayouts()
         {
-            Directory.CreateDirectory(folderPath);
-        }
-        string[] displayProfilesDirectory = Directory.GetFiles(folderPath, "*.json");
+            string[] displayProfiles = Directory.GetFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"), "*.json");
 
-        foreach (string profile in displayProfilesDirectory)
-        {
-            Button loadProfileButton = new()
+            foreach (var profile in displayProfiles)
             {
-                Text = Path.GetFileNameWithoutExtension(profile),
-                Width = 150,
-                Height = 50,
-                Margin = new Padding(10),
-                Tag = profile,
-                ForeColor = Color.White
+                Button loadProfileButton = new Button
+                {
+                    Text = Path.GetFileNameWithoutExtension(profile),
+                    Width = 150,
+                    Height = 50,
+                    Margin = new Padding(10),
+                    Tag = profile,
+                    ForeColor = Color.White
+                };
+
+                Button deleteProfileButton = new Button
+                {
+                    Text = Path.GetFileNameWithoutExtension(profile),
+                    Width = 150,
+                    Height = 50,
+                    Margin = new Padding(10),
+                    Tag = profile,
+                    ForeColor = Color.White
+                };
+
+                loadProfileButton.Click += loadProfileButton_Click;
+                DisplayLoadProfilesLayout.Controls.Add(loadProfileButton);
+
+                deleteProfileButton.Click += deleteProfileButton_Click;
+                DisplayDeleteProfilesLayout.Controls.Add(deleteProfileButton);
+            }
+        }
+
+        private void deleteProfileButton_Click(object sender, EventArgs e)
+        {
+            Button clickedButton = sender as Button;
+            string profileName = clickedButton.Tag.ToString();
+            DisplayConfig.DeleteDisplaySettings(profileName);
+        }
+
+        private void loadProfileButton_Click(object sender, EventArgs e)
+        {
+            Button clickedButton = sender as Button;
+            string profileName = clickedButton.Tag.ToString();
+            DisplayConfig.SetDisplaySettings(profileName);
+        }
+
+        private void DAIRemoteApplicationUI_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = false;
+                trayIconManager.HideIcon();
+            }
+        }
+
+        private void InitializeAudioComponents()
+        {
+            this.audioFormPanel = new Panel
+            {
+                Location = new System.Drawing.Point(10, 60),
+                Size = new System.Drawing.Size(760, 370),
             };
 
-            Button deleteProfileButton = new()
-            {
-                Text = Path.GetFileNameWithoutExtension(profile),
-                Width = 150,
-                Height = 50,
-                Margin = new Padding(10),
-                Tag = profile,
-                ForeColor = Color.White
-            };
+            audioForm = AudioOutputForm.GetInstance(audioManager);
 
-            loadProfileButton.Click += LoadProfileButton_Click;
-            DisplayLoadProfilesLayout.Controls.Add(loadProfileButton);
-
-            deleteProfileButton.Click += DeleteProfileButton_Click;
-            DisplayDeleteProfilesLayout.Controls.Add(deleteProfileButton);
+            this.Controls.Add(this.audioFormPanel);
+            audioFormPanel.Controls.Add(audioForm);
+            audioForm.Show();
         }
-    }
-
-    private void DeleteProfileButton_Click(object sender, EventArgs e)
-    {
-        Button clickedButton = sender as Button;
-        string profileName = clickedButton.Tag.ToString();
-        DisplayConfig.DeleteDisplaySettings(profileName);
-    }
-
-    private void LoadProfileButton_Click(object sender, EventArgs e)
-    {
-        Button clickedButton = sender as Button;
-        string profileName = clickedButton.Tag.ToString();
-        DisplayConfig.SetDisplaySettings(profileName);
-    }
-
-    private void DAIRemoteApplicationUI_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        if (e.CloseReason == CloseReason.UserClosing)
-        {
-            e.Cancel = false;
-            trayIconManager.HideIcon();
-        }
-    }
-
-    private void InitializeAudioDropDown()
-    {
-        this.audioFormPanel = new Panel
-        {
-            Location = new System.Drawing.Point(10, 60),
-            Size = new System.Drawing.Size(760, 370),
-        };
-
-        audioForm = AudioOutputForm.GetInstance(audioManager);
-
-        this.Controls.Add(this.audioFormPanel);
-        audioFormPanel.Controls.Add(audioForm);
-        audioForm.Show();
-    }
 
         public static void BtnAddDisplayConfig_Click(object sender, EventArgs e)
         {
             TrayIconManager.SaveNewProfile(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"));
         }
-    private void BtnAddDisplayConfig_Click(object sender, EventArgs e)
-    {
-        TrayIconManager.SaveNewProfile(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"));
-    }
 
-    private void BtnLoadDisplayConfig_Click(object sender, EventArgs e)
-    {
-        DisplayConfig.SetDisplaySettings("displayConfig" + ".json");
-    }
-
-    private void CheckBoxStartup_CheckedChanged(object sender, EventArgs e)
-    {
-        string startupKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
-        string appName = "DAIRemote";
-        string appPath = Application.ExecutablePath;
-
-        if (checkBoxStartup.Checked)
+        private void BtnLoadDisplayConfig_Click(object sender, EventArgs e)
         {
-            AddToStartup(startupKey, appName, appPath);
+            DisplayConfig.SetDisplaySettings("displayConfig" + ".json");
         }
-        else
-        {
-            RemoveFromStartup(startupKey, appName);
-        }
-    }
 
-    private static void AddToStartup(string startupKey, string appName, string appPath)
-    {
-        try
+        private void CheckBoxStartup_CheckedChanged(object sender, EventArgs e)
         {
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(startupKey, true))
+            string startupKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
+            string appName = "DAIRemote";
+            string appPath = Application.ExecutablePath;
+
+            if (checkBoxStartup.Checked)
             {
-                key.SetValue(appName, $"\"{appPath}\"");
+                AddToStartup(startupKey, appName, appPath);
+            }
+            else
+            {
+                RemoveFromStartup(startupKey, appName);
             }
         }
-        catch (Exception ex)
-        {
-            MessageBox.Show("Error adding to startup: " + ex.Message);
-        }
-    }
 
-    private static void RemoveFromStartup(string startupKey, string appName)
-    {
-        try
+        private void AddToStartup(string startupKey, string appName, string appPath)
         {
-            using RegistryKey key = Registry.CurrentUser.OpenSubKey(startupKey, true);
-            if (key.GetValue(appName) != null)
+            try
             {
-                key.DeleteValue(appName);
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(startupKey, true))
+                {
+                    key.SetValue(appName, $"\"{appPath}\"");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error adding to startup: " + ex.Message);
             }
         }
-        catch (Exception ex)
+
+        private static void RemoveFromStartup(string startupKey, string appName)
         {
-            MessageBox.Show("Error removing from startup: " + ex.Message);
+            try
+            {
+                using RegistryKey key = Registry.CurrentUser.OpenSubKey(startupKey, true);
+                if (key.GetValue(appName) != null)
+                {
+                    key.DeleteValue(appName);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error removing from startup: " + ex.Message);
+            }
         }
-    }
 
-    private static bool IsAppInStartup()
-    {
-        using RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", false);
-        return key.GetValue("DAIRemote") != null;
-    }
+        private bool IsAppInStartup()
+        {
+            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", false))
+            {
+                return key.GetValue("DAIRemote") != null;
+            }
+        }
 
-    private void SetStartupStatus()
-    {
-        checkBoxStartup.Checked = IsAppInStartup();
-    }
+        private void LoadStartupSetting()
+        {
+            checkBoxStartup.Checked = IsAppInStartup();
+        }
 
         private void BtnCycleAudioOutputs_Click(object sender, EventArgs e)
         {
-            audioManager.CycleToNextAudioDevice();
+            audioManager.CycleAudioDevice();
         }
         private void hotkeyComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -323,8 +295,5 @@ public partial class DAIRemoteApplicationUI : Form
         {
 
         }
-    private void BtnCycleAudioOutputs_Click(object sender, EventArgs e)
-    {
-        audioManager.CycleAudioDevice();
     }
 }
