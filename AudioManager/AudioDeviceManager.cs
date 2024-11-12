@@ -15,6 +15,10 @@ public class AudioDeviceManager
     public delegate void AudioDevicesUpdatedEventHandler(List<string> devices);
     public event AudioDevicesUpdatedEventHandler AudioDevicesUpdated;
 
+        public AudioDeviceManager()
+        {
+            
+            controller = new CoreAudioController();
     public AudioDeviceManager()
     {
         // Initialize CoreAudioController, which combs through
@@ -159,5 +163,24 @@ public class AudioDeviceManager
         SetDefaultAudioDevice(audioDevices[nextIndex]);
         Debug.WriteLine($"Switched to {defaultAudioDevice.FullName}");
         AudioDevicesUpdated?.Invoke(ActiveDeviceNames);
+        public void CycleToNextAudioDevice()
+        {
+            // Get the index of the current default device
+            int currentIndex = devices.FindIndex(device => device.Id == defaultAudioDevice.Id);
+            // Calculate the next index in a circular manner
+            int nextIndex = (currentIndex + 1) % devices.Count;
+            // Set the next device as the default audio device
+            setDefaultAudioDevice(devices[nextIndex]);
+            Debug.WriteLine($"Switched to {defaultAudioDevice.FullName}");
+            audioDevicesUpdated?.Invoke(ActiveDeviceNames);
+        }
+        public void RefreshDeviceList()
+        {
+            setActiveDevices();
+            defaultAudioDevice = controller.DefaultPlaybackDevice;
+            audioDevicesUpdated?.Invoke(ActiveDeviceNames);
+        }
+
+
     }
 }
