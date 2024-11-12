@@ -76,6 +76,7 @@
             // 
             // DisplayLoadProfilesLayout
             // 
+            this.DisplayLoadProfilesLayout.AutoScroll = true;
             this.DisplayLoadProfilesLayout.Location = new Point(323, 16);
             this.DisplayLoadProfilesLayout.Margin = new Padding(3, 4, 3, 4);
             this.DisplayLoadProfilesLayout.Name = "DisplayLoadProfilesLayout";
@@ -84,6 +85,7 @@
             // 
             // DisplayDeleteProfilesLayout
             // 
+            this.DisplayDeleteProfilesLayout.AutoScroll = true;
             this.DisplayDeleteProfilesLayout.Location = new Point(323, 261);
             this.DisplayDeleteProfilesLayout.Margin = new Padding(3, 4, 3, 4);
             this.DisplayDeleteProfilesLayout.Name = "DisplayDeleteProfilesLayout";
@@ -93,7 +95,7 @@
             // Logo
             // 
             this.Logo.Location = new Point(0, 0);
-            this.Logo.Name = "pictureBox1";
+            this.Logo.Name = "Logo";
             this.Logo.Size = new Size(110, 110);
             this.Logo.Image = Image.FromFile("Resources/DAIRemoteLogo.ico");
             this.Logo.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -107,7 +109,7 @@
             this.LogoName.Font = new Font("Cascadia Code", 20F, FontStyle.Bold);
             this.LogoName.ForeColor = Color.White;
             this.LogoName.Location = new Point(106, 31);
-            this.LogoName.Name = "textBox1";
+            this.LogoName.Name = "LogoName";
             this.LogoName.Size = new Size(211, 39);
             this.LogoName.TabIndex = 9;
             this.LogoName.Text = "DAIRemote";
@@ -119,10 +121,10 @@
             this.Description.ForeColor = Color.White;
             this.Description.Location = new Point(1, 110);
             this.Description.Multiline = true;
-            this.Description.Name = "textBox2";
+            this.Description.Name = "Description";
             this.Description.Size = new Size(276, 160);
             this.Description.TabIndex = 10;
-            this.Description.Text = resources.GetString("textBox2.Text");
+            this.Description.Text = resources.GetString("Description.Text");
             // 
             // LoadProfile
             // 
@@ -131,7 +133,7 @@
             this.LoadProfile.Font = new Font("Segoe UI", 9F, FontStyle.Underline, GraphicsUnit.Point, 0);
             this.LoadProfile.ForeColor = Color.White;
             this.LoadProfile.Location = new Point(540, 0);
-            this.LoadProfile.Name = "textBox3";
+            this.LoadProfile.Name = "LoadProfile";
             this.LoadProfile.Size = new Size(125, 20);
             this.LoadProfile.TabIndex = 11;
             this.LoadProfile.Text = "Load Profile";
@@ -144,7 +146,7 @@
             this.DeleteProfile.Font = new Font("Segoe UI", 9F, FontStyle.Underline, GraphicsUnit.Point, 0);
             this.DeleteProfile.ForeColor = Color.White;
             this.DeleteProfile.Location = new Point(540, 245);
-            this.DeleteProfile.Name = "textBox4";
+            this.DeleteProfile.Name = "DeleteProfile";
             this.DeleteProfile.Size = new Size(125, 20);
             this.DeleteProfile.TabIndex = 12;
             this.DeleteProfile.Text = "Delete Profile";

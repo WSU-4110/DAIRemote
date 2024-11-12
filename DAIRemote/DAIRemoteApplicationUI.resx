@@ -117,7 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="textBox2.Text" xml:space="preserve">
+  <data name="Description.Text" xml:space="preserve">
     <value>Welcome to DAIRemote! This hub can be used to save a display profile, cycle and change audio devices, and load and delete saved display profiles. To load a profile, click the desired file name in the upper right section. To delete a profile, click the desired file name in the lower right section.</value>
   </data>
 </root>
