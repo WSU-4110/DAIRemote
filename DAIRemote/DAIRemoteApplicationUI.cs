@@ -117,7 +117,7 @@ public partial class DAIRemoteApplicationUI : Form
     {
         this.audioFormPanel = new Panel
         {
-            Location = new System.Drawing.Point(10, 310),
+            Location = new System.Drawing.Point(10, 320),
             Size = new System.Drawing.Size(760, 370),
         };
 
