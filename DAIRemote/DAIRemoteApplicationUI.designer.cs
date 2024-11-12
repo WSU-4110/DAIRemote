@@ -110,6 +110,7 @@
             this.LogoName.ForeColor = Color.White;
             this.LogoName.Location = new Point(106, 31);
             this.LogoName.Name = "LogoName";
+            this.LogoName.ReadOnly = true;
             this.LogoName.Size = new Size(211, 39);
             this.LogoName.TabIndex = 9;
             this.LogoName.Text = "DAIRemote";
@@ -122,6 +123,7 @@
             this.Description.Location = new Point(1, 110);
             this.Description.Multiline = true;
             this.Description.Name = "Description";
+            this.Description.ReadOnly = true;
             this.Description.Size = new Size(276, 160);
             this.Description.TabIndex = 10;
             this.Description.Text = resources.GetString("Description.Text");
@@ -134,6 +136,7 @@
             this.LoadProfile.ForeColor = Color.White;
             this.LoadProfile.Location = new Point(540, 0);
             this.LoadProfile.Name = "LoadProfile";
+            this.LoadProfile.ReadOnly = true;
             this.LoadProfile.Size = new Size(125, 20);
             this.LoadProfile.TabIndex = 11;
             this.LoadProfile.Text = "Load Profile";
@@ -147,6 +150,7 @@
             this.DeleteProfile.ForeColor = Color.White;
             this.DeleteProfile.Location = new Point(540, 245);
             this.DeleteProfile.Name = "DeleteProfile";
+            this.DeleteProfile.ReadOnly = true;
             this.DeleteProfile.Size = new Size(125, 20);
             this.DeleteProfile.TabIndex = 12;
             this.DeleteProfile.Text = "Delete Profile";
