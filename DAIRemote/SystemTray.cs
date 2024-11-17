@@ -9,6 +9,7 @@ public class TrayIconManager
     private Form form;
     private FileSystemWatcher displayProfileDirWatcher;
     private readonly string displayProfilesFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
+    private HotkeyManager hotkeyManager;
 
     private Image aboutIcon;
     private Image DAIRemoteLogoIcon;
@@ -36,6 +37,9 @@ public class TrayIconManager
         {
             Directory.CreateDirectory(displayProfilesFolderPath);
         }
+
+        hotkeyManager = new HotkeyManager();
+        hotkeyManager.LoadHotkeyConfigs();
 
         InitializeTrayIcon();
     }
@@ -111,7 +115,7 @@ public class TrayIconManager
             Enabled = false,
         };
 
-        ToolStripMenuItem saveProfilesLabel = new("Overwrite profile")
+        ToolStripMenuItem saveProfilesLabel = new("Overwrite Profile")
         {
             Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
             ForeColor = Color.Gray,
@@ -120,8 +124,43 @@ public class TrayIconManager
 
         ToolStripMenuItem addNewProfile = new("Add New Profile", addProfileIcon, (sender, e) => SaveNewProfile(displayProfilesFolderPath));
 
+        ToolStripMenuItem setHotkeysLabel = new("Set Hotkeys")
+        {
+            Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
+            ForeColor = Color.Gray,
+            Enabled = false,
+        };
+
         ToolStripMenuItem saveProfileMenuItem = new("Save Profile", saveProfileIcon);
         ToolStripMenuItem deleteProfileMenuItem = new("Delete Profile", deleteProfileIcon);
+        ToolStripMenuItem setHotkeysMenuItem = new("Set Hotkeys", monitorIcon);
+
+        ToolStripMenuItem profileSetHotkey = null;
+
+        string hotkeyText = hotkeyManager.hotkeyConfigs.ContainsKey("Audio Cycling")
+            ? $" ({hotkeyManager.GetHotkeyText(hotkeyManager.hotkeyConfigs["Audio Cycling"])})"
+            : "";
+        ToolStripMenuItem audioCyclingHotkey = new($"Audio Cycling{hotkeyText}", monitorIcon, (sender, e) =>
+        {
+            hotkeyManager.ShowHotkeyInput("Audio Cycling", () => AudioManager.AudioDeviceManager.GetInstance().CycleAudioDevice());
+
+            // Refresh to show the updated hotkey
+            string updatedHotkeyText = hotkeyManager.hotkeyConfigs.ContainsKey("Audio Cycling")
+                ? $" ({hotkeyManager.GetHotkeyText(hotkeyManager.hotkeyConfigs["Audio Cycling"])})"
+                : "";
+
+            // Find the existing menu item
+            foreach (var item in setHotkeysMenuItem.DropDownItems)
+            {
+                if (item is ToolStripMenuItem menuItem && menuItem.Text.StartsWith("Audio Cycling"))
+                {
+                    menuItem.Text = $"Audio Cycling{updatedHotkeyText}";
+                    return;
+                }
+            }
+        });
+        setHotkeysMenuItem.DropDownItems.Add(audioCyclingHotkey);
+        setHotkeysMenuItem.DropDownItems.Add(new ToolStripSeparator());
 
         menu.Items.Add(loadProfilesLabel);
         menu.Items.Add(new ToolStripSeparator());
@@ -138,8 +177,34 @@ public class TrayIconManager
 
             ToolStripMenuItem profileSaveItem = new(fileName, monitorIcon, (sender, e) => SaveProfile(profile));
 
+
+            // Setting up hotkey funtionality for each profile
+            hotkeyText = hotkeyManager.hotkeyConfigs.ContainsKey(fileName)
+                ? $" ({hotkeyManager.GetHotkeyText(hotkeyManager.hotkeyConfigs[fileName])})"
+                : "";
+            profileSetHotkey = new ToolStripMenuItem($"{fileName}{hotkeyText}", monitorIcon, (sender, e) =>
+            {
+                hotkeyManager.ShowHotkeyInput(fileName, () => DisplayConfig.SetDisplaySettings(profile));
+
+                // Refresh to show the updated hotkey
+                string updatedHotkeyText = hotkeyManager.hotkeyConfigs.ContainsKey(fileName)
+                    ? $" ({hotkeyManager.GetHotkeyText(hotkeyManager.hotkeyConfigs[fileName])})"
+                    : "";
+
+                // Find the existing menu item
+                foreach (var item in setHotkeysMenuItem.DropDownItems)
+                {
+                    if (item is ToolStripMenuItem menuItem && menuItem.Text.StartsWith(fileName))
+                    {
+                        menuItem.Text = $"{fileName}{updatedHotkeyText}";
+                        return;
+                    }
+                }
+            });
+
             deleteProfileMenuItem.DropDownItems.Add(profileDeleteItem);
             saveProfileMenuItem.DropDownItems.Add(profileSaveItem);
+            setHotkeysMenuItem.DropDownItems.Add(profileSetHotkey);
         }
 
         menu.Items.Add(new ToolStripSeparator());
@@ -149,8 +214,11 @@ public class TrayIconManager
         saveProfileMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
         saveProfileMenuItem.DropDownItems.Insert(2, saveProfilesLabel);
         saveProfileMenuItem.DropDownItems.Insert(3, new ToolStripSeparator());
+        setHotkeysMenuItem.DropDownItems.Insert(0, setHotkeysLabel);
+        setHotkeysMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
         menu.Items.Add(saveProfileMenuItem);
         menu.Items.Add(deleteProfileMenuItem);
+        menu.Items.Add(setHotkeysMenuItem);
 
         ToolStripMenuItem turnOffAllMonitorsItem = new("Turn Off All Monitors", turnOffAllMonitorsIcon, TurnOffMonitors);
         ToolStripMenuItem aboutMenuItem = new("About", aboutIcon, OnAboutClick);
