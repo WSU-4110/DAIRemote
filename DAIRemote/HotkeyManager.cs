@@ -5,11 +5,13 @@ using System.Runtime.InteropServices;
 namespace DAIRemote;
 public partial class HotkeyManager : Form
 {
+    private AudioManager.AudioDeviceManager audioManager;
     public Dictionary<string, HotkeyConfig> hotkeyConfigs;
     private readonly string ConfigFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/hotkeys.json");
 
     public HotkeyManager()
     {
+        audioManager = AudioManager.AudioDeviceManager.GetInstance();
         LoadHotkeyConfigs();
     }
 
@@ -33,7 +35,6 @@ public partial class HotkeyManager : Form
     private const uint MOD_ALT = 0x0001;
     private const uint MOD_CONTROL = 0x0002;
     private const uint MOD_SHIFT = 0x0004;
-    private const uint MOD_WIN = 0x0008;
 
     public string GetHotkeyText(HotkeyConfig config)
     {
@@ -102,7 +103,18 @@ public partial class HotkeyManager : Form
         // Register Audio Cycling Callback
         if (hotkeyConfigs.ContainsKey("Audio Cycling"))
         {
-            hotkeyConfigs["Audio Cycling"].Callback = AudioManager.AudioDeviceManager.GetInstance().CycleAudioDevice;
+            hotkeyConfigs["Audio Cycling"].Callback = audioManager.CycleAudioDevice;
+        }
+
+        // Register Audio Callbacks
+        List<string> audoDevices = audioManager.ActiveDeviceNames;
+
+        foreach (string audioDeviceName in audoDevices)
+        {
+            if (hotkeyConfigs.ContainsKey(audioDeviceName))
+            {
+                hotkeyConfigs[audioDeviceName].Callback = () => audioManager.SetDefaultAudioDevice(audioDeviceName);
+            }
         }
     }
 
@@ -148,6 +160,11 @@ public partial class HotkeyManager : Form
         buttonPanel.Controls.Add(clearButton);
         buttonPanel.Controls.Add(okButton);
         buttonPanel.Controls.Add(cancelButton);
+
+        if (hotkeyConfigs.ContainsKey(action))
+        {
+            inputBox.Text = GetHotkeyText(hotkeyConfigs[action]);
+        }
 
         uint modifiers = 0;
         uint keyCode = 0;

@@ -10,6 +10,7 @@ public class TrayIconManager
     private FileSystemWatcher displayProfileDirWatcher;
     private readonly string displayProfilesFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
     private HotkeyManager hotkeyManager;
+    private AudioManager.AudioDeviceManager audioManager;
 
     private Image aboutIcon;
     private Image DAIRemoteLogoIcon;
@@ -21,6 +22,7 @@ public class TrayIconManager
     private Image addProfileIcon;
     private Image setHotkeyIcon;
     private Image audioCyclingIcon;
+    private Image audioIcon;
 
     public TrayIconManager(Form form)
     {
@@ -36,12 +38,14 @@ public class TrayIconManager
         addProfileIcon = Image.FromFile("Resources/AddProfile.ico");
         setHotkeyIcon = Image.FromFile("Resources/MonitorSetHotkey.ico");
         audioCyclingIcon = Image.FromFile("Resources/AudioCycling.ico");
+        audioIcon = Image.FromFile("Resources/Audio.ico");
 
         if (!Directory.Exists(displayProfilesFolderPath))
         {
             Directory.CreateDirectory(displayProfilesFolderPath);
         }
 
+        audioManager = AudioManager.AudioDeviceManager.GetInstance();
         // Registers any prexisting hotkeys, otherwise initializes
         // an empty dictionary in preparation for hotkeys.
         hotkeyManager = new HotkeyManager();
@@ -152,7 +156,7 @@ public class TrayIconManager
             : "";
         ToolStripMenuItem audioCyclingHotkey = new($"Audio Cycling{hotkeyText}", audioCyclingIcon, (sender, e) =>
         {
-            hotkeyManager.ShowHotkeyInput("Audio Cycling", () => AudioManager.AudioDeviceManager.GetInstance().CycleAudioDevice());
+            hotkeyManager.ShowHotkeyInput("Audio Cycling", () => audioManager.CycleAudioDevice());
 
             // Refresh to show the updated hotkey
             string updatedHotkeyText = hotkeyManager.hotkeyConfigs.ContainsKey("Audio Cycling")
@@ -170,8 +174,36 @@ public class TrayIconManager
             }
         });
 
-        // Add audio cycling item to the hotkey submenu and separate it
+        // Add audio cycling item to the hotkey submenu
         setHotkeysMenuItem.DropDownItems.Add(audioCyclingHotkey);
+
+        // Add audio devices to hotkey submenu
+        List<string> audioDevices = audioManager.ActiveDeviceNames;
+        foreach (string audioDevice in audioDevices)
+        {
+            ToolStripMenuItem audioItem = new(audioDevice, audioIcon, (sender, e) =>
+            {
+                hotkeyManager.ShowHotkeyInput(audioDevice, () => audioManager.SetDefaultAudioDevice(audioDevice));
+
+                // Refresh to show the updated hotkey
+                string updatedHotkeyText = hotkeyManager.hotkeyConfigs.ContainsKey(audioDevice)
+                    ? $" ({hotkeyManager.GetHotkeyText(hotkeyManager.hotkeyConfigs[audioDevice])})"
+                    : "";
+
+                // Find the existing menu item
+                foreach (var item in setHotkeysMenuItem.DropDownItems)
+                {
+                    if (item is ToolStripMenuItem menuItem && menuItem.Text.StartsWith(audioDevice))
+                    {
+                        menuItem.Text = $"{audioDevice}{updatedHotkeyText}";
+                        return;
+                    }
+                }
+            });
+            setHotkeysMenuItem.DropDownItems.Add(audioItem);
+        }
+
+        // Separate audio hotkeys from display hotkeys in hotkey submenu
         setHotkeysMenuItem.DropDownItems.Add(new ToolStripSeparator());
 
         // Add load profiles label to the main menu and separate it
