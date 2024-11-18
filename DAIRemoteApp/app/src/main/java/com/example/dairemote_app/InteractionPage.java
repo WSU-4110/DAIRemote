@@ -44,6 +44,7 @@ import com.google.android.material.navigation.NavigationView;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class InteractionPage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -71,6 +72,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     private AudioRecyclerAdapter audioRecyclerAdapter;
     private boolean audioListVisible = false;
     private boolean audioMuted = false;
+    private ImageButton audioToggleMuteButton;
 
     // Host Display Profiles variables
     private boolean isRequestDisplayProfilesTaskRunning = false;
@@ -156,7 +158,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         ImageButton previousButton = findViewById(R.id.audio_previous_button);
         ImageButton nextButton = findViewById(R.id.audio_next_button);
         ImageButton audioCycleButton = findViewById(R.id.audio_cycle_button);
-        ImageButton audioToggleMuteButton = findViewById(R.id.audio_togglemute_button);
+        audioToggleMuteButton = findViewById(R.id.audio_togglemute_button);
         currentVolume = findViewById(R.id.audio_slider_volume);
         ImageView audioButton = findViewById(R.id.audiocycle);
         audioControlPanel = findViewById(R.id.audio_control_panel);
@@ -730,15 +732,34 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         String devicesPart = parts[0].substring("AudioDevices: ".length());
                         List<String> deviceList = Arrays.asList(devicesPart.split(","));
                         Log.d("InteractionPageAudio", "Audio devices: " + deviceList);
-                        UpdateAudioDevices(deviceList);
-                        Log.d("InteractionPageAudio", "Audio default device: " + parts[2].substring("DefaultAudioDevice: ".length()));
-                        SetAudioDeviceDefault(parts[2].substring("DefaultAudioDevice: ".length()));
 
-                        // Set seekbar to current host volume
-                        String volumePart = parts[1].substring("Volume: ".length());
-                        Log.d("InteractionPageAudio", "Volume: " + Integer.parseInt(volumePart));
-                        volumeSlider.setProgress(Integer.parseInt(volumePart));
-                        currentVolume.setText(volumePart);
+                        if (deviceList.isEmpty() || deviceList.get(0).isEmpty()) {
+                            List<String> placeholder = Collections.singletonList("No audio devices");
+                            UpdateAudioDevices(placeholder);
+                        } else {
+                            UpdateAudioDevices(deviceList);
+                            Log.d("InteractionPageAudio", "Audio default device: " + parts[2].substring("DefaultAudioDevice: ".length()));
+                            SetAudioDeviceDefault(parts[2].substring("DefaultAudioDevice: ".length()));
+
+                            // Set seekbar to current host volume
+                            String volumePart = parts[1].substring("Volume: ".length());
+                            Log.d("InteractionPageAudio", "Volume: " + Integer.parseInt(volumePart));
+                            volumeSlider.setProgress(Integer.parseInt(volumePart));
+                            currentVolume.setText(volumePart);
+
+                            // Get host's current mute status
+                            String muteStatus = parts[3].substring("Mute: ".length());
+                            Log.d("InteractionPageAudio", "Mute: " + muteStatus);
+                            if(muteStatus.equalsIgnoreCase("true")) {
+                                audioMuted = true;
+                                audioToggleMuteButton.setColorFilter(getColor(R.color.black));
+                                currentVolume.setTextColor(getColor(R.color.black));
+                            } else {
+                                audioMuted = false;
+                                audioToggleMuteButton.setColorFilter(getColor(R.color.grey));
+                                currentVolume.setTextColor(getColor(R.color.grey));
+                            }
+                        }
                     } else {
                         Log.e("InteractionPageAudio", "Unexpected response format: " + response);
                     }
@@ -768,8 +789,14 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     // Load audio devices on recycler
                     String displayProfiles = response.substring("DisplayProfiles: ".length());
                     List<String> deviceList = Arrays.asList(displayProfiles.split(","));
-                    Log.d("InteractionPageDisplays", "Display Profiles: " + deviceList);
-                    UpdateDisplayProfiles(deviceList);
+
+                    if (deviceList.isEmpty() || deviceList.get(0).isEmpty()) {
+                        List<String> placeholder = Collections.singletonList("No display profiles");
+                        UpdateDisplayProfiles(placeholder);
+                    } else {
+                        Log.d("InteractionPageDisplays", "Display Profiles: " + deviceList);
+                        UpdateDisplayProfiles(deviceList);
+                    }
                 } else {
                     Log.e("InteractionPageDisplays", "Unexpected response format: " + response);
                 }

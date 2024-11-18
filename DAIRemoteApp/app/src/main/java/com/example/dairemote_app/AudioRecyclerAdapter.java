@@ -53,27 +53,34 @@ public class AudioRecyclerAdapter extends RecyclerView.Adapter<AudioRecyclerAdap
 
     @Override
     public void onBindViewHolder(@NonNull OptionViewHolder holder, int position) {
-        holder.button.setText(audioDevices.get(position));
-
-        if (position == selectedPosition) {
-            holder.button.setBackgroundColor(Color.parseColor("#044a41"));
+        if ("No audio devices".equals(audioDevices.get(position))) {
+            holder.button.setText("No Audio Devices");
+            holder.button.setEnabled(false);
+            holder.button.setBackgroundColor(Color.GRAY);
+            holder.button.setOnClickListener(null); // Remove click listener
         } else {
-            holder.button.setBackgroundColor(Color.parseColor("#077063"));
-        }
+            holder.button.setText(audioDevices.get(position));
 
-        holder.button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MainActivity.connectionManager.SendHostMessage("AudioConnect " + holder.button.getText().toString());
-                int previousPosition = selectedPosition;
-                selectedPosition = holder.getAdapterPosition();
-
-                if (previousPosition != -1) {
-                    notifyItemChanged(previousPosition);
-                }
-                notifyItemChanged(selectedPosition);
+            if (position == selectedPosition) {
+                holder.button.setBackgroundColor(Color.parseColor("#044a41"));
+            } else {
+                holder.button.setBackgroundColor(Color.parseColor("#077063"));
             }
-        });
+
+            holder.button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    MainActivity.connectionManager.SendHostMessage("AudioConnect " + holder.button.getText().toString());
+                    int previousPosition = selectedPosition;
+                    selectedPosition = holder.getAdapterPosition();
+
+                    if (previousPosition != -1) {
+                        notifyItemChanged(previousPosition);
+                    }
+                    notifyItemChanged(selectedPosition);
+                }
+            });
+        }
     }
 
     @Override

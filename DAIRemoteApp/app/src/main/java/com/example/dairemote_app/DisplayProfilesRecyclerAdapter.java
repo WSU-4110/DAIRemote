@@ -1,5 +1,6 @@
 package com.example.dairemote_app;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,13 +27,21 @@ public class DisplayProfilesRecyclerAdapter extends RecyclerView.Adapter<Display
 
     @Override
     public void onBindViewHolder(@NonNull OptionViewHolder holder, int position) {
-        holder.button.setText(displayProfiles.get(position));
-        holder.button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MainActivity.connectionManager.SendHostMessage("DisplayConnect " + holder.button.getText().toString());
-            }
-        });
+        if ("No display profiles".equals(displayProfiles.get(position))) {
+            holder.button.setText("No Display Profiles");
+            holder.button.setEnabled(false);
+            holder.button.setBackgroundColor(Color.GRAY);
+            holder.button.setOnClickListener(null); // Remove click listener
+        } else {
+            holder.button.setText(displayProfiles.get(position));
+            holder.button.setBackgroundColor(Color.parseColor("#077063"));
+            holder.button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    MainActivity.connectionManager.SendHostMessage("DisplayConnect " + holder.button.getText().toString());
+                }
+            });
+        }
     }
 
     @Override
