@@ -11,8 +11,7 @@ public partial class DAIRemoteApplicationUI : Form
     private AudioOutputForm audioForm;
     private Panel audioFormPanel;
     private AudioManager.AudioDeviceManager audioManager;
-    private HotkeyManager hotkeyManager; // Add HotkeyManager instance
-
+    private HotkeyManager hotkeyManager;
     public DAIRemoteApplicationUI()
     {
         UDPServerHost udpServer = new();
@@ -25,16 +24,14 @@ public partial class DAIRemoteApplicationUI : Form
         InitializeComponent();
         InitializeDisplayProfilesLayouts();
 
-        // Updated the property of the form itself to start with the color
         this.Icon = new Icon("Resources/DAIRemoteLogo.ico");
         trayIconManager = new TrayIconManager(this);
         this.Load += DAIRemoteApplicationUI_Load;
         this.FormClosing += DAIRemoteApplicationUI_FormClosing;
         this.StartPosition = FormStartPosition.CenterScreen;
 
-        SetStartupStatus();   // Checks onStartup default value to set
+        SetStartupStatus();   
 
-        // Initialize HotkeyManager
         hotkeyManager = new HotkeyManager();
     }
 
@@ -79,7 +76,6 @@ public partial class DAIRemoteApplicationUI : Form
             e.Cancel = false;
             trayIconManager.HideIcon();
 
-            // Unregister hotkeys when the application is closing
             hotkeyManager.UnregisterHotkeys();
         }
     }
@@ -100,27 +96,22 @@ public partial class DAIRemoteApplicationUI : Form
     }
     private void BtnAddDisplayConfig_Click(object sender, EventArgs e)
     {
-        // Save a new display profile
         string displayProfilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
 
-        // Ensure that the directory exists
         if (!Directory.Exists(displayProfilePath))
         {
             Directory.CreateDirectory(displayProfilePath);
         }
 
-        // Assuming SaveNewProfile is a method to save the profile (you may need to implement this logic if not already done)
         TrayIconManager.SaveNewProfile(displayProfilePath);
 
-        // Reinitialize and refresh the profiles layout after adding a new profile
-        InitializeDisplayProfilesLayouts();  // This should be updating your UI with new buttons
+        InitializeDisplayProfilesLayouts();  
     }
 
     private void InitializeDisplayProfilesLayouts()
     {
         string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
 
-        // Ensure the folder exists
         if (!Directory.Exists(folderPath))
         {
             Directory.CreateDirectory(folderPath);
@@ -128,7 +119,6 @@ public partial class DAIRemoteApplicationUI : Form
 
         string[] displayProfilesDirectory = Directory.GetFiles(folderPath, "*.json");
 
-        // Clear the old controls before re-adding them
         BtnShowLoadProfiles.Controls.Clear();
         BtnShowDeleteProfiles.Controls.Clear();
 
@@ -154,7 +144,6 @@ public partial class DAIRemoteApplicationUI : Form
         }
         string[] displayProfilesDirectory = Directory.GetFiles(folderPath, "*.json");
 
-        // Create a new form (or use a ListBox in the main form)
         Form profileDialog = new Form();
         profileDialog.Text = isDelete ? "Delete Profile" : "Load Profile";
         profileDialog.Size = new Size(400, 300);
@@ -182,13 +171,11 @@ public partial class DAIRemoteApplicationUI : Form
 
                 if (isDelete)
                 {
-                    // Delete the profile
                     DisplayConfig.DeleteDisplaySettings(profilePath);
                     InitializeDisplayProfilesLayouts();
                 }
                 else
                 {
-                    // Load the profile
                     DisplayConfig.SetDisplaySettings(profilePath);
                 }
                 profileDialog.Close();
@@ -211,7 +198,6 @@ public partial class DAIRemoteApplicationUI : Form
 
     private void BtnSetProfileHotkey_Click(object sender, EventArgs e)
     {
-        // Set hotkeys for loading profiles
         hotkeyManager.ShowHotkeyInput("Load Profile", () => DisplayConfig.SetDisplaySettings("profile.json"));
     }
 
@@ -283,4 +269,5 @@ public partial class DAIRemoteApplicationUI : Form
     {
 
     }
+
 }

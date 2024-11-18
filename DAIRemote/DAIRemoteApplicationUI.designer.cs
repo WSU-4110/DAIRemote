@@ -46,14 +46,13 @@
             this.BtnSaveDisplayConfig.TabIndex = 0;
             this.BtnSaveDisplayConfig.Text = "Add Display Profile";
             this.BtnSaveDisplayConfig.UseVisualStyleBackColor = false;
-            this.BtnSaveDisplayConfig.Click += new System.EventHandler(this.BtnAddDisplayConfig_Click);
-
+            this.BtnSaveDisplayConfig.Click += this.BtnAddDisplayConfig_Click;
             // 
             // checkBoxStartup
             // 
             this.checkBoxStartup.AutoSize = true;
             this.checkBoxStartup.ForeColor = SystemColors.Control;
-            this.checkBoxStartup.Location = new Point(388, 570);
+            this.checkBoxStartup.Location = new Point(388, 519);
             this.checkBoxStartup.Margin = new Padding(4, 5, 4, 5);
             this.checkBoxStartup.Name = "checkBoxStartup";
             this.checkBoxStartup.Size = new Size(272, 29);
@@ -125,6 +124,7 @@
             // 
             // Logo
             // 
+            this.Logo.Image = Properties.Resources.DAIRemoteLogo;
             this.Logo.Location = new Point(42, 13);
             this.Logo.Margin = new Padding(4);
             this.Logo.Name = "Logo";
@@ -167,7 +167,7 @@
             this.AutoScaleDimensions = new SizeF(10F, 25F);
             this.AutoScaleMode = AutoScaleMode.Font;
             this.BackColor = Color.FromArgb(50, 50, 50);
-            this.ClientSize = new Size(1110, 835);
+            this.ClientSize = new Size(1110, 568);
             this.Controls.Add(this.BtnShowDeleteProfiles);
             this.Controls.Add(this.BtnShowLoadProfiles);
             this.Controls.Add(this.Description);
