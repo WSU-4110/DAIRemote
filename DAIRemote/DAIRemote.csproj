@@ -49,10 +49,22 @@
 		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		<BuildAction>None</BuildAction>
 	</None>
-	  <None Update="Resources\TurnOffAllMonitors.ico">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		  <BuildAction>None</BuildAction>
-	  </None>
+	<None Update="Resources\TurnOffAllMonitors.ico">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <BuildAction>None</BuildAction>
+	</None>
+	<None Update="Resources\MonitorSetHotkey.ico">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <BuildAction>None</BuildAction>
+	</None>
+	<None Update="Resources\AudioCycling.ico">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <BuildAction>None</BuildAction>
+	</None>
+	<None Update="Resources\Audio.ico">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <BuildAction>None</BuildAction>
+	</None>
   </ItemGroup>
 
 </Project>

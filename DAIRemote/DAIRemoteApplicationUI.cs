@@ -24,13 +24,6 @@ public partial class DAIRemoteApplicationUI : Form
         InitializeComponent();
         InitializeDisplayProfilesLayouts();
 
-        Task.Run(() =>
-        {
-            this.audioManager = AudioManager.AudioDeviceManager.GetInstance();
-
-            this.Invoke((MethodInvoker)(() => InitializeAudioDropDown()));
-        });
-
         // Updated the property of the form itself to start with the color
         //this.BackColor = Color.FromArgb(50, 50, 50);
         this.Icon = new Icon("Resources/DAIRemoteLogo.ico");
@@ -40,6 +33,18 @@ public partial class DAIRemoteApplicationUI : Form
         this.StartPosition = FormStartPosition.CenterScreen;
 
         SetStartupStatus();   // Checks onStartup default value to set
+    }
+
+    protected override void OnHandleCreated(EventArgs e)
+    {
+        base.OnHandleCreated(e);
+
+        Task.Run(() =>
+        {
+            this.audioManager = AudioManager.AudioDeviceManager.GetInstance();
+
+            this.Invoke((MethodInvoker)(() => InitializeAudioDropDown()));
+        });
     }
 
     private void DAIRemoteApplicationUI_Load(object sender, EventArgs e)
