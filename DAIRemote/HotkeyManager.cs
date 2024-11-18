@@ -9,6 +9,7 @@ public partial class HotkeyManager : Form
     public Dictionary<string, HotkeyConfig> hotkeyConfigs;
     private readonly string ConfigFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/hotkeys.json");
 
+
     public HotkeyManager()
     {
         audioManager = AudioManager.AudioDeviceManager.GetInstance();
@@ -241,5 +242,10 @@ public partial class HotkeyManager : Form
     {
         UnregisterHotkeys();         // Unregister hotkeys on application close
         base.OnFormClosing(e);
+    }
+
+    private void HotkeyManager_Load(object sender, EventArgs e)
+    {
+
     }
 }

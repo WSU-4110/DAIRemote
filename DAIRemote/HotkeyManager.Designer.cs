@@ -28,10 +28,16 @@ partial class HotkeyManager
     /// </summary>
     private void InitializeComponent()
     {
-        this.components = new System.ComponentModel.Container();
-        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(800, 450);
+        this.SuspendLayout();
+        // 
+        // HotkeyManager
+        // 
+        this.AutoScaleDimensions = new SizeF(10F, 25F);
+        this.AutoScaleMode = AutoScaleMode.Font;
+        this.ClientSize = new Size(800, 450);
+        this.Name = "HotkeyManager";
         this.Text = "Form1";
+        this.ResumeLayout(false);
     }
 
     #endregion

@@ -12,7 +12,7 @@ public partial class AudioOutputForm : Form
         {
             DropDownStyle = ComboBoxStyle.DropDownList,
             FormattingEnabled = true,
-            Location = new Point(12, 100),
+            Location = new Point(29, 150),
             Name = "audioDeviceComboBox",
             Size = new Size(260, 33),
             TabIndex = 0

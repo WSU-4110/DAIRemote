@@ -1,16 +1,17 @@
 using AudioManager;
 using DisplayProfileManager;
 using Microsoft.Win32;
+using System.Runtime.InteropServices;
 using UDPServerManagerForm;
 
 namespace DAIRemote;
-
 public partial class DAIRemoteApplicationUI : Form
 {
     private TrayIconManager trayIconManager;
     private AudioOutputForm audioForm;
     private Panel audioFormPanel;
     private AudioManager.AudioDeviceManager audioManager;
+    private HotkeyManager hotkeyManager; // Add HotkeyManager instance
 
     public DAIRemoteApplicationUI()
     {
@@ -25,7 +26,6 @@ public partial class DAIRemoteApplicationUI : Form
         InitializeDisplayProfilesLayouts();
 
         // Updated the property of the form itself to start with the color
-        //this.BackColor = Color.FromArgb(50, 50, 50);
         this.Icon = new Icon("Resources/DAIRemoteLogo.ico");
         trayIconManager = new TrayIconManager(this);
         this.Load += DAIRemoteApplicationUI_Load;
@@ -33,6 +33,9 @@ public partial class DAIRemoteApplicationUI : Form
         this.StartPosition = FormStartPosition.CenterScreen;
 
         SetStartupStatus();   // Checks onStartup default value to set
+
+        // Initialize HotkeyManager
+        hotkeyManager = new HotkeyManager();
     }
 
     protected override void OnHandleCreated(EventArgs e)
@@ -52,46 +55,6 @@ public partial class DAIRemoteApplicationUI : Form
         this.Hide();
     }
 
-    private void InitializeDisplayProfilesLayouts()
-    {
-        DisplayLoadProfilesLayout.Controls.Clear();
-        DisplayDeleteProfilesLayout.Controls.Clear();
-        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
-        if (!Directory.Exists(folderPath))
-        {
-            Directory.CreateDirectory(folderPath);
-        }
-        string[] displayProfilesDirectory = Directory.GetFiles(folderPath, "*.json");
-
-        foreach (string profile in displayProfilesDirectory)
-        {
-            Button loadProfileButton = new()
-            {
-                Text = Path.GetFileNameWithoutExtension(profile),
-                Width = 150,
-                Height = 50,
-                Margin = new Padding(10),
-                Tag = profile,
-                ForeColor = Color.White
-            };
-
-            Button deleteProfileButton = new()
-            {
-                Text = Path.GetFileNameWithoutExtension(profile),
-                Width = 150,
-                Height = 50,
-                Margin = new Padding(10),
-                Tag = profile,
-                ForeColor = Color.White
-            };
-
-            loadProfileButton.Click += LoadProfileButton_Click;
-            DisplayLoadProfilesLayout.Controls.Add(loadProfileButton);
-
-            deleteProfileButton.Click += DeleteProfileButton_Click;
-            DisplayDeleteProfilesLayout.Controls.Add(deleteProfileButton);
-        }
-    }
 
     private void DeleteProfileButton_Click(object sender, EventArgs e)
     {
@@ -115,6 +78,9 @@ public partial class DAIRemoteApplicationUI : Form
         {
             e.Cancel = false;
             trayIconManager.HideIcon();
+
+            // Unregister hotkeys when the application is closing
+            hotkeyManager.UnregisterHotkeys();
         }
     }
 
@@ -132,19 +98,122 @@ public partial class DAIRemoteApplicationUI : Form
         audioFormPanel.Controls.Add(audioForm);
         audioForm.Show();
     }
-
     private void BtnAddDisplayConfig_Click(object sender, EventArgs e)
     {
-        TrayIconManager.SaveNewProfile(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"));
-        DisplayLoadProfilesLayout.Controls.Clear();
-        DisplayDeleteProfilesLayout.Controls.Clear();
-        InitializeDisplayProfilesLayouts();
+        // Save a new display profile
+        string displayProfilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
+
+        // Ensure that the directory exists
+        if (!Directory.Exists(displayProfilePath))
+        {
+            Directory.CreateDirectory(displayProfilePath);
+        }
+
+        // Assuming SaveNewProfile is a method to save the profile (you may need to implement this logic if not already done)
+        TrayIconManager.SaveNewProfile(displayProfilePath);
+
+        // Reinitialize and refresh the profiles layout after adding a new profile
+        InitializeDisplayProfilesLayouts();  // This should be updating your UI with new buttons
     }
 
-    /*private void BtnLoadDisplayConfig_Click(object sender, EventArgs e)
+    private void InitializeDisplayProfilesLayouts()
     {
-        DisplayConfig.SetDisplaySettings("displayConfig" + ".json");
-    }*/
+        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
+
+        // Ensure the folder exists
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
+
+        string[] displayProfilesDirectory = Directory.GetFiles(folderPath, "*.json");
+
+        // Clear the old controls before re-adding them
+        BtnShowLoadProfiles.Controls.Clear();
+        BtnShowDeleteProfiles.Controls.Clear();
+
+
+    }
+
+    private void BtnShowLoadProfiles_Click(object sender, EventArgs e)
+    {
+        ShowProfilesDialog(isDelete: false);
+    }
+
+    private void BtnShowDeleteProfiles_Click(object sender, EventArgs e)
+    {
+        ShowProfilesDialog(isDelete: true);
+    }
+
+    private void ShowProfilesDialog(bool isDelete)
+    {
+        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
+        string[] displayProfilesDirectory = Directory.GetFiles(folderPath, "*.json");
+
+        // Create a new form (or use a ListBox in the main form)
+        Form profileDialog = new Form();
+        profileDialog.Text = isDelete ? "Delete Profile" : "Load Profile";
+        profileDialog.Size = new Size(400, 300);
+
+        ListBox profileListBox = new ListBox();
+        profileListBox.Dock = DockStyle.Fill;
+        profileListBox.Items.AddRange(displayProfilesDirectory.Select(profile => Path.GetFileNameWithoutExtension(profile)).ToArray());
+
+        profileDialog.Controls.Add(profileListBox);
+
+        Button actionButton = new Button
+        {
+            Text = isDelete ? "Delete" : "Load",
+            Dock = DockStyle.Bottom,
+            Height = 50,              
+            FlatStyle = FlatStyle.Flat,
+        };
+
+        actionButton.Click += (s, e) =>
+        {
+            string selectedProfile = profileListBox.SelectedItem?.ToString();
+            if (!string.IsNullOrEmpty(selectedProfile))
+            {
+                string profilePath = Path.Combine(folderPath, selectedProfile + ".json");
+
+                if (isDelete)
+                {
+                    // Delete the profile
+                    DisplayConfig.DeleteDisplaySettings(profilePath);
+                    InitializeDisplayProfilesLayouts();
+                }
+                else
+                {
+                    // Load the profile
+                    DisplayConfig.SetDisplaySettings(profilePath);
+                }
+                profileDialog.Close();
+            }
+            else
+            {
+                MessageBox.Show("Please select a profile.");
+            }
+        };
+
+        profileDialog.Controls.Add(actionButton);
+        profileDialog.ShowDialog();
+    }
+
+
+    private void BtnSetAudioHotkey_Click(object sender, EventArgs e)
+    {
+        hotkeyManager.ShowHotkeyInput("Audio Cycling", audioManager.CycleAudioDevice);
+    }
+
+    private void BtnSetProfileHotkey_Click(object sender, EventArgs e)
+    {
+        // Set hotkeys for loading profiles
+        hotkeyManager.ShowHotkeyInput("Load Profile", () => DisplayConfig.SetDisplaySettings("profile.json"));
+    }
 
     private void CheckBoxStartup_CheckedChanged(object sender, EventArgs e)
     {
@@ -193,6 +262,7 @@ public partial class DAIRemoteApplicationUI : Form
         }
     }
 
+
     private static bool IsAppInStartup()
     {
         using RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", false);
@@ -207,5 +277,10 @@ public partial class DAIRemoteApplicationUI : Form
     private void BtnCycleAudioOutputs_Click(object sender, EventArgs e)
     {
         audioManager.CycleAudioDevice();
+    }
+
+    private void Logo_Click(object sender, EventArgs e)
+    {
+
     }
 }
