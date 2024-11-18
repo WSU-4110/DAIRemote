@@ -346,9 +346,22 @@ public class UDPServerHost
                 else if (parts[1] == "Devices")
                 {
                     List<string> devices = audioManager.ActiveDeviceNames;
-                    string list = string.Join(",", devices);
+                    if (devices.Count > 0)
+                    {
+                        string list = string.Join(",", devices);
 
-                    SendUdpMessage("AudioDevices: " + list + "|Volume: " + audioManager.GetVolume() + "|DefaultAudioDevice: " + audioManager.GetDefaultAudioDevice().FullName);
+                        SendUdpMessage("AudioDevices: " + list
+                            + "|Volume: " + audioManager.GetVolume()
+                            + "|DefaultAudioDevice: " + audioManager.GetDefaultAudioDevice().FullName
+                            + "|Mute: " + audioManager.GetDefaultAudioDevice().IsMuted);
+                    }
+                    else
+                    {
+                        SendUdpMessage("AudioDevices: "
+                            + "|Volume: 0"
+                            + "|DefaultAudioDevice: None"
+                            + "|Mute: true");
+                    }
                 }
                 else if (parts[1] == "TogglePlay")
                 {
@@ -378,10 +391,17 @@ public class UDPServerHost
                 {
                     // Get all .json files from the directory (display profiles)
                     string[] displayProfiles = Directory.GetFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"), "*.json");
-                    string displayProfileName = string.Join(",", Array.ConvertAll(displayProfiles, Path.GetFileNameWithoutExtension));
 
-                    Debug.WriteLine(displayProfileName);
-                    SendUdpMessage("DisplayProfiles: " + displayProfileName);
+                    if (displayProfiles.Length > 0)
+                    {
+                        string displayProfileName = string.Join(",", Array.ConvertAll(displayProfiles, Path.GetFileNameWithoutExtension));
+                        Debug.WriteLine(displayProfileName);
+                        SendUdpMessage("DisplayProfiles: " + displayProfileName);
+                    }
+                    else
+                    {
+                        SendUdpMessage("DisplayProfiles: ");
+                    }
                 }
                 catch (Exception ex)
                 {
