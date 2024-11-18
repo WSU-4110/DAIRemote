@@ -19,6 +19,8 @@ public class TrayIconManager
     private Image saveProfileIcon;
     private Image turnOffAllMonitorsIcon;
     private Image addProfileIcon;
+    private Image setHotkeyIcon;
+    private Image audioCyclingIcon;
 
     public TrayIconManager(Form form)
     {
@@ -32,14 +34,17 @@ public class TrayIconManager
         saveProfileIcon = Image.FromFile("Resources/SaveProfile.ico");
         turnOffAllMonitorsIcon = Image.FromFile("Resources/TurnOffAllMonitors.ico");
         addProfileIcon = Image.FromFile("Resources/AddProfile.ico");
+        setHotkeyIcon = Image.FromFile("Resources/MonitorSetHotkey.ico");
+        audioCyclingIcon = Image.FromFile("Resources/AudioCycling.ico");
 
         if (!Directory.Exists(displayProfilesFolderPath))
         {
             Directory.CreateDirectory(displayProfilesFolderPath);
         }
 
+        // Registers any prexisting hotkeys, otherwise initializes
+        // an empty dictionary in preparation for hotkeys.
         hotkeyManager = new HotkeyManager();
-        hotkeyManager.LoadHotkeyConfigs();
 
         InitializeTrayIcon();
     }
@@ -101,6 +106,8 @@ public class TrayIconManager
     {
         menu.Items.Clear();
 
+        // Create Labels for loading, deleting, saving, and setting hotkeys
+        // system tray submenus
         ToolStripLabel loadProfilesLabel = new("Loaded Profiles")
         {
             Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
@@ -122,8 +129,6 @@ public class TrayIconManager
             Enabled = false,
         };
 
-        ToolStripMenuItem addNewProfile = new("Add New Profile", addProfileIcon, (sender, e) => SaveNewProfile(displayProfilesFolderPath));
-
         ToolStripMenuItem setHotkeysLabel = new("Set Hotkeys")
         {
             Font = new Font("Segoe UI Variable", 9, FontStyle.Regular),
@@ -131,16 +136,21 @@ public class TrayIconManager
             Enabled = false,
         };
 
+        // Add item for handling the addition of new profiles through
+        // the system tray save submenu
+        ToolStripMenuItem addNewProfile = new("Add New Profile", addProfileIcon, (sender, e) => SaveNewProfile(displayProfilesFolderPath));
+
+        // Create the save, delete, sethotkey submenus
         ToolStripMenuItem saveProfileMenuItem = new("Save Profile", saveProfileIcon);
         ToolStripMenuItem deleteProfileMenuItem = new("Delete Profile", deleteProfileIcon);
-        ToolStripMenuItem setHotkeysMenuItem = new("Set Hotkeys", monitorIcon);
+        ToolStripMenuItem setHotkeysMenuItem = new("Set Hotkeys", setHotkeyIcon);
 
-        ToolStripMenuItem profileSetHotkey = null;
-
+        // Check if a hotkey exists for Audio Cycling and name accordingly
+        // Also sets the handling of setting Audio Cycling hotkey
         string hotkeyText = hotkeyManager.hotkeyConfigs.ContainsKey("Audio Cycling")
             ? $" ({hotkeyManager.GetHotkeyText(hotkeyManager.hotkeyConfigs["Audio Cycling"])})"
             : "";
-        ToolStripMenuItem audioCyclingHotkey = new($"Audio Cycling{hotkeyText}", monitorIcon, (sender, e) =>
+        ToolStripMenuItem audioCyclingHotkey = new($"Audio Cycling{hotkeyText}", audioCyclingIcon, (sender, e) =>
         {
             hotkeyManager.ShowHotkeyInput("Audio Cycling", () => AudioManager.AudioDeviceManager.GetInstance().CycleAudioDevice());
 
@@ -159,14 +169,20 @@ public class TrayIconManager
                 }
             }
         });
+
+        // Add audio cycling item to the hotkey submenu and separate it
         setHotkeysMenuItem.DropDownItems.Add(audioCyclingHotkey);
         setHotkeysMenuItem.DropDownItems.Add(new ToolStripSeparator());
 
+        // Add load profiles label to the main menu and separate it
         menu.Items.Add(loadProfilesLabel);
         menu.Items.Add(new ToolStripSeparator());
 
+        // Retrieve any existing display profiles
         string[] displayProfiles = Directory.GetFiles(displayProfilesFolderPath, "*.json");
 
+        // For each existing profile, add it as an item and modify it according
+        // to each load, save, delete, and sethotkey submenu
         foreach (string profile in displayProfiles)
         {
             string fileName = Path.GetFileNameWithoutExtension(profile);
@@ -182,7 +198,7 @@ public class TrayIconManager
             hotkeyText = hotkeyManager.hotkeyConfigs.ContainsKey(fileName)
                 ? $" ({hotkeyManager.GetHotkeyText(hotkeyManager.hotkeyConfigs[fileName])})"
                 : "";
-            profileSetHotkey = new ToolStripMenuItem($"{fileName}{hotkeyText}", monitorIcon, (sender, e) =>
+            ToolStripMenuItem profileSetHotkey = new($"{fileName}{hotkeyText}", monitorIcon, (sender, e) =>
             {
                 hotkeyManager.ShowHotkeyInput(fileName, () => DisplayConfig.SetDisplaySettings(profile));
 
@@ -207,6 +223,10 @@ public class TrayIconManager
             setHotkeysMenuItem.DropDownItems.Add(profileSetHotkey);
         }
 
+        // Separate loadable display profiles from the main menu
+        // Then proceed to add the delete label, add new profile for save submenu
+        // overwrite existing display profiles label in the save submenu,
+        // and the set hotkeys label in the sethotkey submenu
         menu.Items.Add(new ToolStripSeparator());
         deleteProfileMenuItem.DropDownItems.Insert(0, deleteProfilesLabel);
         deleteProfileMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
@@ -216,14 +236,18 @@ public class TrayIconManager
         saveProfileMenuItem.DropDownItems.Insert(3, new ToolStripSeparator());
         setHotkeysMenuItem.DropDownItems.Insert(0, setHotkeysLabel);
         setHotkeysMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
+
+        // Add the save, delete, and sethotkey submenus to the main system tray
         menu.Items.Add(saveProfileMenuItem);
         menu.Items.Add(deleteProfileMenuItem);
         menu.Items.Add(setHotkeysMenuItem);
 
+        // Create the icons for making monitors sleep, the about section, and exiting the application
         ToolStripMenuItem turnOffAllMonitorsItem = new("Turn Off All Monitors", turnOffAllMonitorsIcon, TurnOffMonitors);
         ToolStripMenuItem aboutMenuItem = new("About", aboutIcon, OnAboutClick);
         ToolStripMenuItem exitMenuItem = new("Exit", exitIcon, OnExit);
 
+        // Separate sleeping monitors, and add the sleep, about, and exit to the main system tray menu
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(turnOffAllMonitorsItem);
         menu.Items.Add(new ToolStripSeparator());

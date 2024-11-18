@@ -8,23 +8,32 @@ public partial class HotkeyManager : Form
     public Dictionary<string, HotkeyConfig> hotkeyConfigs;
     private readonly string ConfigFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/hotkeys.json");
 
+    public HotkeyManager()
+    {
+        LoadHotkeyConfigs();
+    }
+
     [DllImport("user32.dll")]
     private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
 
     [DllImport("user32.dll")]
     private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
+    private void UnregisterHotkey(string action)
+    {
+        if (hotkeyConfigs.TryGetValue(action, out HotkeyConfig? value))
+        {
+            UnregisterHotKey(this.Handle, value.Action.GetHashCode());
+            hotkeyConfigs.Remove(action);
+            SaveHotkeyConfigs();
+        }
+    }
+
     // Modifier keys
     private const uint MOD_ALT = 0x0001;
     private const uint MOD_CONTROL = 0x0002;
     private const uint MOD_SHIFT = 0x0004;
     private const uint MOD_WIN = 0x0008;
-
-    private ToolStripMenuItem CreateMenuItem(string action, EventHandler onClick)
-    {
-        string hotkeyText = hotkeyConfigs.ContainsKey(action) ? $" ({GetHotkeyText(hotkeyConfigs[action])})" : "";
-        return new ToolStripMenuItem($"{action}{hotkeyText}", Image.FromFile("Resources/Monitor.ico"), onClick);
-    }
 
     public string GetHotkeyText(HotkeyConfig config)
     {
@@ -68,6 +77,14 @@ public partial class HotkeyManager : Form
         }
     }
 
+    public void UnregisterHotkeys()
+    {
+        foreach (var config in hotkeyConfigs.Values)
+        {
+            UnregisterHotKey(this.Handle, config.Action.GetHashCode());
+        }
+    }
+
     public void RegisterCallbacks()
     {
         // Register Display Callbacks
@@ -91,37 +108,58 @@ public partial class HotkeyManager : Form
 
     public void ShowHotkeyInput(string action, Action functionAction)
     {
-        Form inputForm = new Form();
-        inputForm.Text = $"Set Hotkey for {action}";
-        inputForm.Size = new Size(300, 100);
-        inputForm.StartPosition = FormStartPosition.CenterScreen;
+        Form inputForm = new()
+        {
+            Text = $"Set Hotkey for {action}",
+            Size = new Size(300, 150),
+            StartPosition = FormStartPosition.CenterScreen
+        };
 
-        TextBox inputBox = new TextBox()
+        TextBox inputBox = new()
         {
             Dock = DockStyle.Top,
             ReadOnly = true     // Prevents Manual input
         };
 
-        Button okButton = new Button
+        Button okButton = new()
         {
             Text = "OK",
             Dock = DockStyle.Bottom,
             DialogResult = DialogResult.OK
         };
 
-        Button cancelButton = new Button
+        Button clearButton = new()
+        {
+            Text = "Clear",
+            Dock = DockStyle.Bottom
+        };
+
+        Button cancelButton = new()
         {
             Text = "Cancel",
             Dock = DockStyle.Bottom,
             DialogResult = DialogResult.Cancel
         };
 
-        Panel buttonPanel = new Panel { Dock = DockStyle.Bottom };
+        Panel buttonPanel = new()
+        {
+            Dock = DockStyle.Bottom
+        };
+        buttonPanel.Controls.Add(clearButton);
         buttonPanel.Controls.Add(okButton);
         buttonPanel.Controls.Add(cancelButton);
 
         uint modifiers = 0;
         uint keyCode = 0;
+
+        clearButton.Click += (s, e) =>
+        {
+            inputBox.Text = "Cleared";
+            modifiers = 0;
+            keyCode = 0;
+
+            UnregisterHotkey(action);
+        };
 
         inputBox.KeyDown += (s, args) =>
         {
@@ -138,9 +176,11 @@ public partial class HotkeyManager : Form
         inputForm.Controls.Add(inputBox);
         inputForm.Controls.Add(buttonPanel);
 
-        if (inputForm.ShowDialog() == DialogResult.OK && keyCode != 0)
+        DialogResult result = inputForm.ShowDialog();
+
+        if (result == DialogResult.OK && keyCode != 0)
         {
-            HotkeyConfig config = new HotkeyConfig
+            HotkeyConfig config = new()
             {
                 Action = action,
                 Modifiers = modifiers,
@@ -148,72 +188,20 @@ public partial class HotkeyManager : Form
                 Callback = functionAction
             };
 
-            OnHotkeySelected(action, config, functionAction);
+            RegisterNewHotkey(action, config);
         }
-    }
-
-    private bool HotkeyExists(HotkeyConfig newConfig)
-    {
-        // Check if the hotkey already exists in the hotkeyConfigs
-        foreach (var config in hotkeyConfigs.Values)
+        else if (result == DialogResult.Cancel)
         {
-            if (config.Modifiers == newConfig.Modifiers && config.Key == newConfig.Key && config.Action != newConfig.Action)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void OnHotkeySelected(string action, HotkeyConfig newConfig, Action functionAction)
-    {
-        // Check if hotkey already assigned, if so ask for confirmation to reassign
-        if (HotkeyExists(newConfig))
-        {
-            var result = MessageBox.Show("This hotkey is already assigned to another action. Do you want to reassign it?",
-                "Hotkey Conflict", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-
-            if (result == DialogResult.Yes)
-            {
-                // Unregister the old hotkey
-                var oldAction = hotkeyConfigs.FirstOrDefault(kvp => kvp.Value.Equals(newConfig)).Key;
-                if (oldAction != null)
-                {
-                    UnregisterHotKey(this.Handle, oldAction.GetHashCode());
-                    hotkeyConfigs.Remove(oldAction);
-                }
-
-                // Register the new hotkey
-                RegisterNewHotkey(action, newConfig);
-            }
-            else
-            {
-                // Allow the user to pick a different hotkey
-                PromptForNewHotkey(action, functionAction);
-            }
-        }
-        else
-        {
-            // Register the new hotkey
-            RegisterNewHotkey(action, newConfig);
+            inputForm.Close();
         }
     }
 
     private void RegisterNewHotkey(string action, HotkeyConfig newConfig)
     {
-        if (hotkeyConfigs.ContainsKey(action))
-        {
-            UnregisterHotKey(this.Handle, hotkeyConfigs[action].Action.GetHashCode());
-        }
+        UnregisterHotkey(action);
         hotkeyConfigs[action] = newConfig;
         SaveHotkeyConfigs();
         RegisterHotKey(this.Handle, action.GetHashCode(), newConfig.Modifiers, newConfig.Key);
-    }
-
-    private void PromptForNewHotkey(string action, Action functionAction)
-    {
-        // Open the hotkey input dialog again so the user can choose a different hotkey
-        ShowHotkeyInput(action, functionAction);
     }
 
     protected override void WndProc(ref Message m)
@@ -233,11 +221,8 @@ public partial class HotkeyManager : Form
     }
 
     protected override void OnFormClosing(FormClosingEventArgs e)
-    {// Unregister hotkeys on application close
-        foreach (var config in hotkeyConfigs.Values)
-        {
-            UnregisterHotKey(this.Handle, config.Action.GetHashCode());
-        }
+    {
+        UnregisterHotkeys();         // Unregister hotkeys on application close
         base.OnFormClosing(e);
     }
 }
