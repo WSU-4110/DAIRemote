@@ -89,15 +89,15 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     private final float mouseSensitivity = 1;
     private int initialPointerCount = 0;
 
-    public void startHome() {
-        notifyUser(InteractionPage.this, "Connection lost");
+    public void startHome(String message) {
+        notifyUser(InteractionPage.this, message);
         startActivity(new Intent(InteractionPage.this, MainActivity.class));
         finish();
     }
 
     public void MessageHost(String message) {
         if (!MainActivity.connectionManager.SendHostMessage(message)) {
-            startHome();
+            startHome("Connection lost");
         }
     }
 
@@ -115,7 +115,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (!ConnectionManager.GetConnectionEstablished()) {
-            startHome();
+            startHome("Connection lost");
             return;
         }
 
@@ -288,7 +288,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
                 } else {
-                    startHome();
+                    startHome("Connection lost");
                 }
             }
         });
@@ -311,7 +311,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         displayListVisible = false;
                     }
                 } else {
-                    startHome();
+                    startHome("Connection lost");
                 }
             }
         });
@@ -332,7 +332,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         HideAudioControlPanel();
                     }
                 } else {
-                    startHome();
+                    startHome("Connection lost");
                 }
             }
         });
@@ -467,7 +467,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             public void onClick(View v) {
                 if (ConnectionManager.GetConnectionEstablished()) {
                     MainActivity.connectionManager.Shutdown();
-                    startHome();
+                    startHome("Disconnected from host");
                 }
             }
         });
@@ -719,7 +719,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         @Override
         protected void onPostExecute(Boolean result) {
             if (!result) {
-                startHome();
+                startHome("Connection lost");
             } else {
                 String response = MainActivity.connectionManager.GetHostAudioList();
 
@@ -781,7 +781,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
         @Override
         protected void onPostExecute(Boolean result) {
             if (!result) {
-                startHome();
+                startHome("Connection lost");
             } else {
                 String response = MainActivity.connectionManager.GetHostDisplayProfilesList();
 

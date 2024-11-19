@@ -95,7 +95,7 @@ public class ConnectionMonitor {
         }
 
         // Retry heartbeat 5 times
-        for (int attempt = 0; attempt < 5; attempt++) {
+        for (int attempt = 0; attempt < 2; attempt++) {
             CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
                 try {
                     GetHeartbeatSocket().SendData("DroidHeartBeat");
