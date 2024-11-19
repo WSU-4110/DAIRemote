@@ -409,7 +409,7 @@ public class UDPServerHost
                 }
                 break;
             case "DisplayConnect":
-                DisplayConfig.SetDisplaySettings(DisplayConfig.GetDisplayProfilesDirectory() + "/" + parts[1] + ".json");
+                DisplayConfig.SetDisplaySettings(Path.Combine(DisplayConfig.GetDisplayProfilesDirectory(), parts[1] + ".json"));
                 break;
             case "HOST":
                 SendUdpMessage("HostName: " + Environment.MachineName);
