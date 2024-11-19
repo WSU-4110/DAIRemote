@@ -89,9 +89,7 @@ public partial class HotkeyManager : Form
     public void RegisterCallbacks()
     {
         // Register Display Callbacks
-        string[] displayProfiles = Directory.GetFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"), "*.json");
-
-        foreach (string profile in displayProfiles)
+        foreach (string profile in DisplayConfig.GetDisplayProfiles())
         {
             string fileName = Path.GetFileNameWithoutExtension(profile);
             if (hotkeyConfigs.ContainsKey(fileName))
@@ -107,9 +105,7 @@ public partial class HotkeyManager : Form
         }
 
         // Register Audio Callbacks
-        List<string> audoDevices = audioManager.ActiveDeviceNames;
-
-        foreach (string audioDeviceName in audoDevices)
+        foreach (string audioDeviceName in audioManager.ActiveDeviceNames)
         {
             if (hotkeyConfigs.ContainsKey(audioDeviceName))
             {

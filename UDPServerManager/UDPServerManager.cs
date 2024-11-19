@@ -390,7 +390,7 @@ public class UDPServerHost
                 try
                 {
                     // Get all .json files from the directory (display profiles)
-                    string[] displayProfiles = Directory.GetFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"), "*.json");
+                    string[] displayProfiles = DisplayConfig.GetDisplayProfiles();
 
                     if (displayProfiles.Length > 0)
                     {
@@ -409,7 +409,7 @@ public class UDPServerHost
                 }
                 break;
             case "DisplayConnect":
-                DisplayConfig.SetDisplaySettings(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles/" + parts[1] + ".json"));
+                DisplayConfig.SetDisplaySettings(Path.Combine(DisplayConfig.GetDisplayProfilesDirectory(), parts[1] + ".json"));
                 break;
             case "HOST":
                 SendUdpMessage("HostName: " + Environment.MachineName);

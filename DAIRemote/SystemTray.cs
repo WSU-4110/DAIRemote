@@ -8,7 +8,6 @@ public class TrayIconManager
     private ContextMenuStrip trayMenu;
     private Form form;
     private FileSystemWatcher displayProfileDirWatcher;
-    private readonly string displayProfilesFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
     private HotkeyManager hotkeyManager;
     private AudioManager.AudioDeviceManager audioManager;
 
@@ -40,11 +39,6 @@ public class TrayIconManager
         audioCyclingIcon = Image.FromFile("Resources/AudioCycling.ico");
         audioIcon = Image.FromFile("Resources/Audio.ico");
 
-        if (!Directory.Exists(displayProfilesFolderPath))
-        {
-            Directory.CreateDirectory(displayProfilesFolderPath);
-        }
-
         audioManager = AudioManager.AudioDeviceManager.GetInstance();
         // Registers any prexisting hotkeys, otherwise initializes
         // an empty dictionary in preparation for hotkeys.
@@ -69,7 +63,7 @@ public class TrayIconManager
             Visible = true
         };
 
-        displayProfileDirWatcher = new FileSystemWatcher(displayProfilesFolderPath)
+        displayProfileDirWatcher = new FileSystemWatcher(DisplayConfig.GetDisplayProfilesDirectory())
         {
             NotifyFilter = NotifyFilters.FileName
         };
@@ -147,7 +141,7 @@ public class TrayIconManager
 
         // Add item for handling the addition of new profiles through
         // the system tray save submenu
-        ToolStripMenuItem addNewProfile = new("Add New Profile", addProfileIcon, (sender, e) => SaveNewProfile(displayProfilesFolderPath));
+        ToolStripMenuItem addNewProfile = new("Add New Profile", addProfileIcon, (sender, e) => SaveNewProfile(DisplayConfig.GetDisplayProfilesDirectory()));
 
         // Create the save, delete, sethotkey submenus
         ToolStripMenuItem saveProfileMenuItem = new("Save Profile", saveProfileIcon);
@@ -215,12 +209,9 @@ public class TrayIconManager
         menu.Items.Add(loadProfilesLabel);
         menu.Items.Add(new ToolStripSeparator());
 
-        // Retrieve any existing display profiles
-        string[] displayProfiles = Directory.GetFiles(displayProfilesFolderPath, "*.json");
-
         // For each existing profile, add it as an item and modify it according
         // to each load, save, delete, and sethotkey submenu
-        foreach (string profile in displayProfiles)
+        foreach (string profile in DisplayConfig.GetDisplayProfiles())
         {
             string fileName = Path.GetFileNameWithoutExtension(profile);
             ToolStripMenuItem profileLoadItem = new(fileName, monitorIcon, (sender, e) => DisplayConfig.SetDisplaySettings(profile));
