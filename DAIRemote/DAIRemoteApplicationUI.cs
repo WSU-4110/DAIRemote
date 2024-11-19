@@ -51,8 +51,14 @@ public partial class DAIRemoteApplicationUI : Form
     {
         DisplayLoadProfilesLayout.Controls.Clear();
         DisplayDeleteProfilesLayout.Controls.Clear();
+        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
+        string[] displayProfilesDirectory = Directory.GetFiles(folderPath, "*.json");
 
-        foreach (string profile in DisplayConfig.GetDisplayProfiles())
+        foreach (string profile in displayProfilesDirectory)
         {
             Button loadProfileButton = new()
             {
@@ -111,7 +117,7 @@ public partial class DAIRemoteApplicationUI : Form
     {
         this.audioFormPanel = new Panel
         {
-            Location = new System.Drawing.Point(10, 320),
+            Location = new System.Drawing.Point(12, 465),
             Size = new System.Drawing.Size(760, 370),
         };
 
@@ -124,7 +130,7 @@ public partial class DAIRemoteApplicationUI : Form
 
     private void BtnAddDisplayConfig_Click(object sender, EventArgs e)
     {
-        TrayIconManager.SaveNewProfile(DisplayConfig.GetDisplayProfilesDirectory());
+        TrayIconManager.SaveNewProfile(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"));
         DisplayLoadProfilesLayout.Controls.Clear();
         DisplayDeleteProfilesLayout.Controls.Clear();
         InitializeDisplayProfilesLayouts();
@@ -241,7 +247,8 @@ public partial class DAIRemoteApplicationUI : Form
         }
 
         profileListBox.Items.Clear();
-        profileListBox.Items.AddRange(DisplayConfig.GetDisplayProfiles().Select(profile => Path.GetFileNameWithoutExtension(profile)).ToArray());
+        string[] displayProfiles = Directory.GetFiles(folderPath, "*.json");
+        profileListBox.Items.AddRange(displayProfiles.Select(profile => Path.GetFileNameWithoutExtension(profile)).ToArray());
 
         profileDialog.ShowDialog();
         return profileListBox.SelectedItem?.ToString();
@@ -249,7 +256,7 @@ public partial class DAIRemoteApplicationUI : Form
 
     private void BtnSetDisplayProfileHotkey_click(object sender, EventArgs e)
     {
-        string profile = ShowDisplayProfilesList(DisplayConfig.GetDisplayProfilesDirectory());
+        string profile = ShowDisplayProfilesList(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"));
         if (!string.IsNullOrEmpty(profile))
         {
             trayIconManager.GetHotkeyManager().ShowHotkeyInput(profile, () => DisplayConfig.SetDisplaySettings(profile));
