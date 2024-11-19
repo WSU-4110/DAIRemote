@@ -54,7 +54,7 @@
             // 
             this.checkBoxStartup.AutoSize = true;
             this.checkBoxStartup.ForeColor = SystemColors.Control;
-            this.checkBoxStartup.Location = new Point(23, 570);
+            this.checkBoxStartup.Location = new Point(23, 535);
             this.checkBoxStartup.Margin = new Padding(3, 4, 3, 4);
             this.checkBoxStartup.Name = "checkBoxStartup";
             this.checkBoxStartup.Size = new Size(227, 24);
@@ -138,7 +138,7 @@
             this.LoadProfile.BackColor = Color.FromArgb(50, 50, 50);
             this.LoadProfile.BorderStyle = BorderStyle.None;
             this.LoadProfile.Font = new Font("Segoe UI", 9F, FontStyle.Underline, GraphicsUnit.Point, 0);
-            this.LoadProfile.ForeColor = Color.White;
+            this.LoadProfile.ForeColor = Color.LightSkyBlue;
             this.LoadProfile.Location = new Point(518, 26);
             this.LoadProfile.Margin = new Padding(3, 2, 3, 2);
             this.LoadProfile.Name = "LoadProfile";
@@ -153,7 +153,7 @@
             this.DeleteProfile.BackColor = Color.FromArgb(50, 50, 50);
             this.DeleteProfile.BorderStyle = BorderStyle.None;
             this.DeleteProfile.Font = new Font("Segoe UI", 9F, FontStyle.Underline, GraphicsUnit.Point, 0);
-            this.DeleteProfile.ForeColor = Color.White;
+            this.DeleteProfile.ForeColor = Color.Red;
             this.DeleteProfile.Location = new Point(518, 323);
             this.DeleteProfile.Margin = new Padding(3, 2, 3, 2);
             this.DeleteProfile.Name = "DeleteProfile";
@@ -167,7 +167,7 @@
             // 
             this.AudioCycleHotkey.AccessibleName = "BtnSetAudioCycleHotkey";
             this.AudioCycleHotkey.BackColor = Color.LightSkyBlue;
-            this.AudioCycleHotkey.Location = new Point(23, 446);
+            this.AudioCycleHotkey.Location = new Point(23, 411);
             this.AudioCycleHotkey.Margin = new Padding(3, 4, 3, 4);
             this.AudioCycleHotkey.Name = "AudioCycleHotkey";
             this.AudioCycleHotkey.Size = new Size(229, 54);
@@ -180,7 +180,7 @@
             // 
             this.DisplayProfileHotkey.AccessibleName = "BtnSetDisplayProfileHotkey";
             this.DisplayProfileHotkey.BackColor = Color.LightSkyBlue;
-            this.DisplayProfileHotkey.Location = new Point(23, 508);
+            this.DisplayProfileHotkey.Location = new Point(23, 473);
             this.DisplayProfileHotkey.Margin = new Padding(3, 4, 3, 4);
             this.DisplayProfileHotkey.Name = "DisplayProfileHotkey";
             this.DisplayProfileHotkey.Size = new Size(229, 54);
