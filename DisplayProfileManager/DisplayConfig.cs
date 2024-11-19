@@ -11,6 +11,23 @@ namespace DisplayProfileManager;
 public class DisplayConfig
 {
     public const int ERROR_CONST = 0;
+
+    public static string GetDisplayProfilesDirectory()
+    {
+        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
+
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
+        return folderPath;
+    }
+
+    public static string[] GetDisplayProfiles()
+    {
+        return Directory.GetFiles(GetDisplayProfilesDirectory(), "*.json");
+    }
+
     /*
     The DISPLAYCONFIG_DEVICE_INFO_TYPE enumeration specifies the type of display device info 
     to configure or obtain through the DisplayConfigSetDeviceInfo or DisplayConfigGetDeviceInfo function.
@@ -1264,13 +1281,7 @@ public class DisplayConfig
                 additionalInfo = additionalInfo
             };
 
-            string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
-
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-            fileName = Path.Combine(folderPath, fileName);
+            fileName = Path.Combine(GetDisplayProfilesDirectory(), fileName);
 
             JsonSerializerOptions options = new() { WriteIndented = true };
             string jsonString = System.Text.Json.JsonSerializer.Serialize(displaySettings, options);
@@ -1288,13 +1299,7 @@ public class DisplayConfig
 
     public static bool DeleteDisplaySettings(string fileName)
     {
-        string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles");
-
-        if (!Directory.Exists(folderPath))
-        {
-            Directory.CreateDirectory(folderPath);
-        }
-        fileName = Path.Combine(folderPath, fileName);
+        fileName = Path.Combine(GetDisplayProfilesDirectory(), fileName);
 
         DebugMsg("Deleting display profile: " + fileName);
         if (!File.Exists(fileName))
