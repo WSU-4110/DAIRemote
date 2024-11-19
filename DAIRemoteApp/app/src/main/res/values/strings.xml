@@ -1,8 +1,0 @@
-<resources>
-    <string name="app_name">DAIRemote</string>
-    <string name="interaction_instructions">To simulate input:\nTap with 1 finger to left-click\nTap with 2 fingers to right-click\nTap with 3 fingers to middle-click\n\nDrag with 2 fingers to scroll\n\nLong-press and move to drag\nTap once to release drag</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-</resources>

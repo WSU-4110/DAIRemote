@@ -1,0 +1,114 @@
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\AudioManager.deps.json
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\AudioManager.runtimeconfig.json
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\AudioManager.exe
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DisplayProfileManager.deps.json
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DisplayProfileManager.runtimeconfig.json
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DisplayProfileManager.exe
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\UDPServerManager.deps.json
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\UDPServerManager.runtimeconfig.json
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\UDPServerManager.exe
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\About.ico
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\AddProfile.ico
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\Audio.ico
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\AudioCycling.ico
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\DAIRemoteLogo.ico
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\DeleteProfile.ico
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\Exit.ico
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\Monitor.ico
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\MonitorSetHotkey.ico
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\SaveProfile.ico
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\TurnOffAllMonitors.ico
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DAIRemote.exe
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DAIRemote.deps.json
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DAIRemote.runtimeconfig.json
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DAIRemote.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DAIRemote.pdb
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\AudioSwitcher.AudioApi.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\AudioSwitcher.AudioApi.CoreAudio.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.Asio.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.Core.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.Midi.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.Wasapi.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.WinForms.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.WinMM.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Newtonsoft.Json.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\AudioManager.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DisplayProfileManager.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\UDPServerManager.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\AudioManager.pdb
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DisplayProfileManager.pdb
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\UDPServerManager.pdb
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.csproj.AssemblyReference.cache
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.DAIRemoteApplicationUI.resources
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.HotkeyManager.resources
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.Properties.Resources.resources
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.csproj.GenerateResource.cache
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.AssemblyInfoInputs.cache
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.AssemblyInfo.cs
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.csproj.CoreCompileInputs.cache
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.sourcelink.json
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.csproj.Up2Date
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\refint\DAIRemote.dll
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.pdb
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.genruntimeconfig.cache
+C:\Users\Fahim\OneDrive\Desktop\Display WIP\Combine Dom and Lynn\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\ref\DAIRemote.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\AudioManager.deps.json
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\AudioManager.runtimeconfig.json
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\AudioManager.exe
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DisplayProfileManager.deps.json
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DisplayProfileManager.runtimeconfig.json
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DisplayProfileManager.exe
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\UDPServerManager.deps.json
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\UDPServerManager.runtimeconfig.json
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\UDPServerManager.exe
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\About.ico
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\AddProfile.ico
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\Audio.ico
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\AudioCycling.ico
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\DAIRemoteLogo.ico
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\DeleteProfile.ico
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\Exit.ico
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\Monitor.ico
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\MonitorSetHotkey.ico
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\SaveProfile.ico
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Resources\TurnOffAllMonitors.ico
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DAIRemote.exe
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DAIRemote.deps.json
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DAIRemote.runtimeconfig.json
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DAIRemote.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DAIRemote.pdb
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\AudioSwitcher.AudioApi.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\AudioSwitcher.AudioApi.CoreAudio.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.Asio.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.Core.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.Midi.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.Wasapi.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.WinForms.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\NAudio.WinMM.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\Newtonsoft.Json.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\AudioManager.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DisplayProfileManager.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\UDPServerManager.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\AudioManager.pdb
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\DisplayProfileManager.pdb
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\bin\Debug\net8.0-windows\UDPServerManager.pdb
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.csproj.AssemblyReference.cache
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.DAIRemoteApplicationUI.resources
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.HotkeyManager.resources
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.Properties.Resources.resources
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.csproj.GenerateResource.cache
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.AssemblyInfoInputs.cache
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.AssemblyInfo.cs
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.csproj.CoreCompileInputs.cache
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.sourcelink.json
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.csproj.Up2Date
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\refint\DAIRemote.dll
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.pdb
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\DAIRemote.genruntimeconfig.cache
+C:\Users\Lynn Hakim\source\repos\DAIRemote\DAIRemote\obj\Debug\net8.0-windows\ref\DAIRemote.dll
