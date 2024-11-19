@@ -10,6 +10,8 @@ public partial class DAIRemoteApplicationUI : Form
     private TrayIconManager trayIconManager;
     private AudioOutputForm audioForm;
     private Panel audioFormPanel;
+    private Form profileDialog;
+    private ListBox profileListBox;
     private AudioManager.AudioDeviceManager audioManager;
 
     public DAIRemoteApplicationUI()
@@ -22,17 +24,15 @@ public partial class DAIRemoteApplicationUI : Form
         udpThread.Start();
 
         InitializeComponent();
-        InitializeDisplayProfilesLayouts();
 
-        // Updated the property of the form itself to start with the color
-        //this.BackColor = Color.FromArgb(50, 50, 50);
         this.Icon = new Icon("Resources/DAIRemoteLogo.ico");
         trayIconManager = new TrayIconManager(this);
-        this.Load += DAIRemoteApplicationUI_Load;
         this.FormClosing += DAIRemoteApplicationUI_FormClosing;
         this.StartPosition = FormStartPosition.CenterScreen;
 
         SetStartupStatus();   // Checks onStartup default value to set
+        InitializeDisplayProfilesLayouts(); // Initialize load and delete display profile flow layouts
+        InitializeDisplayProfilesList();    // Initialize the form & listbox used for showing display profiles list
     }
 
     protected override void OnHandleCreated(EventArgs e)
@@ -45,11 +45,6 @@ public partial class DAIRemoteApplicationUI : Form
 
             this.Invoke((MethodInvoker)(() => InitializeAudioDropDown()));
         });
-    }
-
-    private void DAIRemoteApplicationUI_Load(object sender, EventArgs e)
-    {
-        this.Hide();
     }
 
     private void InitializeDisplayProfilesLayouts()
@@ -141,11 +136,6 @@ public partial class DAIRemoteApplicationUI : Form
         InitializeDisplayProfilesLayouts();
     }
 
-    /*private void BtnLoadDisplayConfig_Click(object sender, EventArgs e)
-    {
-        DisplayConfig.SetDisplaySettings("displayConfig" + ".json");
-    }*/
-
     private void CheckBoxStartup_CheckedChanged(object sender, EventArgs e)
     {
         string startupKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
@@ -207,5 +197,69 @@ public partial class DAIRemoteApplicationUI : Form
     private void BtnCycleAudioOutputs_Click(object sender, EventArgs e)
     {
         audioManager.CycleAudioDevice();
+    }
+
+    private void BtnSetAudioHotkey_Click(object sender, EventArgs e)
+    {
+        trayIconManager.GetHotkeyManager().ShowHotkeyInput("Audio Cycling", audioManager.CycleAudioDevice);
+    }
+
+    private void InitializeDisplayProfilesList()
+    {
+        profileDialog = new()
+        {
+            Text = "Display Profiles",
+            Size = new Size(400, 300),
+            StartPosition = FormStartPosition.CenterScreen
+        };
+
+        profileListBox = new()
+        {
+            Dock = DockStyle.Fill
+        };
+        profileDialog.Controls.Add(profileListBox);
+
+        Button actionButton = new()
+        {
+            Text = "Select Profile",
+            Dock = DockStyle.Bottom,
+            Height = 50,
+            FlatStyle = FlatStyle.Flat,
+        };
+
+        actionButton.Click += (s, e) =>
+        {
+            if (profileListBox.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a profile.");
+                return;
+            }
+            profileDialog.Close();
+        };
+        profileDialog.Controls.Add(actionButton);
+    }
+
+    private string ShowDisplayProfilesList(string folderPath)
+    {
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
+
+        profileListBox.Items.Clear();
+        string[] displayProfiles = Directory.GetFiles(folderPath, "*.json");
+        profileListBox.Items.AddRange(displayProfiles.Select(profile => Path.GetFileNameWithoutExtension(profile)).ToArray());
+
+        profileDialog.ShowDialog();
+        return profileListBox.SelectedItem?.ToString();
+    }
+
+    private void BtnSetDisplayProfileHotkey_click(object sender, EventArgs e)
+    {
+        string profile = ShowDisplayProfilesList(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/DisplayProfiles"));
+        if (!string.IsNullOrEmpty(profile))
+        {
+            trayIconManager.GetHotkeyManager().ShowHotkeyInput(profile, () => DisplayConfig.SetDisplaySettings(profile));
+        }
     }
 }

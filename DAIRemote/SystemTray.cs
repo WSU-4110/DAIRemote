@@ -53,6 +53,11 @@ public class TrayIconManager
         InitializeTrayIcon();
     }
 
+    public HotkeyManager GetHotkeyManager()
+    {
+        return this.hotkeyManager;
+    }
+
     private void InitializeTrayIcon()
     {
         trayMenu = CreateTrayMenu();
