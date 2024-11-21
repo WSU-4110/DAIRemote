@@ -39,7 +39,7 @@ public class UDPServerHost
 
     private TimeSpan GetHeartbeatTimeout() { return heartbeatTimeout; }
 
-    private string ExtractDeviceName(string handshakeMessage)
+    public string ExtractDeviceName(string handshakeMessage)
     {
         int byIndex = handshakeMessage.IndexOf("by ");
         if (byIndex >= 0)
