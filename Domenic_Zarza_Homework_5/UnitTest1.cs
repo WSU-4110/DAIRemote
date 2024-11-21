@@ -17,11 +17,20 @@ namespace Domenic_Zarza_Homework_5
         [Fact]
         public void ClientCheck()
         {
-            var obj1 = new UDPServerHost();
+            var obj = new UDPServerHost();
             string ip = "123";
             bool expected = false;
-            bool actual = obj1.IsClient(ip);
+            bool actual = obj.IsClient(ip);
             Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void SetHeartbeat()
+        {
+            var obj = new UDPServerHost();
+            var expected = DateTime.Now;
+            obj.SetLastHeartbeat(expected);
+            Assert.Equal(expected, obj.GetLastHeartbeat());
         }
     }
 }

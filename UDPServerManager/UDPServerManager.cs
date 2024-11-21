@@ -25,19 +25,19 @@ public class UDPServerHost
         remoteEP = new IPEndPoint(IPAddress.Any, serverPort);
     }
 
-    private void SetLastHeartbeat(DateTime time)
+    public void SetLastHeartbeat(DateTime time)
     {
         this.lastHeartbeatTime = time;
     }
 
-    private DateTime GetLastHeartbeat() { return lastHeartbeatTime; }
+    public DateTime GetLastHeartbeat() { return lastHeartbeatTime; }
 
-    private void SetHeartbeatTimeout(TimeSpan time)
+    public void SetHeartbeatTimeout(TimeSpan time)
     {
         this.heartbeatTimeout = time;
     }
 
-    private TimeSpan GetHeartbeatTimeout() { return heartbeatTimeout; }
+    public TimeSpan GetHeartbeatTimeout() { return heartbeatTimeout; }
 
     public string ExtractDeviceName(string handshakeMessage)
     {
