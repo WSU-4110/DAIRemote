@@ -40,5 +40,14 @@ namespace Domenic_Zarza_Homework_5
             var actual = obj.GetLastHeartbeat();
             Assert.Equal(default, actual);
         }
+
+        [Fact]
+        public void SetTimeout()
+        {
+            var obj = new UDPServerHost();
+            var expected = TimeSpan.FromSeconds(10);
+            obj.SetHeartbeatTimeout(expected);
+            Assert.Equal(expected, obj.GetHeartbeatTimeout());
+        }
     }
 }
