@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -52,6 +53,12 @@ class KeyboardToolbarTest {
                 mockPage1Buttons,   // Mock buttons for page 1
                 mockPage2Buttons    // Mock buttons for page 2
         );
+    }
+
+    @AfterAll
+    public static void Cleanup() {
+        keyboardToolbar.ResetKeyboardModifiers();
+        keyboardToolbar = null;
     }
 
     @Test
