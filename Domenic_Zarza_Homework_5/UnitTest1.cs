@@ -49,5 +49,13 @@ namespace Domenic_Zarza_Homework_5
             obj.SetHeartbeatTimeout(expected);
             Assert.Equal(expected, obj.GetHeartbeatTimeout());
         }
+
+        [Fact]
+        public void GetTimeout()
+        {
+            var obj = new UDPServerHost();
+            var actual = obj.GetHeartbeatTimeout();
+            Assert.Equal(default, actual);
+        }
     }
 }
