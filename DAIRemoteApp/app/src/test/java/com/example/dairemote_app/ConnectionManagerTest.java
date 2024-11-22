@@ -35,4 +35,10 @@ class ConnectionManagerTest {
         connectionManager.SetHostName("HostName: PC2");
         assertEquals("PC2", connectionManager.GetHostName(), "Testing GetHostName() with 'PC2'");
     }
+
+    @Test
+    void test_getHostName_Empty() {
+        connectionManager.SetHostName("HostName: ");
+        assertEquals("", connectionManager.GetHostName(), "Testing GetHostName() with no name");
+    }
 }
