@@ -41,3 +41,7 @@ jobs:
       run: ./gradlew build
       working-directory: DAIRemoteApp
 
+    - name: Run tests with Gradle Wrapper
+      run: ./gradlew test
+      working-directory: DAIRemoteApp
+
