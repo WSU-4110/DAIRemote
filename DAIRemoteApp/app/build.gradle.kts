@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id("de.mannodermaus.android-junit5") version "1.11.2.0"
 }
 
 android {
@@ -39,6 +40,7 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.recyclerview)
     testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }
