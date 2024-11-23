@@ -372,6 +372,9 @@ public class TrayIconManager
         inputForm.Controls.Add(okButton);
         inputForm.Controls.Add(cancelButton);
 
+        // Set the OK button as the action for Enter key
+        inputForm.AcceptButton = okButton;
+
         inputForm.ShowDialog();
     }
 
