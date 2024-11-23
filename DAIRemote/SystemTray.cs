@@ -7,7 +7,6 @@ public class TrayIconManager
     private NotifyIcon trayIcon;
     private ContextMenuStrip trayMenu;
     private Form form;
-    private FileSystemWatcher displayProfileDirWatcher;
     private HotkeyManager hotkeyManager;
     private AudioManager.AudioDeviceManager audioManager;
 
@@ -64,7 +63,7 @@ public class TrayIconManager
         };
 
         // Listen for display profile changes
-        displayProfileDirWatcher = new FileSystemWatcher(DisplayConfig.GetDisplayProfilesDirectory())
+        FileSystemWatcher displayProfileDirWatcher = new(DisplayConfig.GetDisplayProfilesDirectory())
         {
             NotifyFilter = NotifyFilters.FileName
         };
@@ -73,7 +72,7 @@ public class TrayIconManager
         displayProfileDirWatcher.Renamed += OnProfilesChanged;
         displayProfileDirWatcher.EnableRaisingEvents = true;
 
-        // Listen to AudioDeviceManager's event handler for notifications
+        // Listen to AudioDeviceManager's event handler for changes
         audioManager.AudioDevicesUpdated += OnAudioDevicesChanged;
 
         trayIcon.DoubleClick += (s, e) => ShowForm();
