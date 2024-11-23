@@ -289,6 +289,10 @@ public class TrayIconManager
         menu.Items.Add(deleteProfileMenuItem);
         menu.Items.Add(setHotkeysMenuItem);
 
+        // Allow the user to refresh audio devices
+        // Helpful for when a new device is added
+        // That was not present during application initialization
+        ToolStripMenuItem refreshAudioDevices = new("Refresh Audio Devices", audioIcon, RefreshAudioDevices);
         // Create the icons for making monitors sleep, the about section, and exiting the application
         ToolStripMenuItem turnOffAllMonitorsItem = new("Turn Off All Monitors", turnOffAllMonitorsIcon, TurnOffMonitors);
         ToolStripMenuItem aboutMenuItem = new("About", aboutIcon, OnAboutClick);
@@ -296,6 +300,7 @@ public class TrayIconManager
 
         // Separate sleeping monitors, and add the sleep, about, and exit to the main system tray menu
         menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add(refreshAudioDevices);
         menu.Items.Add(turnOffAllMonitorsItem);
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(aboutMenuItem);
@@ -380,6 +385,10 @@ public class TrayIconManager
     private void DeleteProfile(string profilePath)
     {
         File.Delete(profilePath);
+    }
+    private void RefreshAudioDevices(object? sender, EventArgs e)
+    {
+        audioManager.RefreshAudioDeviceSubscriptions();
     }
 
     private void TurnOffMonitors(object? sender, EventArgs e)

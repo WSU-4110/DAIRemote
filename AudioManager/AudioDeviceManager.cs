@@ -24,12 +24,7 @@ public class AudioDeviceManager
 
         // Set the initial values for variables needed for functions
         SetAudioDefaults();
-
-        // Subscribe all playback devices, even inactive ones
-        foreach (CoreAudioDevice device in audioController.GetPlaybackDevices())
-        {
-            device.StateChanged.Subscribe(OnAudioDeviceChanged);
-        }
+        SubscribeAudioDevices();
     }
 
     private void SetAudioDefaults()
@@ -44,6 +39,25 @@ public class AudioDeviceManager
     {
         Debug.WriteLine($"Audio device state changed for: {args.Device.FullName}");
         SetAudioDefaults();
+        AudioDevicesUpdated?.Invoke(ActiveDeviceNames);
+    }
+
+    public void SubscribeAudioDevices()
+    {
+        // Subscribe all playback devices, even inactive ones
+        foreach (CoreAudioDevice device in audioController.GetPlaybackDevices())
+        {
+            Debug.WriteLine($"for: {device.FullName}");
+            device.StateChanged.Subscribe(OnAudioDeviceChanged);
+        }
+    }
+
+    public void RefreshAudioDeviceSubscriptions()
+    {
+        audioController.Dispose();
+        audioController = new CoreAudioController();
+        SetAudioDefaults();
+        SubscribeAudioDevices();
         AudioDevicesUpdated?.Invoke(ActiveDeviceNames);
     }
 
