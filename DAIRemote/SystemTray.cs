@@ -384,7 +384,7 @@ public class TrayIconManager
 
     private void DeleteProfile(string profilePath)
     {
-        File.Delete(profilePath);
+        DisplayConfig.DeleteDisplaySettings(profilePath);
     }
     private void RefreshAudioDevices(object? sender, EventArgs e)
     {
