@@ -63,6 +63,7 @@ public class TrayIconManager
             Visible = true
         };
 
+        // Listen for display profile changes
         displayProfileDirWatcher = new FileSystemWatcher(DisplayConfig.GetDisplayProfilesDirectory())
         {
             NotifyFilter = NotifyFilters.FileName
@@ -71,6 +72,9 @@ public class TrayIconManager
         displayProfileDirWatcher.Deleted += OnProfilesChanged;
         displayProfileDirWatcher.Renamed += OnProfilesChanged;
         displayProfileDirWatcher.EnableRaisingEvents = true;
+
+        // Listen to AudioDeviceManager's event handler for notifications
+        audioManager.AudioDevicesUpdated += OnAudioDevicesChanged;
 
         trayIcon.DoubleClick += (s, e) => ShowForm();
     }
@@ -91,6 +95,21 @@ public class TrayIconManager
     }
 
     private void OnProfilesChanged(object sender, FileSystemEventArgs e)
+    {
+        if (form.InvokeRequired)
+        {
+            form.BeginInvoke((MethodInvoker)delegate
+            {
+                PopulateTrayMenu(trayMenu);
+            });
+        }
+        else
+        {
+            PopulateTrayMenu(trayMenu);
+        }
+    }
+
+    private void OnAudioDevicesChanged(List<string> devices)
     {
         if (form.InvokeRequired)
         {
@@ -350,7 +369,6 @@ public class TrayIconManager
         inputForm.Controls.Add(cancelButton);
 
         inputForm.ShowDialog();
-
     }
 
 

@@ -57,11 +57,11 @@ public class AudioDeviceManager
 
     public void SetDefaultAudioDevice(CoreAudioDevice audioDevice)
     {
-		if (audioDevice != this.defaultAudioDevice)
-		{
-			this.defaultAudioDevice = audioDevice;
-			this.defaultAudioDevice.SetAsDefault();
-		}
+        if (audioDevice != this.defaultAudioDevice)
+        {
+            this.defaultAudioDevice = audioDevice;
+            this.defaultAudioDevice.SetAsDefault();
+        }
     }
 
     public void SetDefaultAudioDevice(string deviceFullName)
@@ -70,10 +70,10 @@ public class AudioDeviceManager
 
         if (matchedDevice != null)
         {
-			if ((matchedDevice != this.defaultAudioDevice))
-			{
-				SetDefaultAudioDevice(matchedDevice);
-			}
+            if ((matchedDevice != this.defaultAudioDevice))
+            {
+                SetDefaultAudioDevice(matchedDevice);
+            }
         }
         else
         {
@@ -97,13 +97,13 @@ public class AudioDeviceManager
 
     public void SetVolume(double volume)
     {
-		this.defaultAudioDevice.Volume = volume;
+        this.defaultAudioDevice.Volume = volume;
     }
 
-	public double GetVolume()
-	{
-		return this.defaultAudioDevice.Volume;
-	}
+    public double GetVolume()
+    {
+        return this.defaultAudioDevice.Volume;
+    }
 
     public void IncreaseVolume(int increment = 1)
     {
@@ -146,18 +146,21 @@ public class AudioDeviceManager
 
     public void ToggleAudioMute()
     {
-		SetAudioMute(!this.defaultAudioDevice.IsMuted);
+        SetAudioMute(!this.defaultAudioDevice.IsMuted);
     }
 
     public void CycleAudioDevice()
     {
-        // Get the index of the current default device
-        int currentIndex = audioDevices.FindIndex(device => device.Id == defaultAudioDevice.Id);
-        // Calculate the next index in a circular manner
-        int nextIndex = (currentIndex + 1) % audioDevices.Count;
-        // Set the next device as the default audio device
-        SetDefaultAudioDevice(audioDevices[nextIndex]);
-        Debug.WriteLine($"Switched to {defaultAudioDevice.FullName}");
-        AudioDevicesUpdated?.Invoke(ActiveDeviceNames);
+        if (this.audioDevices.Count > 1)
+        {
+            // Get the index of the current default device
+            int currentIndex = audioDevices.FindIndex(device => device.Id == defaultAudioDevice.Id);
+            // Calculate the next index in a circular manner
+            int nextIndex = (currentIndex + 1) % audioDevices.Count;
+            // Set the next device as the default audio device
+            SetDefaultAudioDevice(audioDevices[nextIndex]);
+            Debug.WriteLine($"Switched to {defaultAudioDevice.FullName}");
+            AudioDevicesUpdated?.Invoke(ActiveDeviceNames);
+        }
     }
 }
