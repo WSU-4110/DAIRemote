@@ -54,7 +54,7 @@ public class AudioDeviceManager
 
     public void RefreshAudioDeviceSubscriptions()
     {
-        audioController.Dispose();
+        audioController?.Dispose();
         audioController = new CoreAudioController();
         SetAudioDefaults();
         SubscribeAudioDevices();
