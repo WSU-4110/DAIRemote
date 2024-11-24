@@ -2,7 +2,7 @@ using UDPServerManagerForm;
 
 namespace Domenic_Zarza_Homework_5
 {
-    public class UnitTest1
+    public class UDPServerHostTests
     {
         [Fact]
         public void ExtractName()
