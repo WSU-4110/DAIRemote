@@ -8,7 +8,7 @@ using UDPServerManager;
 
 namespace UDPServerManagerForm;
 
-public class UDPServerHost
+public class UDPServerHost : IDisposable
 {
     private bool isClientConnected = false;
     private UdpClient udpServer;
@@ -23,6 +23,11 @@ public class UDPServerHost
     {
         udpServer = new UdpClient(serverPort);
         remoteEP = new IPEndPoint(IPAddress.Any, serverPort);
+    }
+
+    public void Dispose()
+    {
+        udpServer.Dispose();
     }
 
     public void SetLastHeartbeat(DateTime time)

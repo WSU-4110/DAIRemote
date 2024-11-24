@@ -7,7 +7,7 @@ namespace Domenic_Zarza_Homework_5
         [Fact]
         public void ExtractName()
         {
-            var obj = new UDPServerHost();
+            using var obj = new UDPServerHost();
             string input = "Connection requested by xyz";
             string expected = "xyz";
             string actual = obj.ExtractDeviceName(input);
@@ -17,7 +17,7 @@ namespace Domenic_Zarza_Homework_5
         [Fact]
         public void ClientCheck()
         {
-            var obj = new UDPServerHost();
+            using var obj = new UDPServerHost();
             string ip = "123";
             bool expected = false;
             bool actual = obj.IsClient(ip);
@@ -27,7 +27,7 @@ namespace Domenic_Zarza_Homework_5
         [Fact]
         public void SetHeartbeat()
         {
-            var obj = new UDPServerHost();
+            using var obj = new UDPServerHost();
             var expected = DateTime.Now;
             obj.SetLastHeartbeat(expected);
             Assert.Equal(expected, obj.GetLastHeartbeat());
@@ -36,7 +36,7 @@ namespace Domenic_Zarza_Homework_5
         [Fact]
         public void GetHeartbeat()
         {
-            var obj = new UDPServerHost();
+            using var obj = new UDPServerHost();
             var actual = obj.GetLastHeartbeat();
             Assert.Equal(default, actual);
         }
@@ -44,7 +44,7 @@ namespace Domenic_Zarza_Homework_5
         [Fact]
         public void SetTimeout()
         {
-            var obj = new UDPServerHost();
+            using var obj = new UDPServerHost();
             var expected = TimeSpan.FromSeconds(10);
             obj.SetHeartbeatTimeout(expected);
             Assert.Equal(expected, obj.GetHeartbeatTimeout());
@@ -53,7 +53,7 @@ namespace Domenic_Zarza_Homework_5
         [Fact]
         public void GetTimeout()
         {
-            var obj = new UDPServerHost();
+            using var obj = new UDPServerHost();
             var actual = obj.GetHeartbeatTimeout();
             Assert.Equal(default, actual);
         }
