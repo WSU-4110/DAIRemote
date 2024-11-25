@@ -37,7 +37,7 @@ jobs:
 
     - name: Test
       run: |
-        if [[ "$RUNNER_OS" == "Windows" ]]; then
+        if ($env:RUNNER_OS -eq "Windows") {
           dotnet test --no-build --verbosity normal --diagnostics /p:EnableWindowsTargeting=true
-        fi
-      working-directory: ./DAIRemote.tests
+          }
+          working-directory: ./DAIRemote.tests
