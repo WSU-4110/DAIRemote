@@ -17,9 +17,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Clean
-      run: dotnet clean ./DAIRemote/DAIRemote.sln
-      working-directory: DAIRemote
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -32,10 +29,6 @@ jobs:
       working-directory: DAIRemote
     - name: Test
       run: |
-        if [[ "$RUNNER_OS" == "Linux" ]]; then
-          dotnet test --no-build --verbosity normal /p:EnableWindowsTargeting=false
-        else
           dotnet test --no-build --verbosity normal /p:EnableWindowsTargeting=true
-        fi
       working-directory: ./DAIRemote.tests
 
