@@ -20,7 +20,7 @@ jobs:
         dotnet-version: 8.0.x
     
     - name: Restore dependencies for DAIRemote Tests & DAIRemote implicitly
-      run: dotnet restore /p:EnableWindowsTargeting=true DAIRemote.tests/DAIRemote.sln
+      run: dotnet restore /p:EnableWindowsTargeting=true DAIRemote.tests/DAIRemote.tests.sln
 
     - name: Build DAIRemote project
       run: dotnet build --no-restore /p:EnableWindowsTargeting=true DAIRemote/DAIRemote.csproj
