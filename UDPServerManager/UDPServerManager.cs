@@ -8,7 +8,7 @@ using UDPServerManager;
 
 namespace UDPServerManagerForm;
 
-public class UDPServerHost
+public class UDPServerHost : IDisposable
 {
     private bool isClientConnected = false;
     private UdpClient udpServer;
@@ -25,21 +25,26 @@ public class UDPServerHost
         remoteEP = new IPEndPoint(IPAddress.Any, serverPort);
     }
 
-    private void SetLastHeartbeat(DateTime time)
+    public void Dispose()
+    {
+        udpServer.Dispose();
+    }
+
+    public void SetLastHeartbeat(DateTime time)
     {
         this.lastHeartbeatTime = time;
     }
 
-    private DateTime GetLastHeartbeat() { return lastHeartbeatTime; }
+    public DateTime GetLastHeartbeat() { return lastHeartbeatTime; }
 
-    private void SetHeartbeatTimeout(TimeSpan time)
+    public void SetHeartbeatTimeout(TimeSpan time)
     {
         this.heartbeatTimeout = time;
     }
 
-    private TimeSpan GetHeartbeatTimeout() { return heartbeatTimeout; }
+    public TimeSpan GetHeartbeatTimeout() { return heartbeatTimeout; }
 
-    private string ExtractDeviceName(string handshakeMessage)
+    public string ExtractDeviceName(string handshakeMessage)
     {
         int byIndex = handshakeMessage.IndexOf("by ");
         if (byIndex >= 0)

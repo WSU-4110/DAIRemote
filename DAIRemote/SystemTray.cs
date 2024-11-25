@@ -391,7 +391,7 @@ public class TrayIconManager
         trayIcon.Visible = true;
     }
 
-    private void OnShow(object sender, EventArgs e)
+    public void OnShow(object sender, EventArgs e)
     {
         ShowForm();
     }
