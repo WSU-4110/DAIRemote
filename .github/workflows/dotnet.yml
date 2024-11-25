@@ -28,5 +28,11 @@ jobs:
       run: dotnet build --no-restore /p:EnableWindowsTargeting=true
       working-directory: DAIRemote
     - name: Test
-      run: dotnet test --no-build --verbosity normal /p:EnableWindowsTargeting=true
-      working-directory: DAIRemote.tests
+      run: |
+        if [[ "$RUNNER_OS" == "Linux" ]]; then
+          dotnet test --no-build --verbosity normal /p:EnableWindowsTargeting=false
+        else
+          dotnet test --no-build --verbosity normal /p:EnableWindowsTargeting=true
+        fi
+      working-directory: ./DAIRemote.tests
+
