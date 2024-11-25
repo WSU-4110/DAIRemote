@@ -40,4 +40,4 @@ jobs:
         if ($env:RUNNER_OS -eq "Windows") {
           dotnet test --no-build --verbosity normal --diagnostics /p:EnableWindowsTargeting=true
           }
-          working-directory: ./DAIRemote.tests
+      working-directory: DAIRemote.tests
