@@ -4,6 +4,7 @@
 name: .NET
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
   pull_request:
@@ -28,4 +29,4 @@ jobs:
       working-directory: DAIRemote
     - name: Test
       run: dotnet test --no-build --verbosity normal /p:EnableWindowsTargeting=true
-      working-directory: ./DAIRemote.tests
+      working-directory: DAIRemote
