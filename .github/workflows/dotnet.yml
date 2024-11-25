@@ -28,4 +28,4 @@ jobs:
       working-directory: DAIRemote
     - name: Test
       run: dotnet test --no-build --verbosity normal /p:EnableWindowsTargeting=true
-      working-directory: DAIRemote
+      working-directory: ./DAIRemote.tests
