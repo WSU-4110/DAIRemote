@@ -37,9 +37,7 @@ jobs:
 
     - name: Test
       run: |
-        if ($env:RUNNER_OS -eq "Windows") {
           dotnet test --no-build --verbosity normal /p:EnableWindowsTargeting=true
-        }
       working-directory: DAIRemote.tests
 
 
