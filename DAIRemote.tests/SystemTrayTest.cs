@@ -106,14 +106,14 @@ namespace DAIRemote.Tests
             var trayIconManager = new TrayIconManager(mockForm.Object);
 
             var method = trayIconManager.GetType().GetMethod("ShowIcon");
-            Assert.NotNull(method); 
+            Assert.NotNull(method);
         }
 
         [Fact]
         public async Task OnShow_Timeout()
         {
             var form = new System.Windows.Forms.Form();
-            var trayIconManager = new TrayIconManager(form); 
+            var trayIconManager = new TrayIconManager(form);
 
             TimeSpan timeout = TimeSpan.FromSeconds(2);
 
