@@ -157,6 +157,9 @@ public partial class HotkeyManager : Form
         buttonPanel.Controls.Add(okButton);
         buttonPanel.Controls.Add(cancelButton);
 
+        // Set the OK button as the action for Enter key
+        inputForm.AcceptButton = okButton;
+
         if (hotkeyConfigs.ContainsKey(action))
         {
             inputBox.Text = GetHotkeyText(hotkeyConfigs[action]);

@@ -33,6 +33,16 @@ public partial class DAIRemoteApplicationUI : Form
         SetStartupStatus();   // Checks onStartup default value to set
         InitializeDisplayProfilesLayouts(); // Initialize load and delete display profile flow layouts
         InitializeDisplayProfilesList();    // Initialize the form & listbox used for showing display profiles list
+
+        // Listen for display profile changes
+        FileSystemWatcher displayProfileDirWatcher = new(DisplayConfig.GetDisplayProfilesDirectory())
+        {
+            NotifyFilter = NotifyFilters.FileName
+        };
+        displayProfileDirWatcher.Created += OnProfilesChanged;
+        displayProfileDirWatcher.Deleted += OnProfilesChanged;
+        displayProfileDirWatcher.Renamed += OnProfilesChanged;
+        displayProfileDirWatcher.EnableRaisingEvents = true;
     }
 
     protected override void OnHandleCreated(EventArgs e)
@@ -45,6 +55,21 @@ public partial class DAIRemoteApplicationUI : Form
 
             this.Invoke((MethodInvoker)(() => InitializeAudioDropDown()));
         });
+    }
+
+    private void OnProfilesChanged(object sender, FileSystemEventArgs e)
+    {
+        if (this.InvokeRequired)
+        {
+            this.BeginInvoke((MethodInvoker)delegate
+            {
+                InitializeDisplayProfilesLayouts();
+            });
+        }
+        else
+        {
+            InitializeDisplayProfilesLayouts();
+        }
     }
 
     private void InitializeDisplayProfilesLayouts()
@@ -87,7 +112,6 @@ public partial class DAIRemoteApplicationUI : Form
         Button clickedButton = sender as Button;
         string profileName = clickedButton.Tag.ToString();
         DisplayConfig.DeleteDisplaySettings(profileName);
-        InitializeDisplayProfilesLayouts();
     }
 
     private void LoadProfileButton_Click(object sender, EventArgs e)
@@ -95,7 +119,6 @@ public partial class DAIRemoteApplicationUI : Form
         Button clickedButton = sender as Button;
         string profileName = clickedButton.Tag.ToString();
         DisplayConfig.SetDisplaySettings(profileName);
-        InitializeDisplayProfilesLayouts();
     }
 
     private void DAIRemoteApplicationUI_FormClosing(object sender, FormClosingEventArgs e)

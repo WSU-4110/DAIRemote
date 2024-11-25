@@ -7,7 +7,6 @@ public class TrayIconManager
     private NotifyIcon trayIcon;
     private ContextMenuStrip trayMenu;
     private Form form;
-    private FileSystemWatcher displayProfileDirWatcher;
     private HotkeyManager hotkeyManager;
     private AudioManager.AudioDeviceManager audioManager;
 
@@ -63,7 +62,8 @@ public class TrayIconManager
             Visible = true
         };
 
-        displayProfileDirWatcher = new FileSystemWatcher(DisplayConfig.GetDisplayProfilesDirectory())
+        // Listen for display profile changes
+        FileSystemWatcher displayProfileDirWatcher = new(DisplayConfig.GetDisplayProfilesDirectory())
         {
             NotifyFilter = NotifyFilters.FileName
         };
@@ -71,6 +71,9 @@ public class TrayIconManager
         displayProfileDirWatcher.Deleted += OnProfilesChanged;
         displayProfileDirWatcher.Renamed += OnProfilesChanged;
         displayProfileDirWatcher.EnableRaisingEvents = true;
+
+        // Listen to AudioDeviceManager's event handler for changes
+        audioManager.AudioDevicesUpdated += OnAudioDevicesChanged;
 
         trayIcon.DoubleClick += (s, e) => ShowForm();
     }
@@ -91,6 +94,21 @@ public class TrayIconManager
     }
 
     private void OnProfilesChanged(object sender, FileSystemEventArgs e)
+    {
+        if (form.InvokeRequired)
+        {
+            form.BeginInvoke((MethodInvoker)delegate
+            {
+                PopulateTrayMenu(trayMenu);
+            });
+        }
+        else
+        {
+            PopulateTrayMenu(trayMenu);
+        }
+    }
+
+    private void OnAudioDevicesChanged(List<string> devices)
     {
         if (form.InvokeRequired)
         {
@@ -270,6 +288,10 @@ public class TrayIconManager
         menu.Items.Add(deleteProfileMenuItem);
         menu.Items.Add(setHotkeysMenuItem);
 
+        // Allow the user to refresh audio devices
+        // Helpful for when a new device is added
+        // That was not present during application initialization
+        ToolStripMenuItem refreshAudioDevices = new("Refresh Audio Devices", audioIcon, RefreshAudioDevices);
         // Create the icons for making monitors sleep, the about section, and exiting the application
         ToolStripMenuItem turnOffAllMonitorsItem = new("Turn Off All Monitors", turnOffAllMonitorsIcon, TurnOffMonitors);
         ToolStripMenuItem aboutMenuItem = new("About", aboutIcon, OnAboutClick);
@@ -277,6 +299,7 @@ public class TrayIconManager
 
         // Separate sleeping monitors, and add the sleep, about, and exit to the main system tray menu
         menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add(refreshAudioDevices);
         menu.Items.Add(turnOffAllMonitorsItem);
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(aboutMenuItem);
@@ -349,8 +372,10 @@ public class TrayIconManager
         inputForm.Controls.Add(okButton);
         inputForm.Controls.Add(cancelButton);
 
-        inputForm.ShowDialog();
+        // Set the OK button as the action for Enter key
+        inputForm.AcceptButton = okButton;
 
+        inputForm.ShowDialog();
     }
 
 
@@ -361,7 +386,11 @@ public class TrayIconManager
 
     private void DeleteProfile(string profilePath)
     {
-        File.Delete(profilePath);
+        DisplayConfig.DeleteDisplaySettings(profilePath);
+    }
+    private void RefreshAudioDevices(object? sender, EventArgs e)
+    {
+        audioManager.RefreshAudioDeviceSubscriptions();
     }
 
     private void TurnOffMonitors(object? sender, EventArgs e)
