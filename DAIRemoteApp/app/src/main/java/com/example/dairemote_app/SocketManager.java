@@ -16,7 +16,7 @@ public class SocketManager {
     int socketPort;
     public byte[] data = new byte[200];
     public DatagramPacket packet = new DatagramPacket(GetData(), GetData().length);
-    private DatagramSocket socket;
+    public DatagramSocket socket;
 
     SocketManager(InetAddress address, int port) {
         SetSocket();

@@ -11,10 +11,9 @@ class SocketManagerTest {
     SocketManager socketManager;
 
     @BeforeEach
-    void setUp() {
-        socketManager = new SocketManager("127.0.0.1", 9999);
+    void setUp() throws UnknownHostException {
+        socketManager = new SocketManager(InetAddress.getByName("127.0.0.1"), 9999);
     }
-
     @Test
     void testSetSocket() {
         socketManager.SetSocket();
@@ -28,9 +27,9 @@ class SocketManagerTest {
     }
 
     @Test
-    void testCloseSocket() {
+    void closeSocket() {
         socketManager.CloseSocket();
-        assertTrue(socketManager.GetSocket().isClosed(), "Socket should be closed");
+        assertTrue(socketManager.socket.isClosed(), "Testing SocketManager CloseSocket(), expecting null");
     }
 
     @Test
