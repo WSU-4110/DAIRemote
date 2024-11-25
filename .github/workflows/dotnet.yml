@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Clean
-      run: dotnet clean ./dairemote/DAIRemote.sln
+      run: dotnet clean ./DAIRemote/DAIRemote.sln
       working-directory: DAIRemote
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
