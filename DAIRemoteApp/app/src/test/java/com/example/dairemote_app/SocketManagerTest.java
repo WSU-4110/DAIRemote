@@ -4,11 +4,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 class SocketManagerTest {
 
     SocketManager socketManager;
+    DatagramPacket packet;
 
     @BeforeEach
     void setUp() throws UnknownHostException {
