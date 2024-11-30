@@ -132,10 +132,15 @@ public partial class DAIRemoteApplicationUI : Form
 
     private void InitializeAudioDropDown()
     {
+        int panelWidth = (int)(this.ClientSize.Width * 0.8);    // 80% of form width
+        int panelHeight = (int)(this.ClientSize.Height * 0.27); // 27% of form height
+        int panelX = 9;                                         // Offset from the left
+        int panelY = this.ClientSize.Height - panelHeight - 16; // Offset from the bottom
+
         this.audioFormPanel = new Panel
         {
-            Location = new System.Drawing.Point(12, 460),
-            Size = new System.Drawing.Size(760, 370),
+            Location = new System.Drawing.Point(panelX, panelY),
+            Size = new System.Drawing.Size(panelWidth, panelHeight),
         };
 
         audioForm = AudioOutputForm.GetInstance(audioManager);
