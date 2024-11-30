@@ -35,14 +35,8 @@ public partial class DAIRemoteApplicationUI : Form
         InitializeDisplayProfilesList();    // Initialize the form & listbox used for showing display profiles list
 
         // Listen for display profile changes
-        FileSystemWatcher displayProfileDirWatcher = new(DisplayConfig.GetDisplayProfilesDirectory())
-        {
-            NotifyFilter = NotifyFilters.FileName
-        };
-        displayProfileDirWatcher.Created += OnProfilesChanged;
-        displayProfileDirWatcher.Deleted += OnProfilesChanged;
-        displayProfileDirWatcher.Renamed += OnProfilesChanged;
-        displayProfileDirWatcher.EnableRaisingEvents = true;
+        DisplayProfileWatcher.Initialize(DisplayConfig.GetDisplayProfilesDirectory());
+        DisplayProfileWatcher.ProfileChanged += OnProfilesChanged;
     }
 
     protected override void OnHandleCreated(EventArgs e)
@@ -59,17 +53,10 @@ public partial class DAIRemoteApplicationUI : Form
 
     private void OnProfilesChanged(object sender, FileSystemEventArgs e)
     {
-        if (this.InvokeRequired)
-        {
-            this.BeginInvoke((MethodInvoker)delegate
-            {
-                InitializeDisplayProfilesLayouts();
-            });
-        }
-        else
+        this.BeginInvoke((MethodInvoker)delegate
         {
             InitializeDisplayProfilesLayouts();
-        }
+        });
     }
 
     private void InitializeDisplayProfilesLayouts()
@@ -132,10 +119,15 @@ public partial class DAIRemoteApplicationUI : Form
 
     private void InitializeAudioDropDown()
     {
+        int panelWidth = (int)(this.ClientSize.Width * 0.8);    // 80% of form width
+        int panelHeight = (int)(this.ClientSize.Height * 0.27); // 27% of form height
+        int panelX = 9;                                         // Offset from the left
+        int panelY = this.ClientSize.Height - panelHeight - 16; // Offset from the bottom
+
         this.audioFormPanel = new Panel
         {
-            Location = new System.Drawing.Point(12, 460),
-            Size = new System.Drawing.Size(760, 370),
+            Location = new System.Drawing.Point(panelX, panelY),
+            Size = new System.Drawing.Size(panelWidth, panelHeight),
         };
 
         audioForm = AudioOutputForm.GetInstance(audioManager);
@@ -276,6 +268,7 @@ public partial class DAIRemoteApplicationUI : Form
         if (!string.IsNullOrEmpty(profile))
         {
             trayIconManager.GetHotkeyManager().ShowHotkeyInput(profile, () => DisplayConfig.SetDisplaySettings(profile));
+            trayIconManager.RefreshSystemTray();
         }
     }
 }
