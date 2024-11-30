@@ -105,6 +105,10 @@ public partial class DAIRemoteApplicationUI : Form
             deleteProfileButton.Click += DeleteProfileButton_Click;
             DisplayDeleteProfilesLayout.Controls.Add(deleteProfileButton);
         }
+
+        // Ensure the layouts are refreshed
+        DisplayLoadProfilesLayout.Refresh();
+        DisplayDeleteProfilesLayout.Refresh();
     }
 
     private void DeleteProfileButton_Click(object sender, EventArgs e)
