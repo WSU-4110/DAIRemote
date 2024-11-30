@@ -35,14 +35,8 @@ public partial class DAIRemoteApplicationUI : Form
         InitializeDisplayProfilesList();    // Initialize the form & listbox used for showing display profiles list
 
         // Listen for display profile changes
-        FileSystemWatcher displayProfileDirWatcher = new(DisplayConfig.GetDisplayProfilesDirectory())
-        {
-            NotifyFilter = NotifyFilters.FileName
-        };
-        displayProfileDirWatcher.Created += OnProfilesChanged;
-        displayProfileDirWatcher.Deleted += OnProfilesChanged;
-        displayProfileDirWatcher.Renamed += OnProfilesChanged;
-        displayProfileDirWatcher.EnableRaisingEvents = true;
+        DisplayProfileWatcher.Initialize(DisplayConfig.GetDisplayProfilesDirectory());
+        DisplayProfileWatcher.ProfileChanged += OnProfilesChanged;
     }
 
     protected override void OnHandleCreated(EventArgs e)
@@ -59,17 +53,10 @@ public partial class DAIRemoteApplicationUI : Form
 
     private void OnProfilesChanged(object sender, FileSystemEventArgs e)
     {
-        if (this.InvokeRequired)
-        {
-            this.BeginInvoke((MethodInvoker)delegate
-            {
-                InitializeDisplayProfilesLayouts();
-            });
-        }
-        else
+        this.BeginInvoke((MethodInvoker)delegate
         {
             InitializeDisplayProfilesLayouts();
-        }
+        });
     }
 
     private void InitializeDisplayProfilesLayouts()
@@ -105,10 +92,6 @@ public partial class DAIRemoteApplicationUI : Form
             deleteProfileButton.Click += DeleteProfileButton_Click;
             DisplayDeleteProfilesLayout.Controls.Add(deleteProfileButton);
         }
-
-        // Ensure the layouts are refreshed
-        DisplayLoadProfilesLayout.Refresh();
-        DisplayDeleteProfilesLayout.Refresh();
     }
 
     private void DeleteProfileButton_Click(object sender, EventArgs e)
@@ -285,6 +268,7 @@ public partial class DAIRemoteApplicationUI : Form
         if (!string.IsNullOrEmpty(profile))
         {
             trayIconManager.GetHotkeyManager().ShowHotkeyInput(profile, () => DisplayConfig.SetDisplaySettings(profile));
+            trayIconManager.RefreshSystemTray();
         }
     }
 }

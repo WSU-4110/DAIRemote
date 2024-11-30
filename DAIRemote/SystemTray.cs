@@ -63,14 +63,8 @@ public class TrayIconManager
         };
 
         // Listen for display profile changes
-        FileSystemWatcher displayProfileDirWatcher = new(DisplayConfig.GetDisplayProfilesDirectory())
-        {
-            NotifyFilter = NotifyFilters.FileName
-        };
-        displayProfileDirWatcher.Created += OnProfilesChanged;
-        displayProfileDirWatcher.Deleted += OnProfilesChanged;
-        displayProfileDirWatcher.Renamed += OnProfilesChanged;
-        displayProfileDirWatcher.EnableRaisingEvents = true;
+        DisplayProfileWatcher.Initialize(DisplayConfig.GetDisplayProfilesDirectory());
+        DisplayProfileWatcher.ProfileChanged += OnProfilesChanged;
 
         // Listen to AudioDeviceManager's event handler for changes
         audioManager.AudioDevicesUpdated += OnAudioDevicesChanged;
@@ -93,34 +87,28 @@ public class TrayIconManager
         return menu;
     }
 
-    private void OnProfilesChanged(object sender, FileSystemEventArgs e)
+    public void RefreshSystemTray()
     {
-        if (form.InvokeRequired)
-        {
-            form.BeginInvoke((MethodInvoker)delegate
-            {
-                PopulateTrayMenu(trayMenu);
-            });
-        }
-        else
+        form.BeginInvoke((MethodInvoker)delegate
         {
             PopulateTrayMenu(trayMenu);
-        }
+        });
+    }
+
+    private void OnProfilesChanged(object sender, FileSystemEventArgs e)
+    {
+        form.BeginInvoke((MethodInvoker)delegate
+        {
+            PopulateTrayMenu(trayMenu);
+        });
     }
 
     private void OnAudioDevicesChanged(List<string> devices)
     {
-        if (form.InvokeRequired)
-        {
-            form.BeginInvoke((MethodInvoker)delegate
-            {
-                PopulateTrayMenu(trayMenu);
-            });
-        }
-        else
+        form.BeginInvoke((MethodInvoker)delegate
         {
             PopulateTrayMenu(trayMenu);
-        }
+        });
     }
 
     private void PopulateTrayMenu(ContextMenuStrip menu)
@@ -238,7 +226,6 @@ public class TrayIconManager
             ToolStripMenuItem profileDeleteItem = new(fileName, monitorIcon, (sender, e) => DeleteProfile(profile));
 
             ToolStripMenuItem profileSaveItem = new(fileName, monitorIcon, (sender, e) => SaveProfile(profile));
-
 
             // Setting up hotkey funtionality for each profile
             hotkeyText = hotkeyManager.hotkeyConfigs.ContainsKey(fileName)
