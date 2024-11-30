@@ -1,4 +1,4 @@
-# Installation
+# Installation Guide
 
 ## Dependencies
 * .NET SDK: Version 8.0 or higher (you can download it from [here](https://dotnet.microsoft.com/en-us/download)). <br />
