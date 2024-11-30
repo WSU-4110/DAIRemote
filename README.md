@@ -15,6 +15,8 @@ Follow the [installation guide](INSTALLATION.md) for detailed setup and build in
 1. Run the desktop application using `dotnet run`.
 2. Use the Android app for remote input and device management.
 
+For a step-by-step walkthrough, check out our video guide: [Getting Started with DAIRemote](https://www.youtube.com/watch?v=8atqA3T8YL0)
+
 ## Running the Android Application
 1. **Using BlueStacks**:
    * Install BlueStacks and launch the app from the built APK file.
