@@ -37,7 +37,7 @@ dotnet run
 ### Option 1 (Using BlueStacks):
 * Download [BlueStacks](https://www.bluestacks.com/download.html)
 * Navigate to the folder where the APK file is stored (e.g. DAIRemoteApp/app/build/outputs/apk/debug)
-* Right-click on the APK file and select "Open with BlueStacks and the Android app should run.
+* Right-click on the APK file and select "Open with BlueStacks" and the Android app should run.
 
 ### Option 2 (Command Line):
 1. **Ensure Android SDK is in PATH**:
@@ -71,6 +71,16 @@ dotnet run
    emulator -avd <yourAVD>
    ```
    - Replace `<yourAVD>` with the name of the AVD you wish to run.
+
+### Option 3 (Using Smartphone):
+1. On your smartphone, go to **Settings<About Phone<Software Information**
+   - Tap on "Build Number" 7 times in a row to enable **Developer Mode**.
+2. Exit back to the Settings Page and go to **Developer Options**
+   - Connect your phone to your PC using a USB cable and click on **USB Debugging** to enable it.
+3. **Open Android Studio**
+   - Now run the app ensuring the virtual device paired is with yours.
+   - The Android applicationa should appear on your smartphone, ready to be used. 
+
 
 ## Debugging
 If you encounter an error after running `gradlew assembleDebug` related to having an older version of Java, follow these steps:
