@@ -1,7 +1,6 @@
 ﻿using AudioSwitcher.AudioApi;
 using AudioSwitcher.AudioApi.CoreAudio;
 using AudioSwitcher.AudioApi.Observables;
-using System.Diagnostics;
 
 namespace AudioManager;
 
@@ -37,7 +36,6 @@ public class AudioDeviceManager
 
     private void OnAudioDeviceChanged(DeviceChangedArgs args)
     {
-        Debug.WriteLine($"Audio device state changed for: {args.Device.FullName}");
         SetAudioDefaults();
         AudioDevicesUpdated?.Invoke(ActiveDeviceNames);
     }
@@ -47,7 +45,6 @@ public class AudioDeviceManager
         // Subscribe all playback devices, even inactive ones
         foreach (CoreAudioDevice device in audioController.GetPlaybackDevices())
         {
-            Debug.WriteLine($"for: {device.FullName}");
             device.StateChanged.Subscribe(OnAudioDeviceChanged);
         }
     }
@@ -173,7 +170,6 @@ public class AudioDeviceManager
             int nextIndex = (currentIndex + 1) % audioDevices.Count;
             // Set the next device as the default audio device
             SetDefaultAudioDevice(audioDevices[nextIndex]);
-            Debug.WriteLine($"Switched to {defaultAudioDevice.FullName}");
             AudioDevicesUpdated?.Invoke(ActiveDeviceNames);
         }
     }

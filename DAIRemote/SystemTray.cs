@@ -44,6 +44,7 @@ public class TrayIconManager
         hotkeyManager = new HotkeyManager();
 
         InitializeTrayIcon();
+        DisplayConfig.NotificationRequested += OnNotificationRequested;
     }
 
     public HotkeyManager GetHotkeyManager()
@@ -423,5 +424,18 @@ public class TrayIconManager
     {
         HideIcon();
         Application.Exit();
+    }
+
+    private void OnNotificationRequested(object sender, NotificationEventArgs e)
+    {
+        SendNotification(trayIcon, e.NotificationText);
+    }
+
+    public void SendNotification(NotifyIcon trayIcon, string notificationText)
+    {
+        trayIcon.BalloonTipTitle = "DAIRemote";
+        trayIcon.BalloonTipText = notificationText;
+        trayIcon.BalloonTipIcon = ToolTipIcon.Error;
+        trayIcon.ShowBalloonTip(3000);
     }
 }

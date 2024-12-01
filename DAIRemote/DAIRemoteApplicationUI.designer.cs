@@ -41,10 +41,9 @@
             // 
             this.BtnSaveDisplayConfig.AccessibleName = "BtnSaveDisplayConfig";
             this.BtnSaveDisplayConfig.BackColor = Color.LightSkyBlue;
-            this.BtnSaveDisplayConfig.Location = new Point(23, 279);
-            this.BtnSaveDisplayConfig.Margin = new Padding(3, 4, 3, 4);
+            this.BtnSaveDisplayConfig.Location = new Point(20, 209);
             this.BtnSaveDisplayConfig.Name = "BtnSaveDisplayConfig";
-            this.BtnSaveDisplayConfig.Size = new Size(229, 53);
+            this.BtnSaveDisplayConfig.Size = new Size(200, 40);
             this.BtnSaveDisplayConfig.TabIndex = 0;
             this.BtnSaveDisplayConfig.Text = "Add Display Profile";
             this.BtnSaveDisplayConfig.UseVisualStyleBackColor = false;
@@ -54,10 +53,9 @@
             // 
             this.checkBoxStartup.AutoSize = true;
             this.checkBoxStartup.ForeColor = SystemColors.Control;
-            this.checkBoxStartup.Location = new Point(23, 528);
-            this.checkBoxStartup.Margin = new Padding(3, 4, 3, 4);
+            this.checkBoxStartup.Location = new Point(20, 396);
             this.checkBoxStartup.Name = "checkBoxStartup";
-            this.checkBoxStartup.Size = new Size(227, 24);
+            this.checkBoxStartup.Size = new Size(184, 19);
             this.checkBoxStartup.TabIndex = 4;
             this.checkBoxStartup.Text = "Launch application on startup";
             this.checkBoxStartup.UseVisualStyleBackColor = true;
@@ -67,10 +65,9 @@
             // 
             this.BtnCycleAudioOutputs.AccessibleName = "BtnCycleAudioOutputs";
             this.BtnCycleAudioOutputs.BackColor = Color.LightSkyBlue;
-            this.BtnCycleAudioOutputs.Location = new Point(23, 340);
-            this.BtnCycleAudioOutputs.Margin = new Padding(3, 4, 3, 4);
+            this.BtnCycleAudioOutputs.Location = new Point(20, 255);
             this.BtnCycleAudioOutputs.Name = "BtnCycleAudioOutputs";
-            this.BtnCycleAudioOutputs.Size = new Size(229, 53);
+            this.BtnCycleAudioOutputs.Size = new Size(200, 40);
             this.BtnCycleAudioOutputs.TabIndex = 5;
             this.BtnCycleAudioOutputs.Text = "Cycle Audio Devices";
             this.BtnCycleAudioOutputs.UseVisualStyleBackColor = false;
@@ -79,27 +76,26 @@
             // DisplayLoadProfilesLayout
             // 
             this.DisplayLoadProfilesLayout.AutoScroll = true;
-            this.DisplayLoadProfilesLayout.Location = new Point(323, 52);
-            this.DisplayLoadProfilesLayout.Margin = new Padding(3, 4, 3, 4);
+            this.DisplayLoadProfilesLayout.Location = new Point(283, 21);
             this.DisplayLoadProfilesLayout.Name = "DisplayLoadProfilesLayout";
-            this.DisplayLoadProfilesLayout.Size = new Size(544, 237);
+            this.DisplayLoadProfilesLayout.Size = new Size(372, 198);
             this.DisplayLoadProfilesLayout.TabIndex = 6;
             // 
             // DisplayDeleteProfilesLayout
             // 
             this.DisplayDeleteProfilesLayout.AutoScroll = true;
-            this.DisplayDeleteProfilesLayout.Location = new Point(323, 349);
-            this.DisplayDeleteProfilesLayout.Margin = new Padding(3, 4, 3, 4);
+            this.DisplayDeleteProfilesLayout.Location = new Point(283, 245);
             this.DisplayDeleteProfilesLayout.Name = "DisplayDeleteProfilesLayout";
-            this.DisplayDeleteProfilesLayout.Size = new Size(544, 237);
+            this.DisplayDeleteProfilesLayout.Size = new Size(372, 198);
             this.DisplayDeleteProfilesLayout.TabIndex = 7;
             // 
             // Logo
             // 
             this.Logo.Image = Properties.Resources.DAIRemoteLogo;
             this.Logo.Location = new Point(0, 0);
+            this.Logo.Margin = new Padding(3, 2, 3, 2);
             this.Logo.Name = "Logo";
-            this.Logo.Size = new Size(112, 123);
+            this.Logo.Size = new Size(98, 92);
             this.Logo.SizeMode = PictureBoxSizeMode.StretchImage;
             this.Logo.TabIndex = 8;
             this.Logo.TabStop = false;
@@ -110,10 +106,11 @@
             this.LogoName.BorderStyle = BorderStyle.None;
             this.LogoName.Font = new Font("Cascadia Code", 20F, FontStyle.Bold);
             this.LogoName.ForeColor = Color.White;
-            this.LogoName.Location = new Point(119, 31);
+            this.LogoName.Location = new Point(104, 23);
+            this.LogoName.Margin = new Padding(3, 2, 3, 2);
             this.LogoName.Name = "LogoName";
             this.LogoName.ReadOnly = true;
-            this.LogoName.Size = new Size(171, 39);
+            this.LogoName.Size = new Size(150, 31);
             this.LogoName.TabIndex = 9;
             this.LogoName.Text = "DAIRemote";
             // 
@@ -122,11 +119,12 @@
             this.Description.BackColor = Color.FromArgb(50, 50, 50);
             this.Description.BorderStyle = BorderStyle.None;
             this.Description.ForeColor = Color.White;
-            this.Description.Location = new Point(14, 121);
+            this.Description.Location = new Point(12, 91);
+            this.Description.Margin = new Padding(3, 2, 3, 2);
             this.Description.Multiline = true;
             this.Description.Name = "Description";
             this.Description.ReadOnly = true;
-            this.Description.Size = new Size(277, 160);
+            this.Description.Size = new Size(242, 120);
             this.Description.TabIndex = 10;
             this.Description.Text = resources.GetString("Description.Text");
             // 
@@ -136,10 +134,11 @@
             this.LoadProfile.BorderStyle = BorderStyle.None;
             this.LoadProfile.Font = new Font("Segoe UI", 9F, FontStyle.Underline, GraphicsUnit.Point, 0);
             this.LoadProfile.ForeColor = Color.LightSkyBlue;
-            this.LoadProfile.Location = new Point(518, 26);
+            this.LoadProfile.Location = new Point(401, 0);
+            this.LoadProfile.Margin = new Padding(3, 2, 3, 2);
             this.LoadProfile.Name = "LoadProfile";
             this.LoadProfile.ReadOnly = true;
-            this.LoadProfile.Size = new Size(125, 20);
+            this.LoadProfile.Size = new Size(109, 16);
             this.LoadProfile.TabIndex = 11;
             this.LoadProfile.Text = "Load Profile";
             this.LoadProfile.TextAlign = HorizontalAlignment.Center;
@@ -150,10 +149,11 @@
             this.DeleteProfile.BorderStyle = BorderStyle.None;
             this.DeleteProfile.Font = new Font("Segoe UI", 9F, FontStyle.Underline, GraphicsUnit.Point, 0);
             this.DeleteProfile.ForeColor = Color.Red;
-            this.DeleteProfile.Location = new Point(518, 323);
+            this.DeleteProfile.Location = new Point(401, 224);
+            this.DeleteProfile.Margin = new Padding(3, 2, 3, 2);
             this.DeleteProfile.Name = "DeleteProfile";
             this.DeleteProfile.ReadOnly = true;
-            this.DeleteProfile.Size = new Size(125, 20);
+            this.DeleteProfile.Size = new Size(109, 16);
             this.DeleteProfile.TabIndex = 12;
             this.DeleteProfile.Text = "Delete Profile";
             this.DeleteProfile.TextAlign = HorizontalAlignment.Center;
@@ -162,10 +162,9 @@
             // 
             this.AudioCycleHotkey.AccessibleName = "BtnSetAudioCycleHotkey";
             this.AudioCycleHotkey.BackColor = Color.LightSkyBlue;
-            this.AudioCycleHotkey.Location = new Point(23, 401);
-            this.AudioCycleHotkey.Margin = new Padding(3, 4, 3, 4);
+            this.AudioCycleHotkey.Location = new Point(20, 301);
             this.AudioCycleHotkey.Name = "AudioCycleHotkey";
-            this.AudioCycleHotkey.Size = new Size(229, 53);
+            this.AudioCycleHotkey.Size = new Size(200, 40);
             this.AudioCycleHotkey.TabIndex = 13;
             this.AudioCycleHotkey.Text = "Set Audio Cycle Hotkey";
             this.AudioCycleHotkey.UseVisualStyleBackColor = false;
@@ -175,10 +174,9 @@
             // 
             this.DisplayProfileHotkey.AccessibleName = "BtnSetDisplayProfileHotkey";
             this.DisplayProfileHotkey.BackColor = Color.LightSkyBlue;
-            this.DisplayProfileHotkey.Location = new Point(23, 463);
-            this.DisplayProfileHotkey.Margin = new Padding(3, 4, 3, 4);
+            this.DisplayProfileHotkey.Location = new Point(20, 347);
             this.DisplayProfileHotkey.Name = "DisplayProfileHotkey";
-            this.DisplayProfileHotkey.Size = new Size(229, 53);
+            this.DisplayProfileHotkey.Size = new Size(200, 40);
             this.DisplayProfileHotkey.TabIndex = 14;
             this.DisplayProfileHotkey.Text = "Set Display Profile Hotkeys";
             this.DisplayProfileHotkey.UseVisualStyleBackColor = false;
@@ -186,10 +184,10 @@
             // 
             // DAIRemoteApplicationUI
             // 
-            this.AutoScaleDimensions = new SizeF(8F, 20F);
+            this.AutoScaleDimensions = new SizeF(7F, 15F);
             this.AutoScaleMode = AutoScaleMode.Font;
             this.BackColor = Color.FromArgb(50, 50, 50);
-            this.ClientSize = new Size(881, 604);
+            this.ClientSize = new Size(666, 453);
             this.Controls.Add(this.DisplayProfileHotkey);
             this.Controls.Add(this.AudioCycleHotkey);
             this.Controls.Add(this.DeleteProfile);
@@ -202,7 +200,6 @@
             this.Controls.Add(this.BtnCycleAudioOutputs);
             this.Controls.Add(this.checkBoxStartup);
             this.Controls.Add(this.BtnSaveDisplayConfig);
-            this.Margin = new Padding(3, 4, 3, 4);
             this.Name = "DAIRemoteApplicationUI";
             this.Text = "DAIRemote";
             ((System.ComponentModel.ISupportInitialize)this.Logo).EndInit();
