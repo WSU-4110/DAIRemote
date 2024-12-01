@@ -1,7 +1,6 @@
 package com.example.dairemote_app;
 
 import android.os.Build;
-import android.util.Log;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -59,9 +58,7 @@ public class ConnectionManager {
         try {
             SetServerAddress(serverAddress);
             SetServerAddress(InetAddress.getByName(GetServerAddress()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e("ConnectionManager", "Error getting serverAddr by Name: " + e.getMessage());
+        } catch (Exception ignored) {
         }
 
         this.executorService = Executors.newCachedThreadPool();
@@ -197,7 +194,6 @@ public class ConnectionManager {
 
                     SetServerResponse(new String(receivePacket.getData()).trim());
                     String serverIp = receivePacket.getAddress().getHostAddress();
-                    Log.i("ConnectionManager", "Response from server: " + GetServerResponse() + " at " + serverIp);
 
                     if (GetServerResponse().contains("Hello, I'm")) {
                         hosts.add(serverIp);
@@ -219,9 +215,7 @@ public class ConnectionManager {
             } else {
                 hostHandler.onError("No hosts found");
             }
-        } catch (SocketException e) {
-            e.printStackTrace();
-            Log.e("ConnectionManager", "Error initializing DatagramSocket: " + e.getMessage());
+        } catch (SocketException ignored) {
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
@@ -237,11 +231,7 @@ public class ConnectionManager {
             udpSocket.setSoTimeout(75);
 
             SetServerResponse(new String(receivePacket.getData(), 0, receivePacket.getLength()));
-        } catch (SocketTimeoutException e) {
-            Log.i("ConnectionManager", "No response received within the timeout: " + e.getMessage());
-            SetServerResponse("");
-        } catch (Exception e) {
-            Log.e("ConnectionManager", "Error waiting for response: " + e.getMessage());
+        } catch (Exception ignored) {
             SetServerResponse("");
         }
     }
@@ -253,20 +243,16 @@ public class ConnectionManager {
         while (GetServerResponse().isEmpty()) {
             try {
                 SendData("Connection requested by " + GetDeviceName(), GetInetAddress());
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.e("ConnectionManager", "Error connecting from InitializeConnection(): " + e.getMessage());
+            } catch (Exception ignored) {
             }
             broadcastCount += 1;
             if (broadcastCount > 5) {
-                Log.e("ConnectionManager", "Timed out waiting for connection response, aborting...");
                 return false;
             } else {
                 // Updates serverResponse else times out and throws socket exception
                 try {
                     WaitForResponse(5000);
-                } catch (Exception e) {
-                    Log.i("ConnectionManager", "Connection initialization timeout: " + broadcastCount);
+                } catch (Exception ignored) {
                 }
             }
 
@@ -279,7 +265,6 @@ public class ConnectionManager {
         if (GetServerResponse().equalsIgnoreCase("Wait")) {
             SetServerResponse("");
             while (GetServerResponse().isEmpty()) {
-                Log.i("ConnectionManager", "Waiting for approval...");
                 WaitForResponse(10000);
                 approvalTimeout += 1;
                 if(approvalTimeout > 5) {
@@ -293,7 +278,6 @@ public class ConnectionManager {
                 return true;
             } else if (GetServerResponse().equalsIgnoreCase("Connection attempt declined.")) {
                 ResetConnectionManager();
-                Log.e("ConnectionManager", "Denied connection");
             }
             SetServerResponse("");
         } else if (GetServerResponse().equalsIgnoreCase("Approved")) {
@@ -301,8 +285,6 @@ public class ConnectionManager {
             ConnectionMonitor.GetInstance(MainActivity.connectionManager);
             SetConnectionEstablished(true);
             return true;
-        } else {
-            Log.e("ConnectionManager", "No response to broadcast.");
         }
         return false;
     }
@@ -325,33 +307,26 @@ public class ConnectionManager {
     public void SendMessage(String message) {
         try {
             SendData(message, GetInetAddress());
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e("ConnectionManager", "Error sending message from sendMessage(String message): " + e.getMessage());
+        } catch (Exception ignored) {
         }
     }
 
-    public boolean HostRequester(String replyCondition, String sendMessage, InetAddress inetAddress, String logTag, String subject) {
+    public boolean HostRequester(String replyCondition, String sendMessage, InetAddress inetAddress) {
         SetServerResponse("");
         int broadcastCount = 0;
         while (!GetServerResponse().startsWith(replyCondition)) {
             try {
                 SendData(sendMessage, inetAddress);
-                Log.d(logTag, "Attempting to retrieve host " + subject);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.e(logTag, "Error retrieving host " + subject + ": " + e.getMessage());
+            } catch (Exception ignored) {
             }
             broadcastCount += 1;
             if (broadcastCount > 5) {
-                Log.e(logTag, "Timed out waiting for host " + subject + ", aborting...");
                 return false;
             } else {
                 // Updates serverResponse else times out and throws socket exception
                 try {
                     WaitForResponse(5000);
-                } catch (Exception e) {
-                    Log.i(logTag, "Host " + subject + " list timeout: " + broadcastCount);
+                } catch (Exception ignored) {
                 }
             }
 
@@ -361,7 +336,7 @@ public class ConnectionManager {
     }
 
     public boolean RequestHostName() {
-        if(HostRequester("HostName", "HOST Name", GetInetAddress(), "ConnectionManagerHost", "host name")) {
+        if(HostRequester("HostName", "HOST Name", GetInetAddress())) {
             SetHostName(GetHostRequesterResponse());
             return true;
         }
@@ -370,7 +345,7 @@ public class ConnectionManager {
 
     // Retrieve audio devices from host
     public boolean RequestHostAudioDevices() {
-        if(HostRequester("AudioDevices", "AUDIO Devices", GetInetAddress(), "ConnectionManagerAudio", "audio devices")) {
+        if(HostRequester("AudioDevices", "AUDIO Devices", GetInetAddress())) {
             SetHostAudioList(GetHostRequesterResponse());
             return true;
         }
@@ -379,7 +354,7 @@ public class ConnectionManager {
 
     // Retrieve display profiles from host
     public boolean RequestHostDisplayProfiles() {
-        if(HostRequester("DisplayProfiles", "DISPLAY Profiles", GetInetAddress(), "ConnectionManagerDisplays", "display profiles")) {
+        if(HostRequester("DisplayProfiles", "DISPLAY Profiles", GetInetAddress())) {
             SetHostDisplayProfilesList(GetHostRequesterResponse());
             return true;
         }
@@ -387,7 +362,6 @@ public class ConnectionManager {
     }
 
     public void ResetConnectionManager() {
-        Log.e("ConnectionManager", "Resetting ConnectionManager");
         StopExecServices(executorService);
         SetConnectionEstablished(false);
         SetServerResponse(null);

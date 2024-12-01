@@ -38,7 +38,6 @@ public class InstructionsPage extends AppCompatActivity implements NavigationVie
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        Log.d("Navigation", "Item selected: " + itemId);
 
         if (itemId == R.id.nav_remote) {
             if (ConnectionManager.GetConnectionEstablished()) {

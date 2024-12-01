@@ -123,7 +123,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         if (serverIps.isEmpty()) {
                             return;
                         }
-                        Log.i("MainActivity", "Hosts found: " + serverIps);
 
                         //!! Implement logic to select the host
                         String selectedHost = serverIps.get(0);
@@ -147,7 +146,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onError(String error) {
                         runOnUiThread(() -> connectionProgress.setVisibility(View.GONE));
-                        Log.e("MainActivity", "Error during host search: " + error);
                         notifyUser(MainActivity.this, "No hosts found");
                         runOnUiThread(() -> {
                             builderTitleMsg(builder, "No Hosts Found", "No available hosts were found. Please add a server host manually.");
@@ -181,7 +179,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        Log.i("MainActivity", "Item selected: " + itemId);
 
         if (itemId == R.id.nav_remote) {
             if (ConnectionManager.GetConnectionEstablished()) {

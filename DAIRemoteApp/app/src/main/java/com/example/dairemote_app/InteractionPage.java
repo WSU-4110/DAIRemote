@@ -450,7 +450,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         MessageHost("KEYBOARD_WRITE " + addedChar);
                     } else {
                         toolbar.AppendKeyCombination(addedChar);
-                        Log.i("KeyCombination", toolbar.GetKeyCombination().toString());
                     }
                     toolbar.GetKeyboardTextView().append(String.valueOf(addedChar));
                 }
@@ -553,7 +552,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             toolbar.AddParentheses();
 
             MessageHost("KEYBOARD_WRITE " + toolbar.GetKeyCombination());
-            Log.i("KeyboardToolbar", "KEYBOARD_WRITE " + toolbar.GetKeyCombination());
 
             ResetKeyboardModifiers();
 
@@ -570,10 +568,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
             toolbar.GetKeyboardTextView().append(msg);
         } else if (audio) {
             MessageHost("AUDIO " + msg);
-            Log.i("KeyboardToolbar", "AUDIO " + msg);
         } else if (!msg.isEmpty()) {
             MessageHost("KEYBOARD_WRITE " + msg);
-            Log.i("KeyboardToolbar", "KEYBOARD_WRITE " + msg);
         }
     }
 
@@ -617,7 +613,6 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        Log.d("Navigation", "Item selected: " + itemId);
 
         if (itemId == R.id.nav_remote) {
             // Current page, do nothing
@@ -731,25 +726,21 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         // Load audio devices on recycler
                         String devicesPart = parts[0].substring("AudioDevices: ".length());
                         List<String> deviceList = Arrays.asList(devicesPart.split(","));
-                        Log.d("InteractionPageAudio", "Audio devices: " + deviceList);
 
                         if (deviceList.isEmpty() || deviceList.get(0).isEmpty()) {
                             List<String> placeholder = Collections.singletonList("No audio devices");
                             UpdateAudioDevices(placeholder);
                         } else {
                             UpdateAudioDevices(deviceList);
-                            Log.d("InteractionPageAudio", "Audio default device: " + parts[2].substring("DefaultAudioDevice: ".length()));
                             SetAudioDeviceDefault(parts[2].substring("DefaultAudioDevice: ".length()));
 
                             // Set seekbar to current host volume
                             String volumePart = parts[1].substring("Volume: ".length());
-                            Log.d("InteractionPageAudio", "Volume: " + Integer.parseInt(volumePart));
                             volumeSlider.setProgress(Integer.parseInt(volumePart));
                             currentVolume.setText(volumePart);
 
                             // Get host's current mute status
                             String muteStatus = parts[3].substring("Mute: ".length());
-                            Log.d("InteractionPageAudio", "Mute: " + muteStatus);
                             if(muteStatus.equalsIgnoreCase("true")) {
                                 audioMuted = true;
                                 audioToggleMuteButton.setColorFilter(getColor(R.color.black));
@@ -760,11 +751,7 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                                 currentVolume.setTextColor(getColor(R.color.grey));
                             }
                         }
-                    } else {
-                        Log.e("InteractionPageAudio", "Unexpected response format: " + response);
                     }
-                } else {
-                    Log.e("InteractionPageAudio", "Unexpected response format: " + response);
                 }
             }
             isRequestAudioDevicesTaskRunning = false;
@@ -794,11 +781,8 @@ public class InteractionPage extends AppCompatActivity implements NavigationView
                         List<String> placeholder = Collections.singletonList("No display profiles");
                         UpdateDisplayProfiles(placeholder);
                     } else {
-                        Log.d("InteractionPageDisplays", "Display Profiles: " + deviceList);
                         UpdateDisplayProfiles(deviceList);
                     }
-                } else {
-                    Log.e("InteractionPageDisplays", "Unexpected response format: " + response);
                 }
             }
             isRequestDisplayProfilesTaskRunning = false;
