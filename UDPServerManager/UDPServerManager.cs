@@ -1,5 +1,4 @@
 ﻿using DisplayProfileManager;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -63,25 +62,21 @@ public class UDPServerHost : IDisposable
             byte[] handshakeData = udpServer.Receive(ref remoteEP);
             string handshakeMessage = Encoding.ASCII.GetString(handshakeData);
 
-            Debug.WriteLine($"Received handshake from {remoteEP.Address}:{remoteEP.Port}: {handshakeMessage}");
-
             return HandleReceivedData(handshakeMessage);
         }
-        catch (SocketException e)
+        catch (SocketException)
         {
-            Debug.WriteLine("Error during handshake: " + e.Message);
+            return false;
         }
-        catch (ObjectDisposedException e)
+        catch (ObjectDisposedException)
         {
-            Debug.WriteLine("Error: UdpClient has been disposed: " + e.Message);
+            return false;
         }
-        return false;
     }
 
     public bool AwaitApproval(string deviceName)
     {
         DeviceHistoryManager deviceHistoryManager = new();
-        Debug.WriteLine("Checking for approval...");
         SendUdpMessage("Wait");
         string ip = remoteEP.Address.ToString();
         if (deviceHistoryManager.SearchDeviceHistory(ip))
@@ -91,7 +86,6 @@ public class UDPServerHost : IDisposable
             udpServer.Send(approvalBytes, approvalBytes.Length, remoteEP);
             clientAddress = ip;
 
-            Debug.WriteLine("Approval granted, prior history");
             return true;
         }
         else
@@ -105,7 +99,6 @@ public class UDPServerHost : IDisposable
             {
                 deviceHistoryManager.SaveDeviceHistory(ip, deviceName);
                 clientAddress = ip;
-                Debug.WriteLine("Approval granted by user");
                 return true;
             }
         }
@@ -128,13 +121,12 @@ public class UDPServerHost : IDisposable
                     await Task.Run(() => this.audioManager = AudioManager.AudioDeviceManager.GetInstance());
 
                     isClientConnected = true;
-                    Debug.WriteLine("Handshake successful, starting message loop...");
                     break;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Debug.WriteLine("Error during handshake: " + e.Message);
+                // Do nothing
             }
         }
     }
@@ -167,20 +159,18 @@ public class UDPServerHost : IDisposable
                 {
                     if (e.SocketErrorCode == SocketError.TimedOut)
                     {
-                        Debug.WriteLine("waiting for next message...");
                         continue;
                     }
                     else
                     {
-                        Debug.WriteLine("Error in message loop: " + e.Message);
                         break;
                     }
                 }
             }
         }
-        catch (ObjectDisposedException e)
+        catch (ObjectDisposedException)
         {
-            Debug.WriteLine("Error: UdpClient has been disposed: " + e.Message);
+            // Do Nothing
         }
         finally
         {
@@ -198,12 +188,10 @@ public class UDPServerHost : IDisposable
         if (receivedData.StartsWith("Hello, I'm"))
         {
             SendUdpMessage("Hello, I'm " + Environment.MachineName);
-            Debug.WriteLine($"Sent reply to client's broadcast at {remoteEP.Address}:{remoteEP.Port}\nAwaiting handshake...");
         }
         else if (receivedData.StartsWith("Hello, DAI"))
         {
             SendUdpMessage("Hello, I'm " + Environment.MachineName);
-            Debug.WriteLine("Sent response to broadcast search");
         }
         else if (receivedData.StartsWith("Connection requested"))
         {
@@ -215,21 +203,18 @@ public class UDPServerHost : IDisposable
             // Check if the heartbeat timeout has been exceeded
             if (DateTime.Now - GetLastHeartbeat() > GetHeartbeatTimeout())
             {
-                Debug.WriteLine("No heartbeat received in 45 minutes. Disconnecting...");
                 isClientConnected = false;
             }
             if (IsClient(remoteEP.Address.ToString()))
             {
                 if (receivedData.Equals("Shutdown requested", StringComparison.OrdinalIgnoreCase))
                 {
-                    Debug.WriteLine("Shutdown message received. Exiting message loop...");
                     isClientConnected = false;
                 }
                 else if (receivedData.Equals("DroidHeartBeat", StringComparison.OrdinalIgnoreCase))
                 {
                     SetLastHeartbeat(DateTime.Now);
                     SendUdpMessage("HeartBeat Ack");
-                    Debug.WriteLine("Acknowledged heartbeat");
                 }
                 else
                 {
@@ -251,7 +236,6 @@ public class UDPServerHost : IDisposable
         string[] parts = command.Split([' '], 2);
         string action = parts[0];
 
-        Debug.WriteLine(action);
         switch (action)
         {
             case "MOUSE_MOVE":
@@ -264,10 +248,6 @@ public class UDPServerHost : IDisposable
                     float y = float.Parse(moveParts[1]);
 
                     MouseManager.SetCursorPosition((int)Math.Floor(x + currentPos.X), (int)Math.Floor(y + currentPos.Y));
-                }
-                else
-                {
-                    Debug.WriteLine("MOUSE_MOVE command received but not enough parameters.");
                 }
                 break;
             case "MOUSE_LMB":
@@ -400,7 +380,6 @@ public class UDPServerHost : IDisposable
                     if (displayProfiles.Length > 0)
                     {
                         string displayProfileName = string.Join(",", Array.ConvertAll(displayProfiles, Path.GetFileNameWithoutExtension));
-                        Debug.WriteLine(displayProfileName);
                         SendUdpMessage("DisplayProfiles: " + displayProfileName);
                     }
                     else
@@ -430,8 +409,6 @@ public class UDPServerHost : IDisposable
     {
         while (true)
         {
-            Debug.WriteLine("UDP Server is listening...");
-
             // Start checking for handshake attempts in the background
             await CheckForHandshake(); // Wait until the handshake succeeds
 
