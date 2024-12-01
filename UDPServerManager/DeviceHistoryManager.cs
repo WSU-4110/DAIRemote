@@ -10,7 +10,7 @@ public class DeviceHistoryManager
 
         if (!Directory.Exists(folderPath))
         {
-            Directory.CreateDirectory(folderPath);
+            _ = Directory.CreateDirectory(folderPath);
         }
 
         string filePath = Path.Combine(folderPath, fileName);
@@ -24,12 +24,12 @@ public class DeviceHistoryManager
         return filePath;
     }
 
-	public class DeviceHistoryEntry
-	{
-		public string DeviceName { get; set; }
-		public string IpAddress { get; set; }
-		public DateTime Timestamp { get; set; }
-	}
+    public class DeviceHistoryEntry
+    {
+        public string DeviceName { get; set; }
+        public string IpAddress { get; set; }
+        public DateTime Timestamp { get; set; }
+    }
 
     public void SaveDeviceHistory(string ipAddress, string deviceName = "")
     {

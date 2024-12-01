@@ -23,7 +23,7 @@ public class DisplayConfig
 
         if (!Directory.Exists(folderPath))
         {
-            Directory.CreateDirectory(folderPath);
+            _ = Directory.CreateDirectory(folderPath);
         }
         return folderPath;
     }
@@ -1005,7 +1005,7 @@ public class DisplayConfig
 
             return true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             RequestNotification("Error loading display profile");
             return false;
@@ -1282,14 +1282,14 @@ public class DisplayConfig
         if (sleep)
         {
             // Go into sleep mode (2)
-            PostMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, 2);
+            _ = PostMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, 2);
         }
         else
         {
             // Wakeup from sleep mode (-1)
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
-                PostMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, -1);
+                _ = PostMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, -1);
                 Thread.Sleep(100);
             });
         }

@@ -34,6 +34,7 @@
             this.DeleteProfile = new TextBox();
             this.AudioCycleHotkey = new Button();
             this.DisplayProfileHotkey = new Button();
+            this.AudioComboBox = new ComboBox();
             ((System.ComponentModel.ISupportInitialize)this.Logo).BeginInit();
             this.SuspendLayout();
             // 
@@ -182,12 +183,23 @@
             this.DisplayProfileHotkey.UseVisualStyleBackColor = false;
             this.DisplayProfileHotkey.Click += this.BtnSetDisplayProfileHotkey_click;
             // 
+            // AudioComboBox
+            // 
+            this.AudioComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            this.AudioComboBox.FormattingEnabled = true;
+            this.AudioComboBox.Location = new Point(20, 418);
+            this.AudioComboBox.Name = "AudioComboBox";
+            this.AudioComboBox.Size = new Size(257, 23);
+            this.AudioComboBox.TabIndex = 15;
+            this.AudioComboBox.SelectedIndexChanged += this.AudioComboBox_SelectedIndexChanged;
+            // 
             // DAIRemoteApplicationUI
             // 
             this.AutoScaleDimensions = new SizeF(7F, 15F);
             this.AutoScaleMode = AutoScaleMode.Font;
             this.BackColor = Color.FromArgb(50, 50, 50);
             this.ClientSize = new Size(666, 453);
+            this.Controls.Add(this.AudioComboBox);
             this.Controls.Add(this.DisplayProfileHotkey);
             this.Controls.Add(this.AudioCycleHotkey);
             this.Controls.Add(this.DeleteProfile);
@@ -221,5 +233,6 @@
         private TextBox DeleteProfile;
         private Button AudioCycleHotkey;
         private Button DisplayProfileHotkey;
+        private ComboBox AudioComboBox;
     }
 }

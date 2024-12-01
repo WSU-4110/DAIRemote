@@ -64,11 +64,11 @@ public class UDPServerHost : IDisposable
 
             return HandleReceivedData(handshakeMessage);
         }
-        catch (SocketException e)
+        catch (SocketException)
         {
             return false;
         }
-        catch (ObjectDisposedException e)
+        catch (ObjectDisposedException)
         {
             return false;
         }
@@ -124,7 +124,7 @@ public class UDPServerHost : IDisposable
                     break;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // Do nothing
             }
@@ -168,7 +168,7 @@ public class UDPServerHost : IDisposable
                 }
             }
         }
-        catch (ObjectDisposedException e)
+        catch (ObjectDisposedException)
         {
             // Do Nothing
         }

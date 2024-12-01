@@ -1,10 +1,5 @@
 ﻿namespace DisplayProfileManager;
-public class NotificationEventArgs : EventArgs
+public class NotificationEventArgs(string notificationText) : EventArgs
 {
-    public string NotificationText { get; }
-
-    public NotificationEventArgs(string notificationText)
-    {
-        NotificationText = notificationText;
-    }
+    public string NotificationText { get; } = notificationText;
 }

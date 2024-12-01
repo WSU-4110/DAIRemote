@@ -1,4 +1,3 @@
-using AudioManager;
 using DisplayProfileManager;
 using Microsoft.Win32;
 using UDPServerManagerForm;
@@ -7,12 +6,16 @@ namespace DAIRemote;
 
 public partial class DAIRemoteApplicationUI : Form
 {
-    private TrayIconManager trayIconManager;
-    private AudioOutputForm audioForm;
-    private Panel audioFormPanel;
+    private readonly TrayIconManager trayIconManager;
     private Form profileDialog;
     private ListBox profileListBox;
     private AudioManager.AudioDeviceManager audioManager;
+    public static event EventHandler<NotificationEventArgs> NotificationRequested;
+
+    public static void RequestNotification(string notificationText)
+    {
+        NotificationRequested?.Invoke(null, new NotificationEventArgs(notificationText));
+    }
 
     public DAIRemoteApplicationUI()
     {
@@ -43,17 +46,12 @@ public partial class DAIRemoteApplicationUI : Form
     {
         base.OnHandleCreated(e);
 
-        Task.Run(() =>
-        {
-            this.audioManager = AudioManager.AudioDeviceManager.GetInstance();
-
-            this.Invoke((MethodInvoker)(() => InitializeAudioDropDown()));
-        });
+        _ = Task.Run(() => this.Invoke((MethodInvoker)(() => InitializeAudioDropDown())));
     }
 
     private void OnProfilesChanged(object sender, FileSystemEventArgs e)
     {
-        this.BeginInvoke((MethodInvoker)delegate
+        _ = this.BeginInvoke((MethodInvoker)delegate
         {
             InitializeDisplayProfilesLayouts();
         });
@@ -66,7 +64,8 @@ public partial class DAIRemoteApplicationUI : Form
 
         foreach (string profile in DisplayConfig.GetDisplayProfiles())
         {
-            Button loadProfileButton = new()
+            // Create buttons for loading and deleting profiles
+            System.Windows.Forms.Button loadProfileButton = new()
             {
                 Text = Path.GetFileNameWithoutExtension(profile),
                 Width = 150,
@@ -76,7 +75,7 @@ public partial class DAIRemoteApplicationUI : Form
                 ForeColor = Color.White
             };
 
-            Button deleteProfileButton = new()
+            System.Windows.Forms.Button deleteProfileButton = new()
             {
                 Text = Path.GetFileNameWithoutExtension(profile),
                 Width = 150,
@@ -86,26 +85,24 @@ public partial class DAIRemoteApplicationUI : Form
                 ForeColor = Color.White
             };
 
+            // Set onClick actions
             loadProfileButton.Click += LoadProfileButton_Click;
-            DisplayLoadProfilesLayout.Controls.Add(loadProfileButton);
-
             deleteProfileButton.Click += DeleteProfileButton_Click;
+
+            // Add buttons to layout
+            DisplayLoadProfilesLayout.Controls.Add(loadProfileButton);
             DisplayDeleteProfilesLayout.Controls.Add(deleteProfileButton);
         }
     }
 
     private void DeleteProfileButton_Click(object sender, EventArgs e)
     {
-        Button clickedButton = sender as Button;
-        string profileName = clickedButton.Tag.ToString();
-        DisplayConfig.DeleteDisplaySettings(profileName);
+        _ = DisplayConfig.DeleteDisplaySettings(((System.Windows.Forms.Button)sender).Tag.ToString());
     }
 
     private void LoadProfileButton_Click(object sender, EventArgs e)
     {
-        Button clickedButton = sender as Button;
-        string profileName = clickedButton.Tag.ToString();
-        DisplayConfig.SetDisplaySettings(profileName);
+        _ = DisplayConfig.SetDisplaySettings(((System.Windows.Forms.Button)sender).Tag.ToString());
     }
 
     private void DAIRemoteApplicationUI_FormClosing(object sender, FormClosingEventArgs e)
@@ -119,22 +116,47 @@ public partial class DAIRemoteApplicationUI : Form
 
     private void InitializeAudioDropDown()
     {
-        int panelWidth = (int)(this.ClientSize.Width * 0.8);    // 80% of form width
-        int panelHeight = (int)(this.ClientSize.Height * 0.27); // 27% of form height
-        int panelX = 9;                                         // Offset from the left
-        int panelY = this.ClientSize.Height - panelHeight - 16; // Offset from the bottom
+        this.audioManager = AudioManager.AudioDeviceManager.GetInstance();
 
-        this.audioFormPanel = new Panel
+        AudioComboBox.SelectedIndexChanged += this.AudioComboBox_SelectedIndexChanged;
+        this.Controls.Add(AudioComboBox);
+
+        audioManager.AudioDevicesUpdated += OnAudioDevicesUpdated;
+        PopulateAudioComboBox(audioManager.ActiveDeviceNames);
+    }
+
+    private void OnAudioDevicesUpdated(List<string> devices)
+    {
+        Invoke(new Action(() => PopulateAudioComboBox(audioManager.ActiveDeviceNames)));
+    }
+
+    private void PopulateAudioComboBox(List<string> audioDevices)
+    {
+        AudioComboBox.Items.Clear();
+        string defaultAudioDevice = audioManager.GetDefaultAudioDevice().FullName;
+        int defaultIndex = -1;
+
+        for (int i = 0; i < audioDevices.Count; i++)
         {
-            Location = new System.Drawing.Point(panelX, panelY),
-            Size = new System.Drawing.Size(panelWidth, panelHeight),
-        };
+            _ = AudioComboBox.Items.Add(audioDevices[i]);
+            if (audioDevices[i] == defaultAudioDevice)
+            {
+                defaultIndex = i;
+            }
+        }
 
-        audioForm = AudioOutputForm.GetInstance(audioManager);
+        if (defaultIndex != -1)
+        {
+            AudioComboBox.SelectedIndex = defaultIndex;
+        }
+    }
 
-        this.Controls.Add(this.audioFormPanel);
-        audioFormPanel.Controls.Add(audioForm);
-        audioForm.Show();
+    private void AudioComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+    {
+        if (AudioComboBox.SelectedItem is string selectedDevice && selectedDevice != audioManager.GetDefaultAudioDevice().FullName)
+        {
+            audioManager.SetDefaultAudioDevice(selectedDevice);
+        }
     }
 
     private void BtnAddDisplayConfig_Click(object sender, EventArgs e)
@@ -165,14 +187,12 @@ public partial class DAIRemoteApplicationUI : Form
     {
         try
         {
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(startupKey, true))
-            {
-                key.SetValue(appName, $"\"{appPath}\"");
-            }
+            using RegistryKey key = Registry.CurrentUser.OpenSubKey(startupKey, true);
+            key.SetValue(appName, $"\"{appPath}\"");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            MessageBox.Show("Error adding to startup: " + ex.Message);
+            RequestNotification("Error adding to startup");
         }
     }
 
@@ -186,9 +206,9 @@ public partial class DAIRemoteApplicationUI : Form
                 key.DeleteValue(appName);
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            MessageBox.Show("Error removing from startup: " + ex.Message);
+            RequestNotification("Error removing from startup");
         }
     }
 
@@ -228,7 +248,7 @@ public partial class DAIRemoteApplicationUI : Form
         };
         profileDialog.Controls.Add(profileListBox);
 
-        Button actionButton = new()
+        System.Windows.Forms.Button actionButton = new()
         {
             Text = "Select Profile",
             Dock = DockStyle.Bottom,
@@ -240,7 +260,7 @@ public partial class DAIRemoteApplicationUI : Form
         {
             if (profileListBox.SelectedItem == null)
             {
-                MessageBox.Show("Please select a profile.");
+                _ = MessageBox.Show("Please select a profile.");
                 return;
             }
             profileDialog.Close();
@@ -252,13 +272,13 @@ public partial class DAIRemoteApplicationUI : Form
     {
         if (!Directory.Exists(folderPath))
         {
-            Directory.CreateDirectory(folderPath);
+            _ = Directory.CreateDirectory(folderPath);
         }
 
         profileListBox.Items.Clear();
         profileListBox.Items.AddRange(DisplayConfig.GetDisplayProfiles().Select(profile => Path.GetFileNameWithoutExtension(profile)).ToArray());
 
-        profileDialog.ShowDialog();
+        _ = profileDialog.ShowDialog();
         return profileListBox.SelectedItem?.ToString();
     }
 

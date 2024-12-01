@@ -6,28 +6,26 @@ public class TrayIconManager
 {
     private NotifyIcon trayIcon;
     private ContextMenuStrip trayMenu;
-    private Form form;
-    private HotkeyManager hotkeyManager;
-    private AudioManager.AudioDeviceManager audioManager;
+    private readonly Form form;
+    private readonly HotkeyManager hotkeyManager;
+    private readonly AudioManager.AudioDeviceManager audioManager;
 
-    private Image aboutIcon;
-    private Image DAIRemoteLogoIcon;
-    private Image deleteProfileIcon;
-    private Image exitIcon;
-    private Image monitorIcon;
-    private Image saveProfileIcon;
-    private Image turnOffAllMonitorsIcon;
-    private Image addProfileIcon;
-    private Image setHotkeyIcon;
-    private Image audioCyclingIcon;
-    private Image audioIcon;
+    private readonly Image aboutIcon;
+    private readonly Image deleteProfileIcon;
+    private readonly Image exitIcon;
+    private readonly Image monitorIcon;
+    private readonly Image saveProfileIcon;
+    private readonly Image turnOffAllMonitorsIcon;
+    private readonly Image addProfileIcon;
+    private readonly Image setHotkeyIcon;
+    private readonly Image audioCyclingIcon;
+    private readonly Image audioIcon;
 
     public TrayIconManager(Form form)
     {
         this.form = form;
 
         aboutIcon = Image.FromFile("Resources/About.ico");
-        DAIRemoteLogoIcon = Image.FromFile("Resources/DAIRemoteLogo.ico");
         deleteProfileIcon = Image.FromFile("Resources/DeleteProfile.ico");
         exitIcon = Image.FromFile("Resources/Exit.ico");
         monitorIcon = Image.FromFile("Resources/Monitor.ico");
@@ -90,7 +88,7 @@ public class TrayIconManager
 
     public void RefreshSystemTray()
     {
-        form.BeginInvoke((MethodInvoker)delegate
+        _ = form.BeginInvoke((MethodInvoker)delegate
         {
             PopulateTrayMenu(trayMenu);
         });
@@ -98,7 +96,7 @@ public class TrayIconManager
 
     private void OnProfilesChanged(object sender, FileSystemEventArgs e)
     {
-        form.BeginInvoke((MethodInvoker)delegate
+        _ = form.BeginInvoke((MethodInvoker)delegate
         {
             PopulateTrayMenu(trayMenu);
         });
@@ -106,7 +104,7 @@ public class TrayIconManager
 
     private void OnAudioDevicesChanged(List<string> devices)
     {
-        form.BeginInvoke((MethodInvoker)delegate
+        _ = form.BeginInvoke((MethodInvoker)delegate
         {
             PopulateTrayMenu(trayMenu);
         });
@@ -181,7 +179,7 @@ public class TrayIconManager
         });
 
         // Add audio cycling item to the hotkey submenu
-        setHotkeysMenuItem.DropDownItems.Add(audioCyclingHotkey);
+        _ = setHotkeysMenuItem.DropDownItems.Add(audioCyclingHotkey);
 
         // Add audio devices to hotkey submenu
         List<string> audioDevices = audioManager.ActiveDeviceNames;
@@ -206,15 +204,15 @@ public class TrayIconManager
                     }
                 }
             });
-            setHotkeysMenuItem.DropDownItems.Add(audioItem);
+            _ = setHotkeysMenuItem.DropDownItems.Add(audioItem);
         }
 
         // Separate audio hotkeys from display hotkeys in hotkey submenu
-        setHotkeysMenuItem.DropDownItems.Add(new ToolStripSeparator());
+        _ = setHotkeysMenuItem.DropDownItems.Add(new ToolStripSeparator());
 
         // Add load profiles label to the main menu and separate it
-        menu.Items.Add(loadProfilesLabel);
-        menu.Items.Add(new ToolStripSeparator());
+        _ = menu.Items.Add(loadProfilesLabel);
+        _ = menu.Items.Add(new ToolStripSeparator());
 
         // For each existing profile, add it as an item and modify it according
         // to each load, save, delete, and sethotkey submenu
@@ -222,7 +220,7 @@ public class TrayIconManager
         {
             string fileName = Path.GetFileNameWithoutExtension(profile);
             ToolStripMenuItem profileLoadItem = new(fileName, monitorIcon, (sender, e) => DisplayConfig.SetDisplaySettings(profile));
-            menu.Items.Add(profileLoadItem);
+            _ = menu.Items.Add(profileLoadItem);
 
             ToolStripMenuItem profileDeleteItem = new(fileName, monitorIcon, (sender, e) => DeleteProfile(profile));
 
@@ -252,16 +250,16 @@ public class TrayIconManager
                 }
             });
 
-            deleteProfileMenuItem.DropDownItems.Add(profileDeleteItem);
-            saveProfileMenuItem.DropDownItems.Add(profileSaveItem);
-            setHotkeysMenuItem.DropDownItems.Add(profileSetHotkey);
+            _ = deleteProfileMenuItem.DropDownItems.Add(profileDeleteItem);
+            _ = saveProfileMenuItem.DropDownItems.Add(profileSaveItem);
+            _ = setHotkeysMenuItem.DropDownItems.Add(profileSetHotkey);
         }
 
         // Separate loadable display profiles from the main menu
         // Then proceed to add the delete label, add new profile for save submenu
         // overwrite existing display profiles label in the save submenu,
         // and the set hotkeys label in the sethotkey submenu
-        menu.Items.Add(new ToolStripSeparator());
+        _ = menu.Items.Add(new ToolStripSeparator());
         deleteProfileMenuItem.DropDownItems.Insert(0, deleteProfilesLabel);
         deleteProfileMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
         saveProfileMenuItem.DropDownItems.Insert(0, addNewProfile);
@@ -272,9 +270,9 @@ public class TrayIconManager
         setHotkeysMenuItem.DropDownItems.Insert(1, new ToolStripSeparator());
 
         // Add the save, delete, and sethotkey submenus to the main system tray
-        menu.Items.Add(saveProfileMenuItem);
-        menu.Items.Add(deleteProfileMenuItem);
-        menu.Items.Add(setHotkeysMenuItem);
+        _ = menu.Items.Add(saveProfileMenuItem);
+        _ = menu.Items.Add(deleteProfileMenuItem);
+        _ = menu.Items.Add(setHotkeysMenuItem);
 
         // Allow the user to refresh audio devices
         // Helpful for when a new device is added
@@ -286,12 +284,12 @@ public class TrayIconManager
         ToolStripMenuItem exitMenuItem = new("Exit", exitIcon, OnExit);
 
         // Separate sleeping monitors, and add the sleep, about, and exit to the main system tray menu
-        menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add(refreshAudioDevices);
-        menu.Items.Add(turnOffAllMonitorsItem);
-        menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add(aboutMenuItem);
-        menu.Items.Add(exitMenuItem);
+        _ = menu.Items.Add(new ToolStripSeparator());
+        _ = menu.Items.Add(refreshAudioDevices);
+        _ = menu.Items.Add(turnOffAllMonitorsItem);
+        _ = menu.Items.Add(new ToolStripSeparator());
+        _ = menu.Items.Add(aboutMenuItem);
+        _ = menu.Items.Add(exitMenuItem);
     }
 
     public static void SaveNewProfile(string profilesFolderPath)
@@ -336,12 +334,12 @@ public class TrayIconManager
 
             if (string.IsNullOrEmpty(userInput))
             {
-                MessageBox.Show("Profile name cannot be empty.");
+                _ = MessageBox.Show("Profile name cannot be empty.");
                 return;
             }
 
             string profilePath = Path.Combine(profilesFolderPath, $"{userInput}.json");
-            DisplayConfig.SaveDisplaySettings(profilePath);
+            _ = DisplayConfig.SaveDisplaySettings(profilePath);
             inputForm.Close();
         };
 
@@ -363,18 +361,18 @@ public class TrayIconManager
         // Set the OK button as the action for Enter key
         inputForm.AcceptButton = okButton;
 
-        inputForm.ShowDialog();
+        _ = inputForm.ShowDialog();
     }
 
 
     private void SaveProfile(string profilePath)
     {
-        DisplayConfig.SaveDisplaySettings(profilePath);
+        _ = DisplayConfig.SaveDisplaySettings(profilePath);
     }
 
     private void DeleteProfile(string profilePath)
     {
-        DisplayConfig.DeleteDisplaySettings(profilePath);
+        _ = DisplayConfig.DeleteDisplaySettings(profilePath);
     }
     private void RefreshAudioDevices(object? sender, EventArgs e)
     {
@@ -395,7 +393,7 @@ public class TrayIconManager
                       "• Use an Android phone as a keyboard and mouse input\n\n" +
                       "All of these features can be controlled remotely, providing convenience from wherever you're sitting.";
 
-        MessageBox.Show(aboutMessage, "About DAIRemote", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        _ = MessageBox.Show(aboutMessage, "About DAIRemote", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     public void HideIcon()
