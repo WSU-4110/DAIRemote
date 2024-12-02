@@ -100,7 +100,6 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
                 // Stop the current connection before attempting a new one
                 MainActivity.connectionManager.Shutdown();
             } else {
-                Log.d("TEST", "Already connected");
                 InitiateInteractionPage("Already connected");
             }
             return true;
@@ -205,7 +204,6 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
 
             @Override
             public void onError(String error) {
-                Log.e("ServersPage", "No hosts available: " + error);
             }
         }, "Hello, DAIRemote");
 
@@ -248,7 +246,6 @@ public class ServersPage extends AppCompatActivity implements NavigationView.OnN
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        Log.d("Navigation", "Item selected: " + itemId);
 
         if (itemId == R.id.nav_remote) {
             if (ConnectionManager.GetConnectionEstablished()) {

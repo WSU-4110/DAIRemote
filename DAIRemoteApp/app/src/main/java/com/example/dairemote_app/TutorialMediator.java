@@ -140,12 +140,10 @@ public class TutorialMediator implements IBuilderTemplate {
 
     public void showNextStep() {
         setCurrentStep(getCurrentStep() + 1);
-        Log.d("InteractiveTutorial", "Starting next step");
         showSteps(getCurrentStep());
     }
 
     public void showSteps(int step) {
-        Log.i("InteractiveTutorial", "Show step: " + step);
         switch (step) {
             case 0:
                 ShowStartStep("Interactive Tutorial",
@@ -190,7 +188,6 @@ public class TutorialMediator implements IBuilderTemplate {
 
                 break;
             default:
-                Log.d("InteractiveTutorial", "Invalid step");
                 break;
         }
     }

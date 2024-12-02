@@ -38,7 +38,6 @@ public class AboutPage extends AppCompatActivity implements NavigationView.OnNav
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        Log.d("Navigation", "Item selected: " + itemId);
 
         if (itemId == R.id.nav_remote) {
             if (ConnectionManager.GetConnectionEstablished()) {

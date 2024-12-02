@@ -28,7 +28,6 @@ public class SocketManager {
         try {
             socket = new DatagramSocket();
         } catch (SocketException e) {
-            Log.e("SocketManager", "Socket creation failed: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -72,10 +71,7 @@ public class SocketManager {
             GetSocket().setSoTimeout(75);
 
             return new String(GetPacket().getData(), 0, GetPacket().getLength());
-        } catch (SocketTimeoutException e) {
-            Log.i("ConnectionManager", "No response received within the timeout: " + e.getMessage());
-        } catch (Exception e) {
-            Log.e("ConnectionManager", "Error waiting for response: " + e.getMessage());
+        } catch (Exception ignored) {
         }
         return "";
     }

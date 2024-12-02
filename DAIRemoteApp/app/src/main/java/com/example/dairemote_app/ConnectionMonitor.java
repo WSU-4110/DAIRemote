@@ -2,7 +2,6 @@ package com.example.dairemote_app;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import java.net.DatagramSocket;
 import java.util.concurrent.CompletableFuture;
@@ -90,7 +89,6 @@ public class ConnectionMonitor {
 
     public boolean SendHeartbeat() {
         if (heartbeatExecutorService.isShutdown()) {
-            Log.e("ConnectionMonitor", "Heartbeat service is not running, cannot send heartbeat.");
             return false;
         }
 
@@ -102,13 +100,9 @@ public class ConnectionMonitor {
                     SetHeartbeatResponse(GetHeartbeatSocket().WaitForResponse(3000));
 
                     if (GetHeartbeatResponse().equalsIgnoreCase("HeartBeat Ack")) {
-                        Log.d("ConnectionManager", "Received heartbeat response: " + GetHeartbeatResponse());
                         return true;
                     }
-                    Log.e("ConnectionManager", "heartbeat was not acknowledged, response was: " + GetHeartbeatResponse());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Log.e("ConnectionMonitor", "Error sending message from sendMessage(String message): " + e.getMessage());
+                } catch (Exception ignored) {
                 }
                 return false;
             }, heartbeatExecutorService);
