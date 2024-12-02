@@ -25,16 +25,16 @@ public class TrayIconManager
     {
         this.form = form;
 
-        aboutIcon = Image.FromFile("Resources/About.ico");
-        deleteProfileIcon = Image.FromFile("Resources/DeleteProfile.ico");
-        exitIcon = Image.FromFile("Resources/Exit.ico");
-        monitorIcon = Image.FromFile("Resources/Monitor.ico");
-        saveProfileIcon = Image.FromFile("Resources/SaveProfile.ico");
-        turnOffAllMonitorsIcon = Image.FromFile("Resources/TurnOffAllMonitors.ico");
-        addProfileIcon = Image.FromFile("Resources/AddProfile.ico");
-        setHotkeyIcon = Image.FromFile("Resources/MonitorSetHotkey.ico");
-        audioCyclingIcon = Image.FromFile("Resources/AudioCycling.ico");
-        audioIcon = Image.FromFile("Resources/Audio.ico");
+        aboutIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "About.ico"));
+        deleteProfileIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "DeleteProfile.ico"));
+        exitIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Exit.ico"));
+        monitorIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Monitor.ico"));
+        saveProfileIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "SaveProfile.ico"));
+        turnOffAllMonitorsIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "TurnOffAllMonitors.ico"));
+        addProfileIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "AddProfile.ico"));
+        setHotkeyIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "MonitorSetHotkey.ico"));
+        audioCyclingIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "AudioCycling.ico"));
+        audioIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Audio.ico"));
 
         audioManager = AudioManager.AudioDeviceManager.GetInstance();
         // Registers any prexisting hotkeys, otherwise initializes
@@ -56,7 +56,7 @@ public class TrayIconManager
         trayIcon = new NotifyIcon
         {
             Text = "DAIRemote",
-            Icon = new Icon("Resources/DAIRemoteLogo.ico"),
+            Icon = new Icon(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "DAIRemoteLogo.ico")),
             ContextMenuStrip = trayMenu,
             Visible = true
         };

@@ -28,7 +28,7 @@ public partial class DAIRemoteApplicationUI : Form
 
         InitializeComponent();
 
-        this.Icon = new Icon("Resources/DAIRemoteLogo.ico");
+        this.Icon = new Icon(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "DAIRemoteLogo.ico"));
         trayIconManager = new TrayIconManager(this);
         this.FormClosing += DAIRemoteApplicationUI_FormClosing;
         this.StartPosition = FormStartPosition.CenterScreen;
