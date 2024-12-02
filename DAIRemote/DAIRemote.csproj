@@ -2,11 +2,18 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+	<TargetFramework>net8.0-windows</TargetFramework>
+	<SelfContained>true</SelfContained>
+	<PublishSingleFile>true</PublishSingleFile>
+	<IncludeNativeLibrariesForSelfExtract>false</IncludeNativeLibrariesForSelfExtract>
+	<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Platforms>AnyCPU;x64</Platforms>
+	<DebugType>embedded</DebugType>
   </PropertyGroup>
   
 
