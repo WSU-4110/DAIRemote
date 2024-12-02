@@ -27,7 +27,7 @@ public class ConnectionManager {
     private String hostRequesterResponse;
     private static String serverResponse;
     private static InetAddress inetAddress;
-    private static final int serverPort = 11000;
+    private static final int serverPort = 9416;
     private static HostSearchCallback hostHandler;
 
     public static byte[] receiveData = new byte[1024];

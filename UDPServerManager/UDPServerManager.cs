@@ -13,7 +13,7 @@ public class UDPServerHost : IDisposable
     private UdpClient udpServer;
     private IPEndPoint remoteEP;
     private string clientAddress;
-    private readonly int serverPort = 11000;
+    private readonly int serverPort = 9416;
     private DateTime lastHeartbeatTime;
     private TimeSpan heartbeatTimeout;
     private AudioManager.AudioDeviceManager audioManager;
