@@ -1,11 +1,31 @@
 # Installation Guide
+This guide provides instructions for both common users who want to use the prebuilt application files and advanced users interested in building the project from source.
 
-## Dependencies
+## Prebuilt Applications
+### .NET Application
+1. Download the Prebuilt Executable
+   - Visit the [Releases](https://github.com/WSU-4110/DAIRemote/releases/tag/Release) page and download the latest version of the ``DAIRemote.zip`` file.
+2. Run the Executable
+   - Extract the downloaded files into a folder of your choice.
+   - Double-click the .exe file to start the application.
+### Android Application
+1. Download the APK
+   - Visit the [Releases](https://github.com/WSU-4110/DAIRemote/releases/tag/Release) page and download the latest ``DAIRemote.apk`` file.
+2. Install the APK on Your Android Device
+   - Transfer the APK to your Android device using a USB cable or cloud storage.
+   - Open the APK file on your device. You may need to enable "Install Unknown Apps" from your device settings.
+   - Follow the on-screen instructions to complete the installation.
+3. Run the Application
+   - Locate the installed app on your device, tap it, and start using the application.
+
+
+## Building from Source
+### Dependencies
 * .NET SDK: Version 8.0 or higher (you can download it from [here](https://dotnet.microsoft.com/en-us/download)). <br />
 * Visual Studio or VSCode (optional for development).
 * [Android Studio](https://developer.android.com/studio?authuser=1)
 
-## Installation Instructions
+### Installation Instructions
 #### Clone The Repository
 ```
 git clone https://github.com/your-username/DAIRemote.git
@@ -21,7 +41,7 @@ Compile the project to ensure everything is set up correctly:
 ```
 dotnet build
 ```
-## Executing the Program
+### Executing the Program
 #### Navigate to the Project Directory
 Ensure you're in the directory where the ```.csproj``` file is located:
 ```
@@ -33,13 +53,22 @@ Start the application using the following command:
 dotnet run
 ```
 
-## Running the Android Application
-### Option 1 (Using BlueStacks):
+### Running the Android Application
+#### Option 1 (Using Smartphone):
+1. On your smartphone, go to **Settings<About Phone<Software Information**
+   - Tap on "Build Number" 7 times in a row to enable **Developer Mode**.
+2. Exit back to the Settings Page and go to **Developer Options**
+   - Connect your phone to your PC using a USB cable and click on **USB Debugging** to enable it.
+3. **Open Android Studio**
+   - Now run the app ensuring the virtual device paired is with yours.
+   - The Android applicationa should appear on your smartphone, ready to be used. 
+
+#### Option 2 (Using BlueStacks):
 * Download [BlueStacks](https://www.bluestacks.com/download.html)
 * Navigate to the folder where the APK file is stored (e.g. DAIRemoteApp/app/build/outputs/apk/debug)
 * Right-click on the APK file and select "Open with BlueStacks" and the Android app should run.
 
-### Option 2 (Command Line):
+#### Option 3 (Command Line):
 1. **Ensure Android SDK is in PATH**:
    - Check if the SDK is located at:
      ```
@@ -71,16 +100,6 @@ dotnet run
    emulator -avd <yourAVD>
    ```
    - Replace `<yourAVD>` with the name of the AVD you wish to run.
-
-### Option 3 (Using Smartphone):
-1. On your smartphone, go to **Settings<About Phone<Software Information**
-   - Tap on "Build Number" 7 times in a row to enable **Developer Mode**.
-2. Exit back to the Settings Page and go to **Developer Options**
-   - Connect your phone to your PC using a USB cable and click on **USB Debugging** to enable it.
-3. **Open Android Studio**
-   - Now run the app ensuring the virtual device paired is with yours.
-   - The Android applicationa should appear on your smartphone, ready to be used. 
-
 
 ## Debugging
 If you encounter an error after running `gradlew assembleDebug` related to having an older version of Java, follow these steps:
