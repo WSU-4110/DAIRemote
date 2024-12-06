@@ -214,6 +214,7 @@
             this.Controls.Add(this.BtnSaveDisplayConfig);
             this.Name = "DAIRemoteApplicationUI";
             this.Text = "DAIRemote";
+            Resize += this.DAIRemoteApplicationUI_Resize;
             ((System.ComponentModel.ISupportInitialize)this.Logo).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

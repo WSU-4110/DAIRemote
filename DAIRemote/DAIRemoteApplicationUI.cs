@@ -109,8 +109,8 @@ public partial class DAIRemoteApplicationUI : Form
     {
         if (e.CloseReason == CloseReason.UserClosing)
         {
-            e.Cancel = false;
-            trayIconManager.HideIcon();
+            this.Hide();
+            e.Cancel = true;
         }
     }
 
@@ -290,6 +290,14 @@ public partial class DAIRemoteApplicationUI : Form
         {
             trayIconManager.GetHotkeyManager().ShowHotkeyInput(profile, () => DisplayConfig.SetDisplaySettings(profile));
             trayIconManager.RefreshSystemTray();
+        }
+    }
+
+    private void DAIRemoteApplicationUI_Resize(object sender, EventArgs e)
+    {
+        if (FormWindowState.Minimized == this.WindowState)
+        {
+            this.Hide();
         }
     }
 }
