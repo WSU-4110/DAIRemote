@@ -231,6 +231,7 @@ public partial class DAIRemoteApplicationUI : Form
     private void BtnSetAudioHotkey_Click(object sender, EventArgs e)
     {
         trayIconManager.GetHotkeyManager().ShowHotkeyInput("Audio Cycling", audioManager.CycleAudioDevice);
+        trayIconManager.RefreshSystemTray();
     }
 
     private void InitializeDisplayProfilesList()
