@@ -31,17 +31,17 @@ class MouseManager
 
     public static void SetCursorPosition(int x, int y)
     {
-        SetCursorPos(x, y);
+        _ = SetCursorPos(x, y);
     }
 
     public static void SetCursorPosition(MousePoint point)
     {
-        SetCursorPos(point.X, point.Y);
+        _ = SetCursorPos(point.X, point.Y);
     }
 
     public static MousePoint GetCursorPosition()
     {
-        GetCursorPos(out MousePoint cursorPos);
+        _ = GetCursorPos(out MousePoint cursorPos);
         return cursorPos;
     }
 

@@ -5,13 +5,16 @@ using System.Runtime.InteropServices;
 namespace DAIRemote;
 public partial class HotkeyManager : Form
 {
-    private AudioManager.AudioDeviceManager audioManager;
+    private AudioManager.AudioDeviceManager audioManager = AudioManager.AudioDeviceManager.GetInstance();
     public Dictionary<string, HotkeyConfig> hotkeyConfigs;
     private readonly string ConfigFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/hotkeys.json");
+    private uint modifiers = 0;
+    private uint keyCode = 0;
+    private string action;
 
     public HotkeyManager()
     {
-        audioManager = AudioManager.AudioDeviceManager.GetInstance();
+        InitializeComponent();
         LoadHotkeyConfigs();
     }
 
@@ -51,7 +54,6 @@ public partial class HotkeyManager : Form
         if (File.Exists(ConfigFilePath))
         {
             hotkeyConfigs = JsonConvert.DeserializeObject<Dictionary<string, HotkeyConfig>>(File.ReadAllText(ConfigFilePath));
-            InitializeHotkeys();
         }
         else
         {
@@ -74,7 +76,7 @@ public partial class HotkeyManager : Form
     {
         foreach (var config in hotkeyConfigs.Values)
         {
-            RegisterHotKey(this.Handle, config.Action.GetHashCode(), config.Modifiers, config.Key);
+            _ = RegisterHotKey(this.Handle, config.Action.GetHashCode(), config.Modifiers, config.Key);
         }
     }
 
@@ -82,7 +84,7 @@ public partial class HotkeyManager : Form
     {
         foreach (var config in hotkeyConfigs.Values)
         {
-            UnregisterHotKey(this.Handle, config.Action.GetHashCode());
+            _ = UnregisterHotKey(this.Handle, config.Action.GetHashCode());
         }
     }
 
@@ -92,124 +94,84 @@ public partial class HotkeyManager : Form
         foreach (string profile in DisplayConfig.GetDisplayProfiles())
         {
             string fileName = Path.GetFileNameWithoutExtension(profile);
-            if (hotkeyConfigs.ContainsKey(fileName))
+            if (hotkeyConfigs.TryGetValue(fileName, out HotkeyConfig? display))
             {
-                hotkeyConfigs[fileName].Callback = () => DisplayConfig.SetDisplaySettings(profile);
+                display.Callback = () => DisplayConfig.SetDisplaySettings(profile);
             }
         }
 
         // Register Audio Cycling Callback
-        if (hotkeyConfigs.ContainsKey("Audio Cycling"))
+        if (hotkeyConfigs.TryGetValue("Audio Cycling", out HotkeyConfig? audioCycling))
         {
-            hotkeyConfigs["Audio Cycling"].Callback = audioManager.CycleAudioDevice;
+            audioCycling.Callback = audioManager.CycleAudioDevice;
         }
 
         // Register Audio Callbacks
         foreach (string audioDeviceName in audioManager.ActiveDeviceNames)
         {
-            if (hotkeyConfigs.ContainsKey(audioDeviceName))
+            if (hotkeyConfigs.TryGetValue(audioDeviceName, out HotkeyConfig? audioDevices))
             {
-                hotkeyConfigs[audioDeviceName].Callback = () => audioManager.SetDefaultAudioDevice(audioDeviceName);
+                audioDevices.Callback = () => audioManager.SetDefaultAudioDevice(audioDeviceName);
             }
         }
     }
 
     public void ShowHotkeyInput(string action, Action functionAction)
     {
-        Form inputForm = new()
+        HotkeyManager HotkeyInputForm = new()
         {
-            Text = $"Set Hotkey for {action}",
-            Size = new Size(300, 150),
-            StartPosition = FormStartPosition.CenterScreen
+            action = action,
+            Text = $"Set Hotkey for {action}"
         };
-
-        TextBox inputBox = new()
-        {
-            Dock = DockStyle.Top,
-            ReadOnly = true     // Prevents Manual input
-        };
-
-        Button okButton = new()
-        {
-            Text = "OK",
-            Dock = DockStyle.Bottom,
-            DialogResult = DialogResult.OK
-        };
-
-        Button clearButton = new()
-        {
-            Text = "Clear",
-            Dock = DockStyle.Bottom
-        };
-
-        Button cancelButton = new()
-        {
-            Text = "Cancel",
-            Dock = DockStyle.Bottom,
-            DialogResult = DialogResult.Cancel
-        };
-
-        Panel buttonPanel = new()
-        {
-            Dock = DockStyle.Bottom
-        };
-        buttonPanel.Controls.Add(clearButton);
-        buttonPanel.Controls.Add(okButton);
-        buttonPanel.Controls.Add(cancelButton);
-
-        // Set the OK button as the action for Enter key
-        inputForm.AcceptButton = okButton;
 
         if (hotkeyConfigs.ContainsKey(action))
         {
-            inputBox.Text = GetHotkeyText(hotkeyConfigs[action]);
+            HotkeyInputForm.HotkeyInputBox.Text = GetHotkeyText(hotkeyConfigs[action]);
         }
 
-        uint modifiers = 0;
-        uint keyCode = 0;
-
-        clearButton.Click += (s, e) =>
+        HotkeyInputForm.HotkeyInputBox.KeyDown += (s, e) =>
         {
-            inputBox.Text = "Cleared";
-            modifiers = 0;
-            keyCode = 0;
+            HotkeyInputForm.modifiers = 0;
+            if (e.Control) HotkeyInputForm.modifiers |= MOD_CONTROL;
+            if (e.Alt) HotkeyInputForm.modifiers |= MOD_ALT;
+            if (e.Shift) HotkeyInputForm.modifiers |= MOD_SHIFT;
+            HotkeyInputForm.keyCode = (uint)e.KeyCode;
+
+            // Display the combination in the input box
+            HotkeyInputForm.HotkeyInputBox.Text = $"{(e.Control ? "Ctrl+" : "")}{(e.Alt ? "Alt+" : "")}{(e.Shift ? "Shift+" : "")}{e.KeyCode}";
+        };
+
+        HotkeyInputForm.HotkeyFormOkBtn.Click += (sender, e) =>
+        {
+            if (HotkeyInputForm.keyCode != 0)
+            {
+                HotkeyConfig config = new()
+                {
+                    Action = action,
+                    Modifiers = HotkeyInputForm.modifiers,
+                    Key = HotkeyInputForm.keyCode,
+                    Callback = functionAction
+                };
+
+                RegisterNewHotkey(action, config);
+            }
+        };
+
+        HotkeyInputForm.HotkeyFormClearBtn.Click += (sender, e) =>
+        {
+            HotkeyInputForm.HotkeyInputBox.Text = "Cleared";
+            HotkeyInputForm.modifiers = 0;
+            HotkeyInputForm.keyCode = 0;
 
             UnregisterHotkey(action);
         };
 
-        inputBox.KeyDown += (s, args) =>
+        HotkeyInputForm.HotkeyFormCancelBtn.Click += (sender, e) =>
         {
-            modifiers = 0;
-            if (args.Control) modifiers |= MOD_CONTROL;
-            if (args.Alt) modifiers |= MOD_ALT;
-            if (args.Shift) modifiers |= MOD_SHIFT;
-            keyCode = (uint)args.KeyCode;
-
-            // Display the combination in the input box
-            inputBox.Text = $"{(args.Control ? "Ctrl+" : "")}{(args.Alt ? "Alt+" : "")}{(args.Shift ? "Shift+" : "")}{args.KeyCode}";
+            HotkeyInputForm.Close();
         };
 
-        inputForm.Controls.Add(inputBox);
-        inputForm.Controls.Add(buttonPanel);
-
-        DialogResult result = inputForm.ShowDialog();
-
-        if (result == DialogResult.OK && keyCode != 0)
-        {
-            HotkeyConfig config = new()
-            {
-                Action = action,
-                Modifiers = modifiers,
-                Key = keyCode,
-                Callback = functionAction
-            };
-
-            RegisterNewHotkey(action, config);
-        }
-        else if (result == DialogResult.Cancel)
-        {
-            inputForm.Close();
-        }
+        HotkeyInputForm.ShowDialog();
     }
 
     private void RegisterNewHotkey(string action, HotkeyConfig newConfig)
@@ -217,7 +179,7 @@ public partial class HotkeyManager : Form
         UnregisterHotkey(action);
         hotkeyConfigs[action] = newConfig;
         SaveHotkeyConfigs();
-        RegisterHotKey(this.Handle, action.GetHashCode(), newConfig.Modifiers, newConfig.Key);
+        _ = RegisterHotKey(this.Handle, action.GetHashCode(), newConfig.Modifiers, newConfig.Key);
     }
 
     protected override void WndProc(ref Message m)
@@ -234,11 +196,5 @@ public partial class HotkeyManager : Form
             }
         }
         base.WndProc(ref m);
-    }
-
-    protected override void OnFormClosing(FormClosingEventArgs e)
-    {
-        UnregisterHotkeys();         // Unregister hotkeys on application close
-        base.OnFormClosing(e);
     }
 }

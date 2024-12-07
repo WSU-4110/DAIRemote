@@ -40,6 +40,7 @@ public class TrayIconManager
         // Registers any prexisting hotkeys, otherwise initializes
         // an empty dictionary in preparation for hotkeys.
         hotkeyManager = new HotkeyManager();
+        hotkeyManager.InitializeHotkeys();
 
         InitializeTrayIcon();
         DisplayConfig.NotificationRequested += OnNotificationRequested;
@@ -421,6 +422,7 @@ public class TrayIconManager
     private void OnExit(object sender, EventArgs e)
     {
         HideIcon();
+        GetHotkeyManager().UnregisterHotkeys();
         Application.Exit();
     }
 

@@ -109,8 +109,8 @@ public partial class DAIRemoteApplicationUI : Form
     {
         if (e.CloseReason == CloseReason.UserClosing)
         {
-            e.Cancel = false;
-            trayIconManager.HideIcon();
+            this.Hide();
+            e.Cancel = true;
         }
     }
 
@@ -231,6 +231,7 @@ public partial class DAIRemoteApplicationUI : Form
     private void BtnSetAudioHotkey_Click(object sender, EventArgs e)
     {
         trayIconManager.GetHotkeyManager().ShowHotkeyInput("Audio Cycling", audioManager.CycleAudioDevice);
+        trayIconManager.RefreshSystemTray();
     }
 
     private void InitializeDisplayProfilesList()
@@ -289,6 +290,14 @@ public partial class DAIRemoteApplicationUI : Form
         {
             trayIconManager.GetHotkeyManager().ShowHotkeyInput(profile, () => DisplayConfig.SetDisplaySettings(profile));
             trayIconManager.RefreshSystemTray();
+        }
+    }
+
+    private void DAIRemoteApplicationUI_Resize(object sender, EventArgs e)
+    {
+        if (FormWindowState.Minimized == this.WindowState)
+        {
+            this.Hide();
         }
     }
 }
