@@ -1,4 +1,4 @@
-using DisplayProfileManager;
+﻿using DisplayProfileManager;
 using Microsoft.Win32;
 using UDPServerManagerForm;
 
@@ -60,49 +60,193 @@ public partial class DAIRemoteApplicationUI : Form
     private void InitializeDisplayProfilesLayouts()
     {
         DisplayLoadProfilesLayout.Controls.Clear();
-        DisplayDeleteProfilesLayout.Controls.Clear();
 
         foreach (string profile in DisplayConfig.GetDisplayProfiles())
         {
-            // Create buttons for loading and deleting profiles
-            System.Windows.Forms.Button loadProfileButton = new()
+            // Create a panel to represent a profile tile
+            Panel profileTile = new()
             {
-                Text = Path.GetFileNameWithoutExtension(profile),
-                Width = 150,
-                Height = 50,
-                Margin = new Padding(10),
-                Tag = profile,
-                ForeColor = Color.White
+                Width = 100,
+                Height = 100,
+                BackgroundImage = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Monitor.ico")),
+                BackgroundImageLayout = ImageLayout.Center,
+                Tag = profile
             };
 
-            System.Windows.Forms.Button deleteProfileButton = new()
+            // Set default click action for the panel (Load Profile)
+            profileTile.Click += (sender, e) => LoadProfileButton_Click(sender, e);
+
+            // Apply a border color using a Paint event
+            profileTile.Paint += (sender, e) =>
             {
-                Text = Path.GetFileNameWithoutExtension(profile),
-                Width = 150,
-                Height = 50,
-                Margin = new Padding(10),
-                Tag = profile,
-                ForeColor = Color.White
+                ControlPaint.DrawBorder(
+                    e.Graphics,
+                    profileTile.ClientRectangle,
+                    Color.LightSlateGray,  // Border color
+                    ButtonBorderStyle.Solid);
             };
 
-            // Set onClick actions
-            loadProfileButton.Click += LoadProfileButton_Click;
-            deleteProfileButton.Click += DeleteProfileButton_Click;
+            // Create a label for the profile name
+            Label profileNameLabel = new()
+            {
+                Text = Path.GetFileNameWithoutExtension(profile),
+                AutoSize = false,
+                TextAlign = ContentAlignment.TopCenter,
+                BackColor = Color.Transparent,
+                Font = new Font(FontFamily.GenericSansSerif, 10, FontStyle.Bold),
+                Width = 90,
+                Height = 85,
+                Top = 15,
+                Left = (100 - 90) / 2, // Center horizontally within the panel
+                Tag = profile
+            };
+            profileNameLabel.Click += (sender, e) => LoadProfileButton_Click(sender, e);
 
-            // Add buttons to layout
-            DisplayLoadProfilesLayout.Controls.Add(loadProfileButton);
-            DisplayDeleteProfilesLayout.Controls.Add(deleteProfileButton);
+            // Create a button for additional options
+            Button optionsButton = new()
+            {
+                Text = "⋮",
+                Width = 22,
+                Height = 22,
+                BackColor = Color.DarkGray,
+                ForeColor = Color.White,
+                Tag = profile,
+                Top = 78,
+                Left = 78
+            };
+
+            // Add options menu on button click
+            optionsButton.Click += (sender, e) => ShowProfileOptionsMenu(sender);
+
+            // Add components to the profile tile
+            profileTile.Controls.Add(optionsButton);
+            profileTile.Controls.Add(profileNameLabel);
+
+            // Add the tile to the layout
+            DisplayLoadProfilesLayout.Controls.Add(profileTile);
         }
     }
 
-    private void DeleteProfileButton_Click(object sender, EventArgs e)
+    private void ShowProfileOptionsMenu(object sender)
     {
-        _ = DisplayConfig.DeleteDisplaySettings(((System.Windows.Forms.Button)sender).Tag.ToString());
+        Button optionsButton = sender as Button;
+        ContextMenuStrip optionsMenu = new();
+
+        // Add Rename option
+        ToolStripMenuItem renameItem = new("Rename");
+        renameItem.Click += (s, e) => RenameProfileButton_Click(optionsButton, e);
+
+        // Add Save option
+        ToolStripMenuItem saveItem = new("Save");
+        saveItem.Click += (s, e) => SaveProfileButton_Click(optionsButton, e);
+
+        // Add Delete option
+        ToolStripMenuItem deleteItem = new("Delete");
+        deleteItem.Click += (s, e) => DeleteProfileButton_Click(optionsButton, e);
+
+        // Add options to the context menu
+        optionsMenu.Items.Add(renameItem);
+        optionsMenu.Items.Add(saveItem);
+        optionsMenu.Items.Add(deleteItem);
+
+        // Show the menu at the button's location
+        optionsMenu.Show(optionsButton, new Point(0, optionsButton.Height));
     }
 
     private void LoadProfileButton_Click(object sender, EventArgs e)
     {
-        _ = DisplayConfig.SetDisplaySettings(((System.Windows.Forms.Button)sender).Tag.ToString());
+        // Tag from either a Panel or Label
+        var control = sender as Control;
+        string profilePath = control?.Tag?.ToString();
+
+        if (!string.IsNullOrEmpty(profilePath))
+        {
+            _ = DisplayConfig.SetDisplaySettings(profilePath);
+        }
+    }
+
+    private void RenameProfileButton_Click(object sender, EventArgs e)
+    {
+        string profilePath = ((sender as Button)?.Tag ?? (sender as Panel)?.Tag).ToString();
+        Form inputForm = new()
+        {
+            Width = 400,
+            Height = 150,
+            Text = "Rename Profile",
+            FormBorderStyle = FormBorderStyle.FixedDialog,
+            StartPosition = FormStartPosition.CenterScreen,
+            MinimizeBox = false,
+            MaximizeBox = false
+        };
+
+        Label promptLabel = new()
+        {
+            Left = 20,
+            Top = 20,
+            Text = "Please enter the new profile name:",
+            AutoSize = true
+        };
+
+        TextBox inputBox = new()
+        {
+            Left = 20,
+            Top = 50,
+            Width = 350
+        };
+
+        Button okButton = new()
+        {
+            Text = "OK",
+            Left = 190,
+            Width = 80,
+            Top = 80,
+            DialogResult = DialogResult.OK
+        };
+        okButton.Click += (sender, e) =>
+        {
+            string userInput = inputBox.Text;
+
+            if (string.IsNullOrEmpty(userInput))
+            {
+                _ = MessageBox.Show("Profile name cannot be empty.");
+                return;
+            }
+
+            _ = DisplayConfig.RenameDisplayProfile(profilePath, userInput);
+            inputForm.Close();
+        };
+
+        Button cancelButton = new()
+        {
+            Text = "Cancel",
+            Left = 290,
+            Width = 80,
+            Top = 80,
+            DialogResult = DialogResult.Cancel
+        };
+        cancelButton.Click += (sender, e) => inputForm.Close();
+
+        inputForm.Controls.Add(promptLabel);
+        inputForm.Controls.Add(inputBox);
+        inputForm.Controls.Add(okButton);
+        inputForm.Controls.Add(cancelButton);
+
+        // Set the OK button as the action for Enter key
+        inputForm.AcceptButton = okButton;
+
+        _ = inputForm.ShowDialog();
+    }
+
+    private void SaveProfileButton_Click(object sender, EventArgs e)
+    {
+        string profilePath = ((sender as Button)?.Tag ?? (sender as Panel)?.Tag).ToString();
+        _ = DisplayConfig.SaveDisplaySettings(profilePath);
+    }
+
+    private void DeleteProfileButton_Click(object sender, EventArgs e)
+    {
+        string profilePath = ((sender as Button)?.Tag ?? (sender as Panel)?.Tag).ToString();
+        _ = DisplayConfig.DeleteDisplaySettings(profilePath);
     }
 
     private void DAIRemoteApplicationUI_FormClosing(object sender, FormClosingEventArgs e)
@@ -163,7 +307,6 @@ public partial class DAIRemoteApplicationUI : Form
     {
         TrayIconManager.SaveNewProfile(DisplayConfig.GetDisplayProfilesDirectory());
         DisplayLoadProfilesLayout.Controls.Clear();
-        DisplayDeleteProfilesLayout.Controls.Clear();
         InitializeDisplayProfilesLayouts();
     }
 

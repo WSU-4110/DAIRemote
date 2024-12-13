@@ -26,12 +26,10 @@
             this.checkBoxStartup = new CheckBox();
             this.BtnCycleAudioOutputs = new Button();
             this.DisplayLoadProfilesLayout = new FlowLayoutPanel();
-            this.DisplayDeleteProfilesLayout = new FlowLayoutPanel();
             this.Logo = new PictureBox();
             this.LogoName = new TextBox();
             this.Description = new TextBox();
             this.LoadProfile = new TextBox();
-            this.DeleteProfile = new TextBox();
             this.AudioCycleHotkey = new Button();
             this.DisplayProfileHotkey = new Button();
             this.AudioComboBox = new ComboBox();
@@ -77,18 +75,10 @@
             // DisplayLoadProfilesLayout
             // 
             this.DisplayLoadProfilesLayout.AutoScroll = true;
-            this.DisplayLoadProfilesLayout.Location = new Point(283, 21);
+            this.DisplayLoadProfilesLayout.Location = new Point(283, 32);
             this.DisplayLoadProfilesLayout.Name = "DisplayLoadProfilesLayout";
-            this.DisplayLoadProfilesLayout.Size = new Size(372, 198);
+            this.DisplayLoadProfilesLayout.Size = new Size(320, 355);
             this.DisplayLoadProfilesLayout.TabIndex = 6;
-            // 
-            // DisplayDeleteProfilesLayout
-            // 
-            this.DisplayDeleteProfilesLayout.AutoScroll = true;
-            this.DisplayDeleteProfilesLayout.Location = new Point(283, 245);
-            this.DisplayDeleteProfilesLayout.Name = "DisplayDeleteProfilesLayout";
-            this.DisplayDeleteProfilesLayout.Size = new Size(372, 198);
-            this.DisplayDeleteProfilesLayout.TabIndex = 7;
             // 
             // Logo
             // 
@@ -135,29 +125,14 @@
             this.LoadProfile.BorderStyle = BorderStyle.None;
             this.LoadProfile.Font = new Font("Segoe UI", 9F, FontStyle.Underline, GraphicsUnit.Point, 0);
             this.LoadProfile.ForeColor = Color.LightSkyBlue;
-            this.LoadProfile.Location = new Point(401, 0);
+            this.LoadProfile.Location = new Point(388, 11);
             this.LoadProfile.Margin = new Padding(3, 2, 3, 2);
             this.LoadProfile.Name = "LoadProfile";
             this.LoadProfile.ReadOnly = true;
             this.LoadProfile.Size = new Size(109, 16);
             this.LoadProfile.TabIndex = 11;
-            this.LoadProfile.Text = "Load Profile";
+            this.LoadProfile.Text = "Current Profiles";
             this.LoadProfile.TextAlign = HorizontalAlignment.Center;
-            // 
-            // DeleteProfile
-            // 
-            this.DeleteProfile.BackColor = Color.FromArgb(50, 50, 50);
-            this.DeleteProfile.BorderStyle = BorderStyle.None;
-            this.DeleteProfile.Font = new Font("Segoe UI", 9F, FontStyle.Underline, GraphicsUnit.Point, 0);
-            this.DeleteProfile.ForeColor = Color.Red;
-            this.DeleteProfile.Location = new Point(401, 224);
-            this.DeleteProfile.Margin = new Padding(3, 2, 3, 2);
-            this.DeleteProfile.Name = "DeleteProfile";
-            this.DeleteProfile.ReadOnly = true;
-            this.DeleteProfile.Size = new Size(109, 16);
-            this.DeleteProfile.TabIndex = 12;
-            this.DeleteProfile.Text = "Delete Profile";
-            this.DeleteProfile.TextAlign = HorizontalAlignment.Center;
             // 
             // AudioCycleHotkey
             // 
@@ -198,16 +173,14 @@
             this.AutoScaleDimensions = new SizeF(7F, 15F);
             this.AutoScaleMode = AutoScaleMode.Font;
             this.BackColor = Color.FromArgb(50, 50, 50);
-            this.ClientSize = new Size(666, 453);
+            this.ClientSize = new Size(615, 453);
             this.Controls.Add(this.AudioComboBox);
             this.Controls.Add(this.DisplayProfileHotkey);
             this.Controls.Add(this.AudioCycleHotkey);
-            this.Controls.Add(this.DeleteProfile);
             this.Controls.Add(this.LoadProfile);
             this.Controls.Add(this.Description);
             this.Controls.Add(this.LogoName);
             this.Controls.Add(this.Logo);
-            this.Controls.Add(this.DisplayDeleteProfilesLayout);
             this.Controls.Add(this.DisplayLoadProfilesLayout);
             this.Controls.Add(this.BtnCycleAudioOutputs);
             this.Controls.Add(this.checkBoxStartup);
@@ -226,12 +199,10 @@
         private CheckBox checkBoxStartup;
         private Button BtnCycleAudioOutputs;
         private FlowLayoutPanel DisplayLoadProfilesLayout;
-        private FlowLayoutPanel DisplayDeleteProfilesLayout;
         private PictureBox Logo;
         private TextBox LogoName;
         private TextBox Description;
         private TextBox LoadProfile;
-        private TextBox DeleteProfile;
         private Button AudioCycleHotkey;
         private Button DisplayProfileHotkey;
         private ComboBox AudioComboBox;

@@ -1271,6 +1271,17 @@ public class DisplayConfig
         return true;
     }
 
+    public static bool RenameDisplayProfile(string fileName, string newFileName)
+    {
+        if (!File.Exists(fileName))
+        {
+            return false;
+        }
+
+        System.IO.File.Move(Path.Combine(GetDisplayProfilesDirectory(), fileName), Path.Combine(GetDisplayProfilesDirectory(), newFileName + ".json"));
+        return true;
+    }
+
     [DllImport("user32.dll")]
     private static extern int PostMessage(int hWnd, int hMsg, int wParam, int lParam);
 
