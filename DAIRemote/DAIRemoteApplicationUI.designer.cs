@@ -77,7 +77,7 @@
             this.DisplayLoadProfilesLayout.AutoScroll = true;
             this.DisplayLoadProfilesLayout.Location = new Point(283, 32);
             this.DisplayLoadProfilesLayout.Name = "DisplayLoadProfilesLayout";
-            this.DisplayLoadProfilesLayout.Size = new Size(320, 355);
+            this.DisplayLoadProfilesLayout.Size = new Size(336, 355);
             this.DisplayLoadProfilesLayout.TabIndex = 6;
             // 
             // Logo
@@ -173,7 +173,7 @@
             this.AutoScaleDimensions = new SizeF(7F, 15F);
             this.AutoScaleMode = AutoScaleMode.Font;
             this.BackColor = Color.FromArgb(50, 50, 50);
-            this.ClientSize = new Size(615, 453);
+            this.ClientSize = new Size(631, 453);
             this.Controls.Add(this.AudioComboBox);
             this.Controls.Add(this.DisplayProfileHotkey);
             this.Controls.Add(this.AudioCycleHotkey);

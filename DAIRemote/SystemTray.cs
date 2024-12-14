@@ -91,6 +91,7 @@ public class TrayIconManager
     {
         _ = form.BeginInvoke((MethodInvoker)delegate
         {
+            hotkeyManager.InitializeHotkeys();
             PopulateTrayMenu(trayMenu);
         });
     }
@@ -361,6 +362,9 @@ public class TrayIconManager
 
         // Set the OK button as the action for Enter key
         inputForm.AcceptButton = okButton;
+
+        // Set the Cancel button as the action for Esc key
+        inputForm.CancelButton = cancelButton;
 
         _ = inputForm.ShowDialog();
     }

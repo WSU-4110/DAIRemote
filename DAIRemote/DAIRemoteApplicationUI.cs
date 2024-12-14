@@ -74,17 +74,14 @@ public partial class DAIRemoteApplicationUI : Form
             };
 
             // Set default click action for the panel (Load Profile)
-            profileTile.Click += (sender, e) => LoadProfileButton_Click(sender, e);
+            profileTile.Click += LoadProfileButton_Click;
 
             // Apply a border color using a Paint event
-            profileTile.Paint += (sender, e) =>
-            {
-                ControlPaint.DrawBorder(
+            profileTile.Paint += (sender, e) => ControlPaint.DrawBorder(
                     e.Graphics,
                     profileTile.ClientRectangle,
                     Color.LightSlateGray,  // Border color
                     ButtonBorderStyle.Solid);
-            };
 
             // Create a label for the profile name
             Label profileNameLabel = new()
@@ -100,7 +97,7 @@ public partial class DAIRemoteApplicationUI : Form
                 Left = (100 - 90) / 2, // Center horizontally within the panel
                 Tag = profile
             };
-            profileNameLabel.Click += (sender, e) => LoadProfileButton_Click(sender, e);
+            profileNameLabel.Click += LoadProfileButton_Click;
 
             // Create a button for additional options
             Button optionsButton = new()
@@ -136,8 +133,12 @@ public partial class DAIRemoteApplicationUI : Form
         ToolStripMenuItem renameItem = new("Rename");
         renameItem.Click += (s, e) => RenameProfileButton_Click(optionsButton, e);
 
+        // Add Set Hotkey option
+        ToolStripMenuItem setHotkeyItem = new("Set Hotkey");
+        setHotkeyItem.Click += (s, e) => SetHotkeyProfileButton_Click(optionsButton, e);
+
         // Add Save option
-        ToolStripMenuItem saveItem = new("Save");
+        ToolStripMenuItem saveItem = new("Overwrite");
         saveItem.Click += (s, e) => SaveProfileButton_Click(optionsButton, e);
 
         // Add Delete option
@@ -145,9 +146,10 @@ public partial class DAIRemoteApplicationUI : Form
         deleteItem.Click += (s, e) => DeleteProfileButton_Click(optionsButton, e);
 
         // Add options to the context menu
-        optionsMenu.Items.Add(renameItem);
-        optionsMenu.Items.Add(saveItem);
-        optionsMenu.Items.Add(deleteItem);
+        _ = optionsMenu.Items.Add(renameItem);
+        _ = optionsMenu.Items.Add(setHotkeyItem);
+        _ = optionsMenu.Items.Add(saveItem);
+        _ = optionsMenu.Items.Add(deleteItem);
 
         // Show the menu at the button's location
         optionsMenu.Show(optionsButton, new Point(0, optionsButton.Height));
@@ -234,7 +236,17 @@ public partial class DAIRemoteApplicationUI : Form
         // Set the OK button as the action for Enter key
         inputForm.AcceptButton = okButton;
 
+        // Set the Cancel button as the action for Esc key
+        inputForm.CancelButton = cancelButton;
+
         _ = inputForm.ShowDialog();
+    }
+
+    private void SetHotkeyProfileButton_Click(object sender, EventArgs e)
+    {
+        string profilePath = ((sender as Button)?.Tag ?? (sender as Panel)?.Tag).ToString();
+        trayIconManager.GetHotkeyManager().ShowHotkeyInput(Path.GetFileNameWithoutExtension(profilePath), () => DisplayConfig.SetDisplaySettings(profilePath));
+        trayIconManager.RefreshSystemTray();
     }
 
     private void SaveProfileButton_Click(object sender, EventArgs e)
@@ -428,10 +440,10 @@ public partial class DAIRemoteApplicationUI : Form
 
     private void BtnSetDisplayProfileHotkey_click(object sender, EventArgs e)
     {
-        string profile = ShowDisplayProfilesList(DisplayConfig.GetDisplayProfilesDirectory());
-        if (!string.IsNullOrEmpty(profile))
+        string fileName = ShowDisplayProfilesList(DisplayConfig.GetDisplayProfilesDirectory());
+        if (!string.IsNullOrEmpty(fileName))
         {
-            trayIconManager.GetHotkeyManager().ShowHotkeyInput(profile, () => DisplayConfig.SetDisplaySettings(profile));
+            trayIconManager.GetHotkeyManager().ShowHotkeyInput(fileName, () => DisplayConfig.SetDisplaySettings(DisplayConfig.GetFullDisplayProfilePath(fileName)));
             trayIconManager.RefreshSystemTray();
         }
     }

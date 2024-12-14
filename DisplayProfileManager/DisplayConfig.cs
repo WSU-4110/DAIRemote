@@ -33,6 +33,31 @@ public class DisplayConfig
         return Directory.GetFiles(GetDisplayProfilesDirectory(), "*.json");
     }
 
+    public static string GetFullDisplayProfilePath(string profileName)
+    {
+        // Get the directory path where display profiles are stored
+        string directoryPath = GetDisplayProfilesDirectory();
+
+        // Get all JSON files in the directory
+        string[] profiles = Directory.GetFiles(directoryPath, "*.json");
+
+        // Loop through the profiles and find the matching one
+        foreach (string profile in profiles)
+        {
+            // Get the file name without extension
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(profile);
+
+            // Check if the file name matches the provided profile name
+            if (string.Equals(fileNameWithoutExtension, profileName, StringComparison.OrdinalIgnoreCase))
+            {
+                return profile;  // Return the full path of the matching file
+            }
+        }
+
+        // Return null or a default path if the profile is not found
+        return null;
+    }
+
     /*
     The DISPLAYCONFIG_DEVICE_INFO_TYPE enumeration specifies the type of display device info 
     to configure or obtain through the DisplayConfigSetDeviceInfo or DisplayConfigGetDeviceInfo function.
