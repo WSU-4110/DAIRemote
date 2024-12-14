@@ -63,7 +63,7 @@ public partial class DAIRemoteApplicationUI : Form
 
         foreach (string profile in DisplayConfig.GetDisplayProfiles())
         {
-            // Create a panel to represent a profile tile
+            // Panel to represent a profile tile
             Panel profileTile = new()
             {
                 Width = 100,
@@ -73,17 +73,17 @@ public partial class DAIRemoteApplicationUI : Form
                 Tag = profile
             };
 
-            // Set default click action for the panel (Load Profile)
+            // Setting default click action for the panel (Load Profile)
             profileTile.Click += LoadProfileButton_Click;
 
-            // Apply a border color using a Paint event
+            // Border color using a Paint event
             profileTile.Paint += (sender, e) => ControlPaint.DrawBorder(
                     e.Graphics,
                     profileTile.ClientRectangle,
                     Color.LightSlateGray,  // Border color
                     ButtonBorderStyle.Solid);
 
-            // Create a label for the profile name
+            // Label for the profile name
             Label profileNameLabel = new()
             {
                 Text = Path.GetFileNameWithoutExtension(profile),
@@ -170,76 +170,16 @@ public partial class DAIRemoteApplicationUI : Form
     private void RenameProfileButton_Click(object sender, EventArgs e)
     {
         string profilePath = ((sender as Button)?.Tag ?? (sender as Panel)?.Tag).ToString();
-        Form inputForm = new()
-        {
-            Width = 400,
-            Height = 150,
-            Text = "Rename Profile",
-            FormBorderStyle = FormBorderStyle.FixedDialog,
-            StartPosition = FormStartPosition.CenterScreen,
-            MinimizeBox = false,
-            MaximizeBox = false
-        };
 
-        Label promptLabel = new()
-        {
-            Left = 20,
-            Top = 20,
-            Text = "Please enter the new profile name:",
-            AutoSize = true
-        };
-
-        TextBox inputBox = new()
-        {
-            Left = 20,
-            Top = 50,
-            Width = 350
-        };
-
-        Button okButton = new()
-        {
-            Text = "OK",
-            Left = 190,
-            Width = 80,
-            Top = 80,
-            DialogResult = DialogResult.OK
-        };
-        okButton.Click += (sender, e) =>
-        {
-            string userInput = inputBox.Text;
-
-            if (string.IsNullOrEmpty(userInput))
+        trayIconManager.ShowInputDialog(
+            "Rename Profile",
+            "Please enter the new profile name:",
+            "New name for profile here",
+            userInput =>
             {
-                _ = MessageBox.Show("Profile name cannot be empty.");
-                return;
+                _ = DisplayConfig.RenameDisplayProfile(profilePath, userInput);
             }
-
-            _ = DisplayConfig.RenameDisplayProfile(profilePath, userInput);
-            inputForm.Close();
-        };
-
-        Button cancelButton = new()
-        {
-            Text = "Cancel",
-            Left = 290,
-            Width = 80,
-            Top = 80,
-            DialogResult = DialogResult.Cancel
-        };
-        cancelButton.Click += (sender, e) => inputForm.Close();
-
-        inputForm.Controls.Add(promptLabel);
-        inputForm.Controls.Add(inputBox);
-        inputForm.Controls.Add(okButton);
-        inputForm.Controls.Add(cancelButton);
-
-        // Set the OK button as the action for Enter key
-        inputForm.AcceptButton = okButton;
-
-        // Set the Cancel button as the action for Esc key
-        inputForm.CancelButton = cancelButton;
-
-        _ = inputForm.ShowDialog();
+        );
     }
 
     private void SetHotkeyProfileButton_Click(object sender, EventArgs e)
@@ -317,7 +257,7 @@ public partial class DAIRemoteApplicationUI : Form
 
     private void BtnAddDisplayConfig_Click(object sender, EventArgs e)
     {
-        TrayIconManager.SaveNewProfile(DisplayConfig.GetDisplayProfilesDirectory());
+        trayIconManager.SaveNewProfile(DisplayConfig.GetDisplayProfilesDirectory());
         DisplayLoadProfilesLayout.Controls.Clear();
         InitializeDisplayProfilesLayouts();
     }

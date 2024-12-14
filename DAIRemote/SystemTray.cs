@@ -294,13 +294,17 @@ public class TrayIconManager
         _ = menu.Items.Add(exitMenuItem);
     }
 
-    public static void SaveNewProfile(string profilesFolderPath)
+    public void ShowInputDialog(
+    string title,
+    string promptText,
+    string inputHint,
+    Action<string> onOkAction)
     {
         Form inputForm = new()
         {
             Width = 400,
             Height = 150,
-            Text = "Save New Profile",
+            Text = title,
             FormBorderStyle = FormBorderStyle.FixedDialog,
             StartPosition = FormStartPosition.CenterScreen,
             MinimizeBox = false,
@@ -311,7 +315,7 @@ public class TrayIconManager
         {
             Left = 20,
             Top = 20,
-            Text = "Please enter the profile name:",
+            Text = promptText,
             AutoSize = true
         };
 
@@ -319,7 +323,8 @@ public class TrayIconManager
         {
             Left = 20,
             Top = 50,
-            Width = 350
+            Width = 350,
+            PlaceholderText = inputHint
         };
 
         Button okButton = new()
@@ -334,14 +339,13 @@ public class TrayIconManager
         {
             string userInput = inputBox.Text;
 
-            if (string.IsNullOrEmpty(userInput))
+            if (string.IsNullOrWhiteSpace(userInput))
             {
-                _ = MessageBox.Show("Profile name cannot be empty.");
+                MessageBox.Show("Input cannot be empty.");
                 return;
             }
 
-            string profilePath = Path.Combine(profilesFolderPath, $"{userInput}.json");
-            _ = DisplayConfig.SaveDisplaySettings(profilePath);
+            onOkAction?.Invoke(userInput); // Execute the provided function
             inputForm.Close();
         };
 
@@ -360,13 +364,19 @@ public class TrayIconManager
         inputForm.Controls.Add(okButton);
         inputForm.Controls.Add(cancelButton);
 
-        // Set the OK button as the action for Enter key
         inputForm.AcceptButton = okButton;
-
-        // Set the Cancel button as the action for Esc key
         inputForm.CancelButton = cancelButton;
 
         _ = inputForm.ShowDialog();
+    }
+
+    public void SaveNewProfile(string profilesFolderPath)
+    {
+        ShowInputDialog(
+            "Save New Profile",
+            "Please enter the profile name:",
+            "New profile name here",
+            userInput => DisplayConfig.SaveDisplaySettings(Path.Combine(profilesFolderPath, $"{userInput}.json")));
     }
 
 
