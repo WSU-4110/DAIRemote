@@ -1,4 +1,5 @@
 ﻿using DisplayProfileManager;
+using System.Reflection;
 
 namespace DAIRemote;
 
@@ -9,13 +10,14 @@ public class TrayIconManager
     private readonly Form form;
     private readonly HotkeyManager hotkeyManager;
     private readonly AudioManager.AudioDeviceManager audioManager;
+    public bool minimized = true;
+    private Assembly assembly = Assembly.GetExecutingAssembly();
 
     private readonly Image aboutIcon;
     private readonly Image deleteProfileIcon;
     private readonly Image exitIcon;
     private readonly Image monitorIcon;
     private readonly Image saveProfileIcon;
-    private readonly Image turnOffAllMonitorsIcon;
     private readonly Image addProfileIcon;
     private readonly Image setHotkeyIcon;
     private readonly Image audioCyclingIcon;
@@ -25,16 +27,15 @@ public class TrayIconManager
     {
         this.form = form;
 
-        aboutIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "About.ico"));
-        deleteProfileIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "DeleteProfile.ico"));
-        exitIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Exit.ico"));
-        monitorIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Monitor.ico"));
-        saveProfileIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "SaveProfile.ico"));
-        turnOffAllMonitorsIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "TurnOffAllMonitors.ico"));
-        addProfileIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "AddProfile.ico"));
-        setHotkeyIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "MonitorSetHotkey.ico"));
-        audioCyclingIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "AudioCycling.ico"));
-        audioIcon = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Audio.ico"));
+        aboutIcon = Properties.Resources.About.ToBitmap();
+        deleteProfileIcon = Properties.Resources.DeleteProfile.ToBitmap();
+        exitIcon = Properties.Resources.Exit.ToBitmap();
+        monitorIcon = Properties.Resources.Monitor;
+        saveProfileIcon = Properties.Resources.SaveProfile.ToBitmap();
+        addProfileIcon = Properties.Resources.AddProfile.ToBitmap();
+        setHotkeyIcon = Properties.Resources.MonitorSetHotkey.ToBitmap();
+        audioCyclingIcon = Properties.Resources.AudioCycling.ToBitmap();
+        audioIcon = Properties.Resources.Audio.ToBitmap();
 
         audioManager = AudioManager.AudioDeviceManager.GetInstance();
         // Registers any prexisting hotkeys, otherwise initializes
@@ -57,7 +58,7 @@ public class TrayIconManager
         trayIcon = new NotifyIcon
         {
             Text = "DAIRemote",
-            Icon = new Icon(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "DAIRemoteLogo.ico")),
+            Icon = Properties.Resources.DAIRemoteLogoIcon,
             ContextMenuStrip = trayMenu,
             Visible = true
         };
@@ -89,15 +90,16 @@ public class TrayIconManager
 
     public void RefreshSystemTray()
     {
-        _ = form.BeginInvoke((MethodInvoker)delegate
+        _ = form.BeginInvoke((System.Windows.Forms.MethodInvoker)delegate
         {
+            hotkeyManager.InitializeHotkeys();
             PopulateTrayMenu(trayMenu);
         });
     }
 
     private void OnProfilesChanged(object sender, FileSystemEventArgs e)
     {
-        _ = form.BeginInvoke((MethodInvoker)delegate
+        _ = form.BeginInvoke((System.Windows.Forms.MethodInvoker)delegate
         {
             PopulateTrayMenu(trayMenu);
         });
@@ -105,7 +107,7 @@ public class TrayIconManager
 
     private void OnAudioDevicesChanged(List<string> devices)
     {
-        _ = form.BeginInvoke((MethodInvoker)delegate
+        _ = form.BeginInvoke((System.Windows.Forms.MethodInvoker)delegate
         {
             PopulateTrayMenu(trayMenu);
         });
@@ -280,26 +282,28 @@ public class TrayIconManager
         // That was not present during application initialization
         ToolStripMenuItem refreshAudioDevices = new("Refresh Audio Devices", audioIcon, RefreshAudioDevices);
         // Create the icons for making monitors sleep, the about section, and exiting the application
-        ToolStripMenuItem turnOffAllMonitorsItem = new("Turn Off All Monitors", turnOffAllMonitorsIcon, TurnOffMonitors);
         ToolStripMenuItem aboutMenuItem = new("About", aboutIcon, OnAboutClick);
         ToolStripMenuItem exitMenuItem = new("Exit", exitIcon, OnExit);
 
         // Separate sleeping monitors, and add the sleep, about, and exit to the main system tray menu
         _ = menu.Items.Add(new ToolStripSeparator());
         _ = menu.Items.Add(refreshAudioDevices);
-        _ = menu.Items.Add(turnOffAllMonitorsItem);
         _ = menu.Items.Add(new ToolStripSeparator());
         _ = menu.Items.Add(aboutMenuItem);
         _ = menu.Items.Add(exitMenuItem);
     }
 
-    public static void SaveNewProfile(string profilesFolderPath)
+    public void ShowInputDialog(
+    string title,
+    string promptText,
+    string inputHint,
+    Action<string> onOkAction)
     {
         Form inputForm = new()
         {
             Width = 400,
             Height = 150,
-            Text = "Save New Profile",
+            Text = title,
             FormBorderStyle = FormBorderStyle.FixedDialog,
             StartPosition = FormStartPosition.CenterScreen,
             MinimizeBox = false,
@@ -310,7 +314,7 @@ public class TrayIconManager
         {
             Left = 20,
             Top = 20,
-            Text = "Please enter the profile name:",
+            Text = promptText,
             AutoSize = true
         };
 
@@ -318,7 +322,8 @@ public class TrayIconManager
         {
             Left = 20,
             Top = 50,
-            Width = 350
+            Width = 350,
+            PlaceholderText = inputHint
         };
 
         Button okButton = new()
@@ -333,14 +338,13 @@ public class TrayIconManager
         {
             string userInput = inputBox.Text;
 
-            if (string.IsNullOrEmpty(userInput))
+            if (string.IsNullOrWhiteSpace(userInput))
             {
-                _ = MessageBox.Show("Profile name cannot be empty.");
+                MessageBox.Show("Input cannot be empty.");
                 return;
             }
 
-            string profilePath = Path.Combine(profilesFolderPath, $"{userInput}.json");
-            _ = DisplayConfig.SaveDisplaySettings(profilePath);
+            onOkAction?.Invoke(userInput); // Execute the provided function
             inputForm.Close();
         };
 
@@ -359,10 +363,19 @@ public class TrayIconManager
         inputForm.Controls.Add(okButton);
         inputForm.Controls.Add(cancelButton);
 
-        // Set the OK button as the action for Enter key
         inputForm.AcceptButton = okButton;
+        inputForm.CancelButton = cancelButton;
 
         _ = inputForm.ShowDialog();
+    }
+
+    public void SaveNewProfile(string profilesFolderPath)
+    {
+        ShowInputDialog(
+            "Save New Profile",
+            "Please enter the profile name:",
+            "New profile name here",
+            userInput => DisplayConfig.SaveDisplaySettings(Path.Combine(profilesFolderPath, $"{userInput}.json")));
     }
 
 
@@ -378,11 +391,6 @@ public class TrayIconManager
     private void RefreshAudioDevices(object? sender, EventArgs e)
     {
         audioManager.RefreshAudioDeviceSubscriptions();
-    }
-
-    private void TurnOffMonitors(object? sender, EventArgs e)
-    {
-        DisplayConfig.DisplayToggleSleep(true);
     }
 
     private void OnAboutClick(object? sender, EventArgs e)
@@ -414,9 +422,16 @@ public class TrayIconManager
 
     private void ShowForm()
     {
-        form.Show();
-        form.WindowState = FormWindowState.Normal;
-        form.Activate();
+        minimized = !minimized;
+        if(!minimized)
+        {
+            form.Show();
+            form.WindowState = FormWindowState.Normal;
+            form.Activate();
+        } else
+        {
+            form.Hide();
+        }
     }
 
     private void OnExit(object sender, EventArgs e)

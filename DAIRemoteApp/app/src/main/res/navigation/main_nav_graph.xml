@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_nav_graph"
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.example.dairemote_app.fragments.MainFragment"
+        android:label="Main">
+        <action
+            android:id="@+id/action_to_interaction"
+            app:destination="@id/interactionFragment" />
+        <action
+            android:id="@+id/action_to_servers"
+            app:destination="@id/serversFragment" />
+        <action
+            android:id="@+id/action_to_instructions"
+            app:destination="@id/instructionsFragment" />
+        <action
+            android:id="@+id/action_to_about"
+            app:destination="@id/aboutFragment" />
+<!--        <action
+            android:id="@+id/action_main_to_interaction"
+            app:destination="@id/interactionFragment" />
+        <action
+            android:id="@+id/action_main_to_servers"
+            app:destination="@id/serversFragment" />
+        <action
+            android:id="@+id/action_main_to_instructions"
+            app:destination="@id/instructionsFragment" />
+        <action
+            android:id="@+id/action_main_to_about"
+            app:destination="@id/aboutFragment" />-->
+    </fragment>
+
+    <fragment
+        android:id="@+id/interactionFragment"
+        android:name="com.example.dairemote_app.fragments.InteractionFragment"
+        android:label="Remote">
+        <action
+            android:id="@+id/action_to_main"
+            app:destination="@id/mainFragment" />
+        <action
+            android:id="@+id/action_to_servers"
+            app:destination="@id/serversFragment" />
+        <action
+            android:id="@+id/action_to_instructions"
+            app:destination="@id/instructionsFragment" />
+        <action
+            android:id="@+id/action_to_about"
+            app:destination="@id/aboutFragment" />
+<!--        <action
+            android:id="@+id/action_interaction_to_main"
+            app:destination="@id/mainFragment" />
+        <action
+            android:id="@+id/action_interaction_to_servers"
+            app:destination="@id/serversFragment" />
+        <action
+            android:id="@+id/action_interaction_to_instructions"
+            app:destination="@id/instructionsFragment" />
+        <action
+            android:id="@+id/action_interaction_to_about"
+            app:destination="@id/aboutFragment" />-->
+    </fragment>
+
+    <fragment
+        android:id="@+id/serversFragment"
+        android:name="com.example.dairemote_app.fragments.ServersFragment"
+        android:label="Servers">
+        <action
+            android:id="@+id/action_to_main"
+            app:destination="@id/mainFragment" />
+        <action
+            android:id="@+id/action_to_interaction"
+            app:destination="@id/interactionFragment" />
+        <action
+            android:id="@+id/action_to_instructions"
+            app:destination="@id/instructionsFragment" />
+        <action
+            android:id="@+id/action_to_about"
+            app:destination="@id/aboutFragment" />
+<!--        <action
+            android:id="@+id/action_servers_to_main"
+            app:destination="@id/mainFragment" />
+        <action
+            android:id="@+id/action_servers_to_interaction"
+            app:destination="@id/interactionFragment" />
+        <action
+            android:id="@+id/action_servers_to_instructions"
+            app:destination="@id/instructionsFragment" />
+        <action
+            android:id="@+id/action_servers_to_about"
+            app:destination="@id/aboutFragment" />-->
+    </fragment>
+
+    <fragment
+        android:id="@+id/instructionsFragment"
+        android:name="com.example.dairemote_app.fragments.InstructionsFragment"
+        android:label="Instructions">
+        <action
+            android:id="@+id/action_to_main"
+            app:destination="@id/mainFragment" />
+        <action
+            android:id="@+id/action_to_interaction"
+            app:destination="@id/interactionFragment" />
+        <action
+            android:id="@+id/action_to_servers"
+            app:destination="@id/serversFragment" />
+        <action
+            android:id="@+id/action_to_about"
+            app:destination="@id/aboutFragment" />
+<!--        <action
+            android:id="@+id/action_instructions_to_main"
+            app:destination="@id/mainFragment" />
+        <action
+            android:id="@+id/action_instructions_to_interaction"
+            app:destination="@id/interactionFragment" />
+        <action
+            android:id="@+id/action_instructions_to_servers"
+            app:destination="@id/serversFragment" />
+        <action
+            android:id="@+id/action_instructions_to_about"
+            app:destination="@id/aboutFragment" />-->
+    </fragment>
+
+    <fragment
+        android:id="@+id/aboutFragment"
+        android:name="com.example.dairemote_app.fragments.AboutFragment"
+        android:label="About">
+        <action
+            android:id="@+id/action_to_main"
+            app:destination="@id/mainFragment" />
+        <action
+            android:id="@+id/action_to_interaction"
+            app:destination="@id/interactionFragment" />
+        <action
+            android:id="@+id/action_to_servers"
+            app:destination="@id/serversFragment" />
+        <action
+            android:id="@+id/action_to_instructions"
+            app:destination="@id/instructionsFragment" />
+<!--        <action
+            android:id="@+id/action_about_to_main"
+            app:destination="@id/mainFragment" />
+        <action
+            android:id="@+id/action_about_to_interaction"
+            app:destination="@id/interactionFragment" />
+        <action
+            android:id="@+id/action_about_to_servers"
+            app:destination="@id/serversFragment" />
+        <action
+            android:id="@+id/action_about_to_instructions"
+            app:destination="@id/instructionsFragment" />-->
+    </fragment>
+</navigation>

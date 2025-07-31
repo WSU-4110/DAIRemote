@@ -10,6 +10,8 @@ public class AudioDeviceManager
     private CoreAudioDevice defaultAudioDevice;
     private CoreAudioController audioController;
     private List<CoreAudioDevice> audioDevices;
+    private IDisposable defaultDeviceSubscription;
+    private List<IDisposable> deviceSubscriptions = new List<IDisposable>();
 
     public delegate void AudioDevicesUpdatedEventHandler(List<string> devices);
     public event AudioDevicesUpdatedEventHandler AudioDevicesUpdated;
@@ -21,17 +23,21 @@ public class AudioDeviceManager
         // initialization.
         audioController = new CoreAudioController();
 
+        // Subscribe to default device changes
+        defaultDeviceSubscription = audioController.AudioDeviceChanged.Subscribe(OnDefaultDeviceChanged);
+
         // Set the initial values for variables needed for functions
         SetAudioDefaults();
         SubscribeAudioDevices();
     }
 
-    private void SetAudioDefaults()
+    private void OnDefaultDeviceChanged(DeviceChangedArgs args)
     {
-        // Set the initial values for variables needed for functions
-        defaultAudioDevice = audioController.DefaultPlaybackDevice;
-        // Get list of active devices
-        SetActiveDevices();
+        if (args.ChangedType == DeviceChangedType.DefaultChanged)
+        {
+            SetAudioDefaults();
+            AudioDevicesUpdated?.Invoke(ActiveDeviceNames);
+        }
     }
 
     private void OnAudioDeviceChanged(DeviceChangedArgs args)
@@ -42,20 +48,51 @@ public class AudioDeviceManager
 
     public void SubscribeAudioDevices()
     {
-        // Subscribe all playback devices, even inactive ones
+        // Clear existing subscriptions
+        foreach (var sub in deviceSubscriptions)
+        {
+            sub.Dispose();
+        }
+        deviceSubscriptions.Clear();
+
+        // Subscribe to all playback devices
         foreach (CoreAudioDevice device in audioController.GetPlaybackDevices())
         {
-            device.StateChanged.Subscribe(OnAudioDeviceChanged);
+            var subscription = device.StateChanged.Subscribe(OnAudioDeviceChanged);
+            deviceSubscriptions.Add(subscription);
         }
+    }
+
+    private void SetAudioDefaults()
+    {
+        // Set the initial values for variables needed for functions
+        defaultAudioDevice = audioController.DefaultPlaybackDevice;
+        // Get list of active devices
+        SetActiveDevices();
     }
 
     public void RefreshAudioDeviceSubscriptions()
     {
         audioController?.Dispose();
         audioController = new CoreAudioController();
+
+        // Renew default device subscription
+        defaultDeviceSubscription?.Dispose();
+        defaultDeviceSubscription = audioController.AudioDeviceChanged.Subscribe(OnDefaultDeviceChanged);
+
         SetAudioDefaults();
         SubscribeAudioDevices();
         AudioDevicesUpdated?.Invoke(ActiveDeviceNames);
+    }
+
+    public void Dispose()
+    {
+        defaultDeviceSubscription?.Dispose();
+        foreach (var sub in deviceSubscriptions)
+        {
+            sub.Dispose();
+        }
+        audioController?.Dispose();
     }
 
     public static AudioDeviceManager GetInstance()
@@ -81,14 +118,10 @@ public class AudioDeviceManager
 
         if (matchedDevice != null)
         {
-            if ((matchedDevice != this.defaultAudioDevice))
+            if (matchedDevice != this.defaultAudioDevice)
             {
                 SetDefaultAudioDevice(matchedDevice);
             }
-        }
-        else
-        {
-            throw new ArgumentException($"No device found with the name '{deviceFullName}'");
         }
     }
 

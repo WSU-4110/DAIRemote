@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -10,6 +11,8 @@ namespace DisplayProfileManager;
 public class DisplayConfig
 {
     public const int ERROR_CONST = 0;
+    private static AudioManager.AudioDeviceManager audioManager = AudioManager.AudioDeviceManager.GetInstance();
+    private static string profileAudioDevice;
     public static event EventHandler<NotificationEventArgs> NotificationRequested;
 
     public static void RequestNotification(string notificationText)
@@ -31,6 +34,40 @@ public class DisplayConfig
     public static string[] GetDisplayProfiles()
     {
         return Directory.GetFiles(GetDisplayProfilesDirectory(), "*.json");
+    }
+
+    public static string GetFullDisplayProfilePath(string profileName)
+    {
+        // Get the directory path where display profiles are stored
+        string directoryPath = GetDisplayProfilesDirectory();
+
+        // Get all JSON files in the directory
+        string[] profiles = Directory.GetFiles(directoryPath, "*.json");
+
+        // Loop through the profiles and find the matching one
+        foreach (string profile in profiles)
+        {
+            // Get the file name without extension
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(profile);
+
+            // Check if the file name matches the provided profile name
+            if (string.Equals(fileNameWithoutExtension, profileName, StringComparison.OrdinalIgnoreCase))
+            {
+                return profile;  // Return the full path of the matching file
+            }
+        }
+
+        // Return null or a default path if the profile is not found
+        return null;
+    }
+
+    private static void setAudioDevice(string device)
+    {
+        if (device != null)
+        {
+            audioManager.RefreshAudioDeviceSubscriptions();
+            audioManager.SetDefaultAudioDevice(device);
+        }
     }
 
     /*
@@ -875,6 +912,9 @@ public class DisplayConfig
         {
             string json = System.IO.File.ReadAllText(fileName);
             var displaySettings = JsonConvert.DeserializeObject<dynamic>(json);
+
+            profileAudioDevice = displaySettings.defaultAudioDevice;
+
             List<DISPLAYCONFIG_PATH_INFO> pathInfoList = [];
 
             foreach (var pathInfo in displaySettings.pathInfoArray)
@@ -1127,10 +1167,15 @@ public class DisplayConfig
                         RequestNotification("Failed to apply display profile");
                         return false;
                     }
+
+                    setAudioDevice(profileAudioDevice);
+
                     return true;
                 }
                 return false;
             }
+
+            setAudioDevice(profileAudioDevice);
 
             return true;
         }
@@ -1239,7 +1284,8 @@ public class DisplayConfig
                                }
                            }
                 }).ToList(),
-                additionalInfo = additionalInfo
+                additionalInfo = additionalInfo,
+                defaultAudioDevice = audioManager.GetDefaultAudioDevice().FullName
             };
 
             fileName = Path.Combine(GetDisplayProfilesDirectory(), fileName);
@@ -1271,10 +1317,21 @@ public class DisplayConfig
         return true;
     }
 
+    public static bool RenameDisplayProfile(string fileName, string newFileName)
+    {
+        if (!File.Exists(fileName))
+        {
+            return false;
+        }
+
+        System.IO.File.Move(Path.Combine(GetDisplayProfilesDirectory(), fileName), Path.Combine(GetDisplayProfilesDirectory(), newFileName + ".json"));
+        return true;
+    }
+
     [DllImport("user32.dll")]
     private static extern int PostMessage(int hWnd, int hMsg, int wParam, int lParam);
 
-    public static void DisplayToggleSleep(bool sleep = true)
+/*    public static void DisplayToggleSleep(bool sleep = true)
     {
         const int WM_SYSCOMMAND = 0x0112;
         const int SC_MONITORPOWER = 0xF170;
@@ -1293,7 +1350,7 @@ public class DisplayConfig
                 Thread.Sleep(100);
             });
         }
-    }
+    }*/
 
     static void Main()
     {

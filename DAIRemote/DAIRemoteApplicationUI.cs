@@ -1,4 +1,4 @@
-using DisplayProfileManager;
+﻿using DisplayProfileManager;
 using Microsoft.Win32;
 using UDPServerManagerForm;
 
@@ -28,8 +28,10 @@ public partial class DAIRemoteApplicationUI : Form
 
         InitializeComponent();
 
-        this.Icon = new Icon(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "DAIRemoteLogo.ico"));
+        this.Icon = Properties.Resources.DAIRemoteLogoIcon;
         trayIconManager = new TrayIconManager(this);
+
+        this.WindowState = FormWindowState.Minimized;
         this.FormClosing += DAIRemoteApplicationUI_FormClosing;
         this.StartPosition = FormStartPosition.CenterScreen;
 
@@ -40,6 +42,9 @@ public partial class DAIRemoteApplicationUI : Form
         // Listen for display profile changes
         DisplayProfileWatcher.Initialize(DisplayConfig.GetDisplayProfilesDirectory());
         DisplayProfileWatcher.ProfileChanged += OnProfilesChanged;
+
+        // Hide the form initially
+        this.Hide();
     }
 
     protected override void OnHandleCreated(EventArgs e)
@@ -60,49 +65,145 @@ public partial class DAIRemoteApplicationUI : Form
     private void InitializeDisplayProfilesLayouts()
     {
         DisplayLoadProfilesLayout.Controls.Clear();
-        DisplayDeleteProfilesLayout.Controls.Clear();
 
         foreach (string profile in DisplayConfig.GetDisplayProfiles())
         {
-            // Create buttons for loading and deleting profiles
-            System.Windows.Forms.Button loadProfileButton = new()
+            // Panel to represent a profile tile
+            Panel profileTile = new()
             {
-                Text = Path.GetFileNameWithoutExtension(profile),
-                Width = 150,
-                Height = 50,
-                Margin = new Padding(10),
-                Tag = profile,
-                ForeColor = Color.White
+                Width = 100,
+                Height = 100,
+                BackgroundImage = Properties.Resources.Monitor,
+                BackgroundImageLayout = ImageLayout.Center,
+                Tag = profile
             };
 
-            System.Windows.Forms.Button deleteProfileButton = new()
+            // Setting default click action for the panel (Load Profile)
+            profileTile.Click += LoadProfileButton_Click;
+
+            // Border color using a Paint event
+            profileTile.Paint += (sender, e) => ControlPaint.DrawBorder(
+                    e.Graphics,
+                    profileTile.ClientRectangle,
+                    Color.LightSlateGray,  // Border color
+                    ButtonBorderStyle.Solid);
+
+            // Label for the profile name
+            Label profileNameLabel = new()
             {
                 Text = Path.GetFileNameWithoutExtension(profile),
-                Width = 150,
-                Height = 50,
-                Margin = new Padding(10),
+                AutoSize = false,
+                TextAlign = ContentAlignment.TopCenter,
+                BackColor = Color.Transparent,
+                Font = new Font(FontFamily.GenericSansSerif, 10, FontStyle.Bold),
+                Width = 90,
+                Height = 85,
+                Top = 15,
+                Left = (100 - 90) / 2, // Center horizontally within the panel
+                Tag = profile
+            };
+            profileNameLabel.Click += LoadProfileButton_Click;
+
+            // Create a button for additional options
+            Button optionsButton = new()
+            {
+                Text = "⋮",
+                Width = 22,
+                Height = 22,
+                BackColor = Color.DarkGray,
+                ForeColor = Color.White,
                 Tag = profile,
-                ForeColor = Color.White
+                Top = 78,
+                Left = 78
             };
 
-            // Set onClick actions
-            loadProfileButton.Click += LoadProfileButton_Click;
-            deleteProfileButton.Click += DeleteProfileButton_Click;
+            // Add options menu on button click
+            optionsButton.Click += (sender, e) => ShowProfileOptionsMenu(sender);
 
-            // Add buttons to layout
-            DisplayLoadProfilesLayout.Controls.Add(loadProfileButton);
-            DisplayDeleteProfilesLayout.Controls.Add(deleteProfileButton);
+            // Add components to the profile tile
+            profileTile.Controls.Add(optionsButton);
+            profileTile.Controls.Add(profileNameLabel);
+
+            // Add the tile to the layout
+            DisplayLoadProfilesLayout.Controls.Add(profileTile);
         }
     }
 
-    private void DeleteProfileButton_Click(object sender, EventArgs e)
+    private void ShowProfileOptionsMenu(object sender)
     {
-        _ = DisplayConfig.DeleteDisplaySettings(((System.Windows.Forms.Button)sender).Tag.ToString());
+        Button optionsButton = sender as Button;
+        ContextMenuStrip optionsMenu = new();
+
+        // Add Rename option
+        ToolStripMenuItem renameItem = new("Rename");
+        renameItem.Click += (s, e) => RenameProfileButton_Click(optionsButton, e);
+
+        // Add Set Hotkey option
+        ToolStripMenuItem setHotkeyItem = new("Set Hotkey");
+        setHotkeyItem.Click += (s, e) => SetHotkeyProfileButton_Click(optionsButton, e);
+
+        // Add Save option
+        ToolStripMenuItem saveItem = new("Overwrite");
+        saveItem.Click += (s, e) => SaveProfileButton_Click(optionsButton, e);
+
+        // Add Delete option
+        ToolStripMenuItem deleteItem = new("Delete");
+        deleteItem.Click += (s, e) => DeleteProfileButton_Click(optionsButton, e);
+
+        // Add options to the context menu
+        _ = optionsMenu.Items.Add(renameItem);
+        _ = optionsMenu.Items.Add(setHotkeyItem);
+        _ = optionsMenu.Items.Add(saveItem);
+        _ = optionsMenu.Items.Add(deleteItem);
+
+        // Show the menu at the button's location
+        optionsMenu.Show(optionsButton, new Point(0, optionsButton.Height));
     }
 
     private void LoadProfileButton_Click(object sender, EventArgs e)
     {
-        _ = DisplayConfig.SetDisplaySettings(((System.Windows.Forms.Button)sender).Tag.ToString());
+        // Tag from either a Panel or Label
+        var control = sender as Control;
+        string profilePath = control?.Tag?.ToString();
+
+        if (!string.IsNullOrEmpty(profilePath))
+        {
+            _ = DisplayConfig.SetDisplaySettings(profilePath);
+        }
+    }
+
+    private void RenameProfileButton_Click(object sender, EventArgs e)
+    {
+        string profilePath = ((sender as Button)?.Tag ?? (sender as Panel)?.Tag).ToString();
+
+        trayIconManager.ShowInputDialog(
+            "Rename Profile",
+            "Please enter the new profile name:",
+            "New name for profile here",
+            userInput =>
+            {
+                _ = DisplayConfig.RenameDisplayProfile(profilePath, userInput);
+            }
+        );
+    }
+
+    private void SetHotkeyProfileButton_Click(object sender, EventArgs e)
+    {
+        string profilePath = ((sender as Button)?.Tag ?? (sender as Panel)?.Tag).ToString();
+        trayIconManager.GetHotkeyManager().ShowHotkeyInput(Path.GetFileNameWithoutExtension(profilePath), () => DisplayConfig.SetDisplaySettings(profilePath));
+        trayIconManager.RefreshSystemTray();
+    }
+
+    private void SaveProfileButton_Click(object sender, EventArgs e)
+    {
+        string profilePath = ((sender as Button)?.Tag ?? (sender as Panel)?.Tag).ToString();
+        _ = DisplayConfig.SaveDisplaySettings(profilePath);
+    }
+
+    private void DeleteProfileButton_Click(object sender, EventArgs e)
+    {
+        string profilePath = ((sender as Button)?.Tag ?? (sender as Panel)?.Tag).ToString();
+        _ = DisplayConfig.DeleteDisplaySettings(profilePath);
     }
 
     private void DAIRemoteApplicationUI_FormClosing(object sender, FormClosingEventArgs e)
@@ -110,6 +211,7 @@ public partial class DAIRemoteApplicationUI : Form
         if (e.CloseReason == CloseReason.UserClosing)
         {
             this.Hide();
+            trayIconManager.minimized = true;
             e.Cancel = true;
         }
     }
@@ -161,9 +263,8 @@ public partial class DAIRemoteApplicationUI : Form
 
     private void BtnAddDisplayConfig_Click(object sender, EventArgs e)
     {
-        TrayIconManager.SaveNewProfile(DisplayConfig.GetDisplayProfilesDirectory());
+        trayIconManager.SaveNewProfile(DisplayConfig.GetDisplayProfilesDirectory());
         DisplayLoadProfilesLayout.Controls.Clear();
-        DisplayDeleteProfilesLayout.Controls.Clear();
         InitializeDisplayProfilesLayouts();
     }
 
@@ -285,10 +386,10 @@ public partial class DAIRemoteApplicationUI : Form
 
     private void BtnSetDisplayProfileHotkey_click(object sender, EventArgs e)
     {
-        string profile = ShowDisplayProfilesList(DisplayConfig.GetDisplayProfilesDirectory());
-        if (!string.IsNullOrEmpty(profile))
+        string fileName = ShowDisplayProfilesList(DisplayConfig.GetDisplayProfilesDirectory());
+        if (!string.IsNullOrEmpty(fileName))
         {
-            trayIconManager.GetHotkeyManager().ShowHotkeyInput(profile, () => DisplayConfig.SetDisplaySettings(profile));
+            trayIconManager.GetHotkeyManager().ShowHotkeyInput(fileName, () => DisplayConfig.SetDisplaySettings(DisplayConfig.GetFullDisplayProfilePath(fileName)));
             trayIconManager.RefreshSystemTray();
         }
     }
@@ -298,6 +399,7 @@ public partial class DAIRemoteApplicationUI : Form
         if (FormWindowState.Minimized == this.WindowState)
         {
             this.Hide();
+            trayIconManager.minimized = true;
         }
     }
 }

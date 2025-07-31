@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace DAIRemote;
 public partial class HotkeyManager : Form
 {
-    private AudioManager.AudioDeviceManager audioManager = AudioManager.AudioDeviceManager.GetInstance();
+    private readonly AudioManager.AudioDeviceManager audioManager = AudioManager.AudioDeviceManager.GetInstance();
     public Dictionary<string, HotkeyConfig> hotkeyConfigs;
     private readonly string ConfigFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DAIRemote/hotkeys.json");
     private uint modifiers = 0;
@@ -171,7 +171,13 @@ public partial class HotkeyManager : Form
             HotkeyInputForm.Close();
         };
 
-        HotkeyInputForm.ShowDialog();
+        // Set the OK button as the action for Enter key
+        HotkeyInputForm.AcceptButton = HotkeyInputForm.HotkeyFormOkBtn;
+
+        // Set the Cancel button as the action for Esc key
+        HotkeyInputForm.CancelButton = HotkeyInputForm.HotkeyFormCancelBtn;
+
+        _ = HotkeyInputForm.ShowDialog();
     }
 
     private void RegisterNewHotkey(string action, HotkeyConfig newConfig)
