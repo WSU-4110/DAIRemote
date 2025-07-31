@@ -1,26 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_home"
-            android:title="Home"
+            android:title="@string/home"
             android:icon="@drawable/home_icon"/>
         <item
             android:id="@+id/nav_remote"
-            android:title="Remote"
-            android:icon="@drawable/mouse_icon"/>
+            android:title="@string/remote"
+            android:icon="@drawable/interaction_icon"/>
         <item
             android:id="@+id/nav_server"
-            android:title="Server"
+            android:title="@string/server"
             android:icon="@drawable/server_icon"/>
         <item
             android:id="@+id/nav_help"
-            android:title="Help"
+            android:title="@string/help"
             android:icon="@drawable/help_icon"/>
         <item
             android:id="@+id/nav_about"
-            android:title="About"
+            android:title="@string/about"
             android:icon="@drawable/about_icon"/>
     </group>
 

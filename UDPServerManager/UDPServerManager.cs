@@ -16,16 +16,22 @@ public class UDPServerHost : IDisposable
     private readonly int serverPort = 9416;
     private DateTime lastHeartbeatTime;
     private TimeSpan heartbeatTimeout;
+    private DeviceHistoryManager deviceHistoryManager = new();
     private AudioManager.AudioDeviceManager audioManager;
+    private WindowsServiceAdvertiser advertiser;
 
     public UDPServerHost()
     {
         udpServer = new UdpClient(serverPort);
         remoteEP = new IPEndPoint(IPAddress.Any, serverPort);
+
+        advertiser = new WindowsServiceAdvertiser("DAIRemote Desktop", serverPort);
+        advertiser.StartAdvertising();
     }
 
     public void Dispose()
     {
+        advertiser?.Dispose();
         udpServer.Dispose();
     }
 
@@ -60,6 +66,13 @@ public class UDPServerHost : IDisposable
         try
         {
             byte[] handshakeData = udpServer.Receive(ref remoteEP);
+
+            // Check if device is blocked
+            if (deviceHistoryManager.IsDeviceBlocked(remoteEP.Address.ToString()))
+            {
+                return false;
+            }
+
             string handshakeMessage = Encoding.ASCII.GetString(handshakeData);
 
             return HandleReceivedData(handshakeMessage);
@@ -76,9 +89,20 @@ public class UDPServerHost : IDisposable
 
     public bool AwaitApproval(string deviceName)
     {
-        DeviceHistoryManager deviceHistoryManager = new();
         SendUdpMessage("Wait");
         string ip = remoteEP.Address.ToString();
+        string port = remoteEP.Port.ToString();
+
+        // Check if device is blocked
+        if (deviceHistoryManager.IsDeviceBlocked(ip))
+        {
+            string denialMessage = "Denied";
+            byte[] denialBytes = Encoding.ASCII.GetBytes(denialMessage);
+            udpServer.Send(denialBytes, denialBytes.Length, remoteEP);
+            return false;
+        }
+
+        // Check if device is already approved
         if (deviceHistoryManager.SearchDeviceHistory(ip))
         {
             string approvalMessage = "Approved";
@@ -90,19 +114,34 @@ public class UDPServerHost : IDisposable
         }
         else
         {
-            UDPServerManagerForm form = new();
-            DialogResult connect = MessageBox.Show($"Allow ({remoteEP.Address}:{remoteEP.Port}) to connect?",
-                "Pending Connection", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+            DialogResult result = ConnectionPromptForm.ShowConnectionPrompt(ip, port, deviceName);
 
-            if (form.HandleConnectionResult(connect, udpServer, remoteEP))
+            if (result == DialogResult.Yes)
             {
                 deviceHistoryManager.SaveDeviceHistory(ip, deviceName);
+                string approvalMessage = "Approved";
+                byte[] approvalBytes = Encoding.ASCII.GetBytes(approvalMessage);
+                udpServer.Send(approvalBytes, approvalBytes.Length, remoteEP);
                 clientAddress = ip;
                 return true;
             }
+            else if (result == DialogResult.Cancel)
+            {
+                // Block the device
+                deviceHistoryManager.BlockDevice(ip, deviceName);
+                string blockMessage = "Blocked";
+                byte[] blockBytes = Encoding.ASCII.GetBytes(blockMessage);
+                udpServer.Send(blockBytes, blockBytes.Length, remoteEP);
+                return false;
+            }
+            else // DialogResult.No
+            {
+                string denialMessage = "Denied";
+                byte[] denialBytes = Encoding.ASCII.GetBytes(denialMessage);
+                udpServer.Send(denialBytes, denialBytes.Length, remoteEP);
+                return false;
+            }
         }
-        return false;
     }
 
     // Method to start checking for handshake attempts in the background

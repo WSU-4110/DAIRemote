@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black">
+
+    <!-- DAIRemote Logo Button -->
+    <ImageButton
+        android:id="@+id/DAIRemoteLogoBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="180dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/clickable_dairemote_logo"
+        android:padding="70dp"
+        android:src="@drawable/dairemote_logo"
+        app:layout_constraintBottom_toTopOf="@+id/startContext"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/connectionLoading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="75dp"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/DAIRemoteLogoBtn"
+        app:layout_constraintEnd_toEndOf="@+id/DAIRemoteLogoBtn"
+        app:layout_constraintStart_toStartOf="@+id/DAIRemoteLogoBtn"
+        app:layout_constraintTop_toTopOf="@+id/DAIRemoteLogoBtn" />
+
+    <!-- DAIRemote Title Text -->
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="97dp"
+        android:layout_marginEnd="97dp"
+        android:layout_marginBottom="-45dp"
+        android:fontFamily="@font/audiowide"
+        android:text="@string/dairemote"
+        android:textColor="@color/white"
+        android:textSize="35sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/DAIRemoteLogoBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- "Tap to Start" Text -->
+    <TextView
+        android:id="@+id/startContext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-70dp"
+        android:fontFamily="@font/audiowide"
+        android:text="@string/tap_to_start"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/DAIRemoteLogoBtn" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

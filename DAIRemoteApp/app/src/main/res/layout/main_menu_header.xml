@@ -29,7 +29,7 @@
         android:layout_marginStart="3dp"
         android:layout_marginTop="34dp"
         android:fontFamily="@font/audiowide"
-        android:text="DAIRemote"
+        android:text="@string/dairemote"
         android:textColor="@color/white"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
