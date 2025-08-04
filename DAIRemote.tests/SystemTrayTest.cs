@@ -1,14 +1,12 @@
 namespace DAIRemote.Tests
 {
+    using Moq;
     using System;
-    using System.Drawing;
     using System.Reflection;
-    using System.Windows.Forms;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Windows.Forms;
     using Xunit;
-    using Moq;
-    using AudioManager;
 
     public class SystemTrayTest
     {

@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -1331,26 +1330,26 @@ public class DisplayConfig
     [DllImport("user32.dll")]
     private static extern int PostMessage(int hWnd, int hMsg, int wParam, int lParam);
 
-/*    public static void DisplayToggleSleep(bool sleep = true)
-    {
-        const int WM_SYSCOMMAND = 0x0112;
-        const int SC_MONITORPOWER = 0xF170;
-        const int HWND_BROADCAST = 0xFFFF;
-        if (sleep)
+    /*    public static void DisplayToggleSleep(bool sleep = true)
         {
-            // Go into sleep mode (2)
-            _ = PostMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, 2);
-        }
-        else
-        {
-            // Wakeup from sleep mode (-1)
-            _ = Task.Run(() =>
+            const int WM_SYSCOMMAND = 0x0112;
+            const int SC_MONITORPOWER = 0xF170;
+            const int HWND_BROADCAST = 0xFFFF;
+            if (sleep)
             {
-                _ = PostMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, -1);
-                Thread.Sleep(100);
-            });
-        }
-    }*/
+                // Go into sleep mode (2)
+                _ = PostMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, 2);
+            }
+            else
+            {
+                // Wakeup from sleep mode (-1)
+                _ = Task.Run(() =>
+                {
+                    _ = PostMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, -1);
+                    Thread.Sleep(100);
+                });
+            }
+        }*/
 
     static void Main()
     {
