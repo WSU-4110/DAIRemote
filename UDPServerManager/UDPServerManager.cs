@@ -110,6 +110,8 @@ public class UDPServerHost : IDisposable
             udpServer.Send(approvalBytes, approvalBytes.Length, remoteEP);
             clientAddress = ip;
 
+            advertiser.StopAdvertising();
+
             return true;
         }
         else
@@ -123,6 +125,9 @@ public class UDPServerHost : IDisposable
                 byte[] approvalBytes = Encoding.ASCII.GetBytes(approvalMessage);
                 udpServer.Send(approvalBytes, approvalBytes.Length, remoteEP);
                 clientAddress = ip;
+
+                advertiser.StopAdvertising();
+
                 return true;
             }
             else if (result == DialogResult.Cancel)
@@ -449,6 +454,7 @@ public class UDPServerHost : IDisposable
         while (true)
         {
             // Start checking for handshake attempts in the background
+            advertiser.StartAdvertising();
             await CheckForHandshake(); // Wait until the handshake succeeds
 
             // Enter the message loop once the handshake is successful

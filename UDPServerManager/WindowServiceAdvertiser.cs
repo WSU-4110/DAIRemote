@@ -1,9 +1,4 @@
 ﻿using Makaretu.Dns;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net;
-using System.Threading.Tasks;
 
 public class WindowsServiceAdvertiser : IDisposable
 {
@@ -36,7 +31,6 @@ public class WindowsServiceAdvertiser : IDisposable
     {
         serviceDiscovery?.Dispose();
         mdns?.Dispose();
-        Console.WriteLine("Service advertisement stopped");
     }
 
     public void Dispose()

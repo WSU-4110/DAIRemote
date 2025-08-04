@@ -423,12 +423,13 @@ public class TrayIconManager
     private void ShowForm()
     {
         minimized = !minimized;
-        if(!minimized)
+        if (!minimized)
         {
             form.Show();
             form.WindowState = FormWindowState.Normal;
             form.Activate();
-        } else
+        }
+        else
         {
             form.Hide();
         }
