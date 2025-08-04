@@ -507,6 +507,7 @@ class InteractionFragment : Fragment() {
             ) {
                 if (!toolbar.getModifierToggled()) {
                     messageHost("KEYBOARD_WRITE {ENTER}")
+                    toolbar.getKeyboardTextView().text = ""
                 }
                 true
             } else {
@@ -854,7 +855,7 @@ class InteractionFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        setupConnectionMonitoring(5000)
+        setupConnectionMonitoring(250)
     }
 
     override fun onStop() {
