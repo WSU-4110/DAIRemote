@@ -1,15 +1,17 @@
 package com.example.dairemote_app.utils
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import com.example.dairemote_app.fragments.SettingsFragment
 import com.example.dairemote_app.viewmodels.ConnectionViewModel
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-private const val HEARTBEAT_INTERVAL_MS = 2000L
-private const val HEARTBEAT_TIMEOUT_MS: Int = 250
-private const val MAX_MISSED_HEARTBEATS = 3
+private var HEARTBEAT_INTERVAL_MS = 5000L
+private var HEARTBEAT_TIMEOUT_MS: Int = 1000
+private var MAX_MISSED_HEARTBEATS = 3
 
 class ConnectionMonitor(manager: ConnectionManager, private val viewModel: ConnectionViewModel) {
     private lateinit var connectionManager: ConnectionManager
@@ -38,6 +40,18 @@ class ConnectionMonitor(manager: ConnectionManager, private val viewModel: Conne
 
     private fun getHeartbeatSocket(): SocketManager {
         return this.heartbeatSocket
+    }
+
+    fun setHeartbeatInterval(long: Long) {
+        HEARTBEAT_INTERVAL_MS = long
+    }
+
+    fun setHeartbeatTimeout(int: Int) {
+        HEARTBEAT_TIMEOUT_MS = int
+    }
+
+    fun setHeartmeatMaxMissed(int: Int) {
+        MAX_MISSED_HEARTBEATS = int
     }
 
     private val heartbeatService = object : Runnable {
