@@ -51,10 +51,12 @@ class MainFragment : Fragment() {
 
         sharedPrefsHelper = SharedPrefsHelper(requireContext())
 
-        // Check for saved host and attempt automatic connection
-        val savedHost = sharedPrefsHelper.getLastConnectedHost()
-        if (savedHost != null && viewModel.connectionState.value != true) {
-            attemptConnection()
+        if(sharedPrefsHelper.getAutoConnectionSetting()) {
+            // Check for saved host and attempt automatic connection
+            val savedHost = sharedPrefsHelper.getLastConnectedHost()
+            if (savedHost != null && viewModel.connectionState.value != true) {
+                attemptConnection()
+            }
         }
 
         setupBackPressHandler()

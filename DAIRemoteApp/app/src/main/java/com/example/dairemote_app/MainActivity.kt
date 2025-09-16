@@ -81,6 +81,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.nav_about -> {
                 navController.navigate(R.id.aboutFragment)
             }
+
+            R.id.nav_settings -> {
+                navController.navigate(R.id.settingsFragment)
+            }
         }
 
         binding.drawerLayout.closeDrawer(GravityCompat.START)

@@ -1,5 +1,7 @@
-﻿using DisplayProfileManager;
+using DisplayProfileManager;
 using Microsoft.Win32;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UDPServerManagerForm;
 
 namespace DAIRemote;
@@ -8,7 +10,9 @@ public partial class DAIRemoteApplicationUI : Form
 {
     private readonly TrayIconManager trayIconManager;
     private Form profileDialog;
+    private Form audioDialog;
     private ListBox profileListBox;
+    private ListBox audioListBox;
     private AudioManager.AudioDeviceManager audioManager;
     public static event EventHandler<NotificationEventArgs> NotificationRequested;
 
@@ -38,6 +42,7 @@ public partial class DAIRemoteApplicationUI : Form
         SetStartupStatus();   // Checks onStartup default value to set
         InitializeDisplayProfilesLayouts(); // Initialize load and delete display profile flow layouts
         InitializeDisplayProfilesList();    // Initialize the form & listbox used for showing display profiles list
+        InitializeAudioDevicesList();
 
         // Listen for display profile changes
         DisplayProfileWatcher.Initialize(DisplayConfig.GetDisplayProfilesDirectory());
@@ -142,6 +147,10 @@ public partial class DAIRemoteApplicationUI : Form
         ToolStripMenuItem setHotkeyItem = new("Set Hotkey");
         setHotkeyItem.Click += (s, e) => SetHotkeyProfileButton_Click(optionsButton, e);
 
+        // Add Set Default Audio Device option
+        ToolStripMenuItem setDefaultAudioDevice = new("Set Audio");
+        setDefaultAudioDevice.Click += (s, e) => SetDefaultAudioDevice_Click(optionsButton, e);
+
         // Add Save option
         ToolStripMenuItem saveItem = new("Overwrite");
         saveItem.Click += (s, e) => SaveProfileButton_Click(optionsButton, e);
@@ -153,6 +162,7 @@ public partial class DAIRemoteApplicationUI : Form
         // Add options to the context menu
         _ = optionsMenu.Items.Add(renameItem);
         _ = optionsMenu.Items.Add(setHotkeyItem);
+        _ = optionsMenu.Items.Add(setDefaultAudioDevice);
         _ = optionsMenu.Items.Add(saveItem);
         _ = optionsMenu.Items.Add(deleteItem);
 
@@ -187,11 +197,28 @@ public partial class DAIRemoteApplicationUI : Form
         );
     }
 
+    // Set hotkey tooltip function
     private void SetHotkeyProfileButton_Click(object sender, EventArgs e)
     {
         string profilePath = ((sender as Button)?.Tag ?? (sender as Panel)?.Tag).ToString();
         trayIconManager.GetHotkeyManager().ShowHotkeyInput(Path.GetFileNameWithoutExtension(profilePath), () => DisplayConfig.SetDisplaySettings(profilePath));
         trayIconManager.RefreshSystemTray();
+    }
+
+    // Set hotkey main application pop up function to allow choosing a profile from a list and setting the hotkey.
+    private void BtnSetDisplayProfileHotkey_click(object sender, EventArgs e)
+    {
+        string fileName = ShowDisplayProfilesList(DisplayConfig.GetDisplayProfilesDirectory());
+        if (!string.IsNullOrEmpty(fileName))
+        {
+            trayIconManager.GetHotkeyManager().ShowHotkeyInput(fileName, () => DisplayConfig.SetDisplaySettings(DisplayConfig.GetFullDisplayProfilePath(fileName)));
+            trayIconManager.RefreshSystemTray();
+        }
+    }
+
+    private void SetDefaultAudioDevice_Click(object sender, EventArgs e)
+    {
+        ShowAudioDevicesList(((sender as Button)?.Tag ?? (sender as Panel)?.Tag).ToString());
     }
 
     private void SaveProfileButton_Click(object sender, EventArgs e)
@@ -370,6 +397,42 @@ public partial class DAIRemoteApplicationUI : Form
         profileDialog.Controls.Add(actionButton);
     }
 
+    private void InitializeAudioDevicesList()
+    {
+        audioDialog = new()
+        {
+            Text = "Audio Devices",
+            Size = new Size(400, 300),
+            StartPosition = FormStartPosition.CenterScreen
+        };
+
+        audioListBox = new()
+        {
+            Dock = DockStyle.Fill
+        };
+        audioDialog.Controls.Add(audioListBox);
+
+        System.Windows.Forms.Button actionButton = new()
+        {
+            Text = "Select Device",
+            Dock = DockStyle.Bottom,
+            Height = 50,
+            FlatStyle = FlatStyle.Flat,
+        };
+
+        actionButton.Click += (s, e) =>
+        {
+            if (audioListBox.SelectedItem == null)
+            {
+                _ = MessageBox.Show("Please select a new default audio device.");
+                return;
+            }
+            audioDialog.DialogResult = DialogResult.OK;
+            audioDialog.Close();
+        };
+        audioDialog.Controls.Add(actionButton);
+    }
+
     private string ShowDisplayProfilesList(string folderPath)
     {
         if (!Directory.Exists(folderPath))
@@ -384,13 +447,32 @@ public partial class DAIRemoteApplicationUI : Form
         return profileListBox.SelectedItem?.ToString();
     }
 
-    private void BtnSetDisplayProfileHotkey_click(object sender, EventArgs e)
+    private void ShowAudioDevicesList(string profilePath)
     {
-        string fileName = ShowDisplayProfilesList(DisplayConfig.GetDisplayProfilesDirectory());
-        if (!string.IsNullOrEmpty(fileName))
+        // Read current settings first
+        string json = File.ReadAllText(profilePath);
+        JObject displaySettings = JObject.Parse(json);
+        string currentDefaultDevice = displaySettings["defaultAudioDevice"]?.ToString();
+
+        // Populate the list
+        audioListBox.Items.Clear();
+        audioListBox.Items.AddRange(audioManager.ActiveDeviceNames.Cast<object>().ToArray());
+
+        // Set the current default device as selected if it exists in the list
+        if (!string.IsNullOrEmpty(currentDefaultDevice))
         {
-            trayIconManager.GetHotkeyManager().ShowHotkeyInput(fileName, () => DisplayConfig.SetDisplaySettings(DisplayConfig.GetFullDisplayProfilePath(fileName)));
-            trayIconManager.RefreshSystemTray();
+            int index = audioListBox.Items.Cast<string>().ToList().IndexOf(currentDefaultDevice);
+            if (index >= 0)
+            {
+                audioListBox.SelectedIndex = index;
+            }
+        }
+
+        // Show dialog and check result
+        if (audioDialog.ShowDialog() == DialogResult.OK && audioListBox.SelectedItem != null)
+        {
+            displaySettings["defaultAudioDevice"] = audioListBox.SelectedItem.ToString();
+            File.WriteAllText(profilePath, displaySettings.ToString(Formatting.Indented));
         }
     }
 
