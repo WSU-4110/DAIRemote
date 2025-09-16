@@ -20,6 +20,9 @@
         <action
             android:id="@+id/action_to_about"
             app:destination="@id/aboutFragment" />
+        <action
+            android:id="@+id/action_to_settings"
+            app:destination="@id/settingsFragment" />
 <!--        <action
             android:id="@+id/action_main_to_interaction"
             app:destination="@id/interactionFragment" />
@@ -50,6 +53,9 @@
         <action
             android:id="@+id/action_to_about"
             app:destination="@id/aboutFragment" />
+        <action
+            android:id="@+id/action_to_settings"
+            app:destination="@id/settingsFragment" />
 <!--        <action
             android:id="@+id/action_interaction_to_main"
             app:destination="@id/mainFragment" />
@@ -80,6 +86,9 @@
         <action
             android:id="@+id/action_to_about"
             app:destination="@id/aboutFragment" />
+        <action
+            android:id="@+id/action_to_settings"
+            app:destination="@id/settingsFragment" />
 <!--        <action
             android:id="@+id/action_servers_to_main"
             app:destination="@id/mainFragment" />
@@ -110,6 +119,9 @@
         <action
             android:id="@+id/action_to_about"
             app:destination="@id/aboutFragment" />
+        <action
+            android:id="@+id/action_to_settings"
+            app:destination="@id/settingsFragment" />
 <!--        <action
             android:id="@+id/action_instructions_to_main"
             app:destination="@id/mainFragment" />
@@ -140,6 +152,9 @@
         <action
             android:id="@+id/action_to_instructions"
             app:destination="@id/instructionsFragment" />
+        <action
+            android:id="@+id/action_to_settings"
+            app:destination="@id/settingsFragment" />
 <!--        <action
             android:id="@+id/action_about_to_main"
             app:destination="@id/mainFragment" />
@@ -152,5 +167,38 @@
         <action
             android:id="@+id/action_about_to_instructions"
             app:destination="@id/instructionsFragment" />-->
+    </fragment>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.dairemote_app.fragments.SettingsFragment"
+        android:label="Settings">
+        <action
+            android:id="@+id/action_to_main"
+            app:destination="@id/mainFragment" />
+        <action
+            android:id="@+id/action_to_interaction"
+            app:destination="@id/interactionFragment" />
+        <action
+            android:id="@+id/action_to_servers"
+            app:destination="@id/serversFragment" />
+        <action
+            android:id="@+id/action_to_instructions"
+            app:destination="@id/instructionsFragment" />
+        <action
+            android:id="@+id/action_to_about"
+            app:destination="@id/aboutFragment" />
+        <!--        <action
+                    android:id="@+id/action_about_to_main"
+                    app:destination="@id/mainFragment" />
+                <action
+                    android:id="@+id/action_about_to_interaction"
+                    app:destination="@id/interactionFragment" />
+                <action
+                    android:id="@+id/action_about_to_servers"
+                    app:destination="@id/serversFragment" />
+                <action
+                    android:id="@+id/action_about_to_instructions"
+                    app:destination="@id/instructionsFragment" />-->
     </fragment>
 </navigation>

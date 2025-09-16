@@ -42,8 +42,13 @@ public class AudioDeviceManager
 
     private void OnAudioDeviceChanged(DeviceChangedArgs args)
     {
-        SetAudioDefaults();
-        AudioDevicesUpdated?.Invoke(ActiveDeviceNames);
+        Thread.Sleep(1000);
+        // Only refresh if the device state changed (ignores volume/mute)
+        if (args.ChangedType == DeviceChangedType.StateChanged)
+        {
+            SetAudioDefaults();
+            AudioDevicesUpdated?.Invoke(ActiveDeviceNames);
+        }
     }
 
     public void SubscribeAudioDevices()
@@ -65,16 +70,23 @@ public class AudioDeviceManager
 
     private void SetAudioDefaults()
     {
-        // Set the initial values for variables needed for functions
-        defaultAudioDevice = audioController.DefaultPlaybackDevice;
-        // Get list of active devices
-        SetActiveDevices();
+        if (audioController != null)
+        {
+            // Set the initial values for variables needed for functions
+            defaultAudioDevice = audioController.DefaultPlaybackDevice;
+            // Get list of active devices
+            SetActiveDevices();
+        }
     }
 
     public void RefreshAudioDeviceSubscriptions()
     {
-        audioController?.Dispose();
-        audioController = new CoreAudioController();
+        // Clear existing subscriptions
+        foreach (var sub in deviceSubscriptions)
+        {
+            sub.Dispose();
+        }
+        deviceSubscriptions.Clear();
 
         // Renew default device subscription
         defaultDeviceSubscription?.Dispose();
@@ -118,10 +130,7 @@ public class AudioDeviceManager
 
         if (matchedDevice != null)
         {
-            if (matchedDevice != this.defaultAudioDevice)
-            {
-                SetDefaultAudioDevice(matchedDevice);
-            }
+            SetDefaultAudioDevice(matchedDevice);
         }
     }
 

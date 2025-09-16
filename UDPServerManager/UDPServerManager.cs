@@ -19,6 +19,8 @@ public class UDPServerHost : IDisposable
     private DeviceHistoryManager deviceHistoryManager = new();
     private AudioManager.AudioDeviceManager audioManager;
     private WindowsServiceAdvertiser advertiser;
+    private int heartbeatTimeoutSeconds = 30;
+    private int udpSocketReceiveTimeoutMilliseconds = 20000;    // 20-second timeout for receive
 
     public UDPServerHost()
     {
@@ -185,9 +187,9 @@ public class UDPServerHost : IDisposable
     {
         try
         {
-            udpServer.Client.ReceiveTimeout = 20000; // 20-second timeout for receive
+            udpServer.Client.ReceiveTimeout = udpSocketReceiveTimeoutMilliseconds;
             SetLastHeartbeat(DateTime.Now);
-            SetHeartbeatTimeout(TimeSpan.FromSeconds(2700));
+            SetHeartbeatTimeout(TimeSpan.FromSeconds(heartbeatTimeoutSeconds));
 
             while (isClientConnected)
             {
@@ -464,8 +466,11 @@ public class UDPServerHost : IDisposable
             }
 
             // Reinitialize the UDP server for new connections
+            udpServer?.Dispose();
             udpServer = new UdpClient(serverPort);
             remoteEP = new IPEndPoint(IPAddress.Any, serverPort);
+
+            isClientConnected = false;
         }
     }
 }

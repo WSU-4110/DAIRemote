@@ -45,6 +45,7 @@ import com.example.dairemote_app.utils.BackspaceEditText
 import com.example.dairemote_app.utils.ConnectionMonitor
 import com.example.dairemote_app.utils.DisplayProfilesRecyclerAdapter
 import com.example.dairemote_app.utils.KeyboardToolbar
+import com.example.dairemote_app.utils.SharedPrefsHelper
 import com.example.dairemote_app.viewmodels.ConnectionViewModel
 import java.net.SocketException
 
@@ -53,6 +54,7 @@ class InteractionFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var viewModel: ConnectionViewModel
     private var connectionMonitor: ConnectionMonitor? = null
+    private lateinit var sharedPrefsHelper: SharedPrefsHelper
 
     // Other variables from your Activity
     private lateinit var editText: BackspaceEditText
@@ -159,6 +161,7 @@ class InteractionFragment : Fragment() {
                 viewModel.connectionManager!!
             )
         displayRecyclerViewOptions.setAdapter(displayProfilesRecyclerAdapter)
+        sharedPrefsHelper = SharedPrefsHelper(requireContext())
 
         /*        val tutorial = TutorialMediator.GetInstance(AlertDialog.Builder(requireContext()))
                 if (tutorial != null) {
@@ -188,6 +191,9 @@ class InteractionFragment : Fragment() {
 
     private fun setupConnectionMonitoring(delay: Int) {
         connectionMonitor = viewModel.connectionManager?.let { ConnectionMonitor.getInstance(it, viewModel) }
+        connectionMonitor?.setHeartbeatTimeout(sharedPrefsHelper.getHeartbeatTimeout())
+        connectionMonitor?.setHeartbeatInterval(sharedPrefsHelper.getHeartbeatInterval())
+        connectionMonitor?.setHeartmeatMaxMissed(sharedPrefsHelper.getMaxMissedHeartbeats())
         connectionMonitor!!.startHeartbeat(delay)
     }
 

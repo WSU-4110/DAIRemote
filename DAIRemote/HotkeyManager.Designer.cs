@@ -127,6 +127,6 @@ partial class HotkeyManager
     private TextBox HotkeyInputBox;
     private TableLayoutPanel HotkeyFormBtnPanel;
     private Button HotkeyFormClearBtn;
-    private Button HotkeyFormOkBtn;
-    private Button HotkeyFormCancelBtn;
+    public Button HotkeyFormOkBtn;
+    public Button HotkeyFormCancelBtn;
 }

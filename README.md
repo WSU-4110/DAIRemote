@@ -2,7 +2,7 @@
 
 ## Description
 
-DAIRemote is a versatile display, audio, and input remote for Windows desktops. It allows users to:
+DAIRemote is a versatile display, audio, and input remote for Windows 10/11 desktops. It allows users to:
 * Save and load display profiles
 * Cycle through audio playback devices
 * Use hotkeys for audio cycling, audio playback devices, and display profiles
@@ -13,7 +13,7 @@ All from the comfort of wherever you're sitting.
 ## Getting Started
 Our latest release can be found at [releases](https://github.com/WSU-4110/DAIRemote/releases/tag/Release).
 ### Desktop
-1. First, extract the contents of DAIRemote.zip to a desired location.
+1. First, download the DAIRemote.exe to a desired location.
 2. Simply double click the DAIRemote.exe to start the deskptop application.
 ### Android
 1. Connect your android device to your desktop with a suitable cable & file transfer enabled.

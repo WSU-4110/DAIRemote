@@ -14,9 +14,6 @@ namespace DAIRemote
             Application.SetCompatibleTextRenderingDefault(false);
             ApplicationConfiguration.Initialize();
             Application.Run(new DAIRemoteApplicationUI());
-
-
-
         }
 
     }

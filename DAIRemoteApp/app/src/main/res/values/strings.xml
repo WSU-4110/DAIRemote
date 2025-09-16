@@ -48,4 +48,5 @@
     <string name="remote">Remote</string>
     <string name="server">Server</string>
     <string name="help">Help</string>
+    <string name="settings">Settings</string>
 </resources>
